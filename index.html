@@ -1,1 +1,30 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZONDI</title><style>body{background:#0a0a0a;color:#fff;font-family:system-ui;display:flex;flex-direction:column;align-items:center;margin:0;padding:20px}.logo{width:120px;height:120px;background:#1a1a1a;border:2px solid #d4af37;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:48px;margin-top:20px}h1{color:#d4af37}.tag{background:#1a1a1a;color:#d4af37;padding:6px 12px;border-radius:20px;font-size:12px;margin:10px}.card{background:#151515;border:1px solid #222;border-radius:16px;padding:18px;margin:10px;width:90%;max-width:400px}.btn{background:#d4af37;color:#000;padding:12px;border-radius:24px;border:none;width:100%;font-weight:bold;margin:5px 0}</style></head><body><div class="logo">🦁</div><h3>ZONDI PATROL SERVICE</h3><div class="tag">SECURITY RESPONSE NETWORK</div><h1>Protection that feels close.</h1><p style="color:#999;text-align:center;max-width:360px">One platform for clients, patrol teams and SOS response with live visibility.</p><div class="card"><button class="btn" onclick="location.href='/login'">Sign in</button><button class="btn" style="background:#222;color:#fff;border:1px solid #333" onclick="location.href='/clients'">Create account</button></div><div class="card"><h4>Client Portal</h4><p style="color:#888">Live location & SOS</p><a href="/clients" style="color:#d4af37">Open →</a></div><div class="card"><h4>Patrol Portal</h4><p style="color:#888">Tracking & radio</p><a href="/patrol" style="color:#d4af37">Open →</a></div></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ZONDI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,system-ui}
+body{background:#080808;color:#fff;padding:24px;display:flex;flex-direction:column;align-items:center}
+.logo{width:110px;height:110px;background:#111;border:2px solid #E8B62A;border-radius:28px;display:flex;align-items:center;justify-content:center;font-size:54px}
+.badge{margin:14px 0;background:#1a1a1a;border:1px solid #222;color:#E8B62A;padding:6px 14px;border-radius:20px;font-size:11px;letter-spacing:1px}
+h1{font-size:28px;line-height:1.1;margin:10px 0} h1 span{color:#E8B62A}
+p.sub{color:#777;text-align:center;max-width:320px;font-size:14px;margin:10px 0 20px}
+.btn{width:100%;max-width:360px;padding:14px;border-radius:30px;border:none;font-weight:700;margin:6px 0;cursor:pointer}
+.gold{background:#E8B62A;color:#000} .dark{background:#151515;color:#fff;border:1px solid #222}
+.card{width:100%;max-width:360px;background:#121212;border:1px solid #1e1e1e;border-radius:18px;padding:18px;margin:10px 0}
+.card a{color:#E8B62A;text-decoration:none;font-size:13px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="logo">🦁</div>
+<div style="font-weight:800;letter-spacing:2px;margin-top:10px;font-size:13px">ZONDI PATROL SERVICE</div>
+<div class="badge">SECURITY RESPONSE NETWORK</div>
+<h1>Protection that feels <span>close.</span></h1>
+<p class="sub">One platform for clients, patrol teams and SOS response with live visibility.</p>
+<button class="btn gold" onclick="location.href='/login'">Sign in</button>
+<button class="btn dark" onclick="location.href='/clients'">Create account</button>
+<div class="card"><b>Client Portal</b><div style="color:#666;font-size:13px;margin:6px 0">Live location & SOS</div><a href="/clients">Open →</a></div>
+<div class="card"><b>Patrol Portal</b><div style="color:#666;font-size:13px;margin:6px 0">Tracking & radio</div><a href="/patrol">Open →</a></div>
+</body>
+</html>
