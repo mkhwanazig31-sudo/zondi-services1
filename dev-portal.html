@@ -1,28 +1,162 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Control Room - ZONDI</title>
-<style>:root{--bg:#0F0F0F;--card:#1A1A1A;--ink:#fff;--blue:#2D7FF9;--gold:#E8B62A;--line:#2A2A2A;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);color:var(--ink);padding:20px}h2{margin:0 0 4px}.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}.btn{padding:10px 14px;border-radius:10px;border:none;font-weight:700;cursor:pointer}.gold{background:var(--gold);color:#000}.blue{background:var(--blue);color:#fff}.small{font-size:12px;color:var(--muted)}</style>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Control Room - ZONDI</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>:root{--bg:#0A0A0B;--card:#17171D;--card2:#1F1F27;--line:#272731;--blue:#2D7FF9;--gold:#E8B62A;--green:#00E676;--red:#FF3B30;--muted:#8E8E93;--ink:#fff}*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:var(--bg);color:var(--ink);padding:0 0 40px}
+.top{position:sticky;top:0;z-index:1000;background:rgba(10,10,11,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;padding:12px}
+.sCard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+.sCard b{font-size:22px;display:block}.sCard span{font-size:10px;color:var(--muted);letter-spacing:1px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:18px;margin:12px 12px;padding:14px}
+.btn{padding:10px 14px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:12px}.gold{background:var(--gold);color:#000}.blue{background:var(--blue);color:#fff}.red{background:var(--red);color:#fff}.gray{background:var(--card2);color:#fff;border:1px solid var(--line)}
+.userRow{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0;cursor:pointer}
+.userRow:hover{border-color:#3A3A46}
+.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:#fff;margin-top:10px}
+/* FILE MODAL */
+#fileModal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:5000;display:none;padding:12px;overflow:auto}
+.file{background:var(--card);border:1px solid var(--line);border-radius:20px;max-width:520px;margin:20px auto;overflow:hidden}
+.fileHeader{padding:16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.fileBody{padding:14px}
+#fileMap{height:260px;width:100%;background:#101014}
+.tag{font-size:10px;padding:4px 8px;border-radius:20px;border:1px solid var(--line);display:inline-block;margin-right:6px}
+</style>
 <script>if(localStorage.getItem('zondi_role')!=='dev'){location.href='/login'}</script>
 </head><body>
-<h2>🛰️ ZONDI Control Room</h2><p class="small">Access: zondi@123 invisible — no phone needed</p>
-<div class="box"><h3>🛡️ Pending Patrol Approvals</h3><div id="pending"></div></div>
-<div class="box"><h3>👥 All Users</h3><div id="all"></div></div>
-<div class="box"><button class="btn blue" onclick="localStorage.setItem('zondi_role','');location.href='/login'">Logout</button></div>
+<div class="top"><div><div style="font-weight:900;font-size:16px">🛰️ ZONDI CONTROL</div><div style="font-size:11px;color:var(--muted)">Invisible • zondi@123 • Full File System</div></div><button class="btn blue" onclick="logout()">Logout</button></div>
+
+<div class="stats">
+<div class="sCard"><b id="cTotal">0</b><span>CLIENTS</span></div>
+<div class="sCard"><b id="pTotal">0</b><span>PATROLS</span></div>
+<div class="sCard"><b id="pPending" style="color:var(--gold)">0</b><span>PENDING</span></div>
+<div class="sCard"><b id="liveNow" style="color:var(--green)">0</b><span>LIVE NOW</span></div>
+</div>
+
+<div class="box"><h3 style="margin:0 0 6px">🛡️ Pending Patrol Approvals</h3><div id="pending"></div></div>
+
+<div class="box"><div style="display:flex;justify-content:space-between"><h3 style="margin:0">📁 Client Files</h3><span style="font-size:11px;color:var(--muted)" id="clientCount"></span></div><input id="searchClient" class="search" placeholder="Search client phone / name / ID..." oninput="load()"><div id="clients" style="margin-top:10px"></div></div>
+
+<div class="box"><div style="display:flex;justify-content:space-between"><h3 style="margin:0">🚓 Patrol Files</h3><span style="font-size:11px;color:var(--muted)" id="patrolCount"></span></div><input id="searchPatrol" class="search" placeholder="Search patrol..." oninput="load()"><div id="patrols" style="margin-top:10px"></div></div>
+
+<div class="box"><h3 style="margin:0 0 10px">🗺️ All Live Map</h3><div id="allMap" style="height:320px;border-radius:14px;background:#101014"></div></div>
+
+<!-- FILE VIEW -->
+<div id="fileModal" onclick="if(event.target.id==='fileModal')closeFile()">
+<div class="file"><div class="fileHeader"><div><b id="fName">File</b><br><small id="fPhone" style="color:var(--muted)"></small></div><button class="btn gray" onclick="closeFile()">✕</button></div>
+<div id="fileMap"></div>
+<div class="fileBody">
+<div id="fTags" style="margin-bottom:10px"></div>
+<div id="fInfo" style="font-size:13px;line-height:1.6;color:#C7C7CC"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px"><button class="btn blue" onclick="navigateFile()">🧭 Navigate</button><button class="btn gray" onclick="copyFileLink()">📋 Copy Maps Link</button></div>
+<div style="margin-top:14px;display:flex;gap:10px"><button class="btn gold" id="fApproveBtn" onclick="approveFile()" style="display:none">Approve Patrol</button><button class="btn red" onclick="deleteFile()">🗑️ Delete File Forever</button></div>
+</div></div>
+</div>
+
 <script>
+let currentFileKey=null, currentFileData=null, fileMap=null, allMap=null, allMarkers={};
+let locCache=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
+
+function getUsers(){ return JSON.parse(localStorage.getItem('zondi_users')||'{}'); }
+
 function load(){
- let users=JSON.parse(localStorage.getItem('zondi_users')||'{}');
- let pend=document.getElementById('pending'); pend.innerHTML='';
- let all=document.getElementById('all'); all.innerHTML='';
- let hasPending=false;
- Object.keys(users).forEach(phone=>{
-   let u=users[phone];
-   all.innerHTML+=`<div style="background:#222;border:1px solid #333;border-radius:10px;padding:10px;margin:6px 0;display:flex;justify-content:space-between"><span><b>${phone}</b><br><small style="color:#8A857E">${u.role} • ${u.status}</small></span>${u.status==='pending'?`<button class="btn gold" onclick="approve('${phone}')">Approve</button>`:`<small style="color:#2D7FF9">${u.status}</small>`}</div>`;
-   if(u.status==='pending'){hasPending=true; pend.innerHTML+=`<div style="background:#222;border:1px solid #333;border-radius:10px;padding:10px;margin:6px 0;display:flex;justify-content:space-between;align-items:center"><span><b>${phone}</b><br><small style="color:#8A857E">Patrol unit</small></span><button class="btn gold" onclick="approve('${phone}')">Approve</button></div>`}
+ let users=getUsers();
+ let searchC=(document.getElementById('searchClient').value||'').toLowerCase();
+ let searchP=(document.getElementById('searchPatrol').value||'').toLowerCase();
+ let pendDiv=document.getElementById('pending'); pendDiv.innerHTML='';
+ let cDiv=document.getElementById('clients'); cDiv.innerHTML='';
+ let pDiv=document.getElementById('patrols'); pDiv.innerHTML='';
+ let cCount=0,pCount=0,pendCount=0, liveKeys=Object.keys(locCache);
+
+ // Update live cache from server if available
+ fetch('/api/location').then(r=>r.json()).then(locs=>{ Object.assign(locCache,locs); localStorage.setItem('zondi_patrol_cache',JSON.stringify(locCache)); }).catch(()=>{});
+
+ Object.keys(users).forEach(key=>{
+  let u=users[key];
+  let role=(u.role||'').toLowerCase();
+  let status=(u.status||'').toLowerCase();
+  let live=locCache[key]||locCache[u.client_id]||null;
+  if(role==='client') cCount++; if(role==='patrol') pCount++; if(status==='pending') pendCount++;
+  if(status==='pending' && role==='patrol'){
+   pendDiv.innerHTML+=`<div class="userRow" onclick="openFile('${key}')"><div><b>🚓 ${key}</b><br><small style="color:var(--muted)">${u.client_id||''} • pending</small></div><button class="btn gold" onclick="event.stopPropagation();approve('${key}')">Approve</button></div>`;
+  }
+  // client files
+  if(role==='client'){
+   if(searchC &&!(`${key} ${u.client_id||''} ${u.name||''}`.toLowerCase().includes(searchC))) return;
+   cDiv.innerHTML+=`<div class="userRow" onclick="openFile('${key}')"><div><b>👤 ${u.name||key}</b><br><small style="color:var(--muted)">${key} • ${u.client_id||''} ${live?`• ±${live.accuracy||live.acc||'?'}m • LIVE`:''} ${live?.sos?'• 🚨 SOS':''}</small></div><span style="color:var(--muted)">›</span></div>`;
+  }
+  if(role==='patrol'){
+   if(searchP &&!(`${key} ${u.client_id||''}`.toLowerCase().includes(searchP))) return;
+   pDiv.innerHTML+=`<div class="userRow" onclick="openFile('${key}')"><div><b>🚓 ${key}</b><br><small style="color:var(--muted)">${u.client_id||''} • ${status} ${live?`• LIVE`:''}</small></div><span style="color:var(--muted)">›</span></div>`;
+  }
  });
- if(!hasPending) pend.innerHTML='<small style="color:#8A857E">No pending</small>';
+ document.getElementById('cTotal').innerText=cCount;
+ document.getElementById('pTotal').innerText=pCount;
+ document.getElementById('pPending').innerText=pendCount;
+ document.getElementById('liveNow').innerText=liveKeys.length;
+ document.getElementById('clientCount').innerText=cCount+' files';
+ document.getElementById('patrolCount').innerText=pCount+' files';
+ if(pendCount===0) pendDiv.innerHTML='<small style="color:var(--muted)">No pending</small>';
+ renderAllMap();
 }
-function approve(phone){
- let users=JSON.parse(localStorage.getItem('zondi_users')||'{}');
- if(users[phone]){users[phone].status='approved'; localStorage.setItem('zondi_users',JSON.stringify(users)); load();}
+
+function approve(key){ let users=getUsers(); if(users[key]){users[key].status='approved'; localStorage.setItem('zondi_users',JSON.stringify(users)); load();} }
+
+function openFile(key){
+ let users=getUsers(); let u=users[key]; if(!u) return;
+ currentFileKey=key; let live=locCache[key]||locCache[u.client_id]||Object.values(locCache).find(v=>v.phone===key) || null; currentFileData=live||{lat:-25.7479,lng:28.2293};
+ document.getElementById('fName').innerText=(u.name||key)+' • '+(u.client_id||'');
+ document.getElementById('fPhone').innerText=key+' • '+u.role+' • '+u.status;
+ document.getElementById('fTags').innerHTML=`<span class="tag">${u.role}</span><span class="tag" style="color:${u.status==='pending'?'#E8B62A':'#2D7FF9'}">${u.status}</span>${live?`<span class="tag" style="color:#00E676">LIVE ±${live.accuracy||live.acc||'?'}m</span>`:''}${live?.sos?`<span class="tag" style="background:#FF3B30;color:#fff">🚨 SOS</span>`:''}`;
+ document.getElementById('fInfo').innerHTML=`
+ <b>Phone / Email:</b> ${key}<br>
+ <b>Client ID:</b> ${u.client_id||'N/A'}<br>
+ <b>Name:</b> ${u.name||key}<br>
+ <b>Role:</b> ${u.role}<br>
+ <b>Status:</b> ${u.status}<br>
+ <b>Created:</b> ${u.created?new Date(u.created).toLocaleString():'Unknown'}<br><br>
+ ${live?`<b>📍 Live Location:</b> ${live.lat?.toFixed(7)}, ${live.lng?.toFixed(7)}<br><b>🎯 Accuracy:</b> ±${live.accuracy||live.acc||'?'}m ${(live.accuracy||99)<10?'Excellent':(live.accuracy||99)<15?'Good':'Improving'}<br><b>🕒 Last Seen:</b> ${new Date(live.ts).toLocaleString()}<br><b>${live.sos?'🚨 SOS ACTIVE':''}</b>`:`<span style="color:var(--muted)">No live location yet — client hasn't opened app on this device. File exists, waiting for GPS.</span>`}
+ `;
+ document.getElementById('fApproveBtn').style.display=(u.status==='pending')?'inline-block':'none';
+ document.getElementById('fileModal').style.display='block';
+ setTimeout(()=>{
+   if(fileMap) fileMap.remove();
+   fileMap=L.map('fileMap',{zoomControl:false}).setView([currentFileData.lat||-25.7479, currentFileData.lng||28.2293], live?19:5);
+   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(fileMap);
+   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:22,opacity:.8}).addTo(fileMap);
+   if(live) L.marker([live.lat,live.lng]).addTo(fileMap).bindPopup(`${key}<br>±${live.accuracy||'?'}m`).openPopup();
+   setTimeout(()=>fileMap.invalidateSize(),300);
+ },100);
 }
-load();
-</script>
-</body></html>
+
+function closeFile(){ document.getElementById('fileModal').style.display='none'; currentFileKey=null; }
+
+function approveFile(){ if(currentFileKey) approve(currentFileKey); document.getElementById('fApproveBtn').style.display='none'; load(); }
+
+function deleteFile(){
+ if(!currentFileKey) return;
+ if(!confirm('DELETE FILE FOREVER?\n\n'+currentFileKey+'\nThis removes user + live location. Cannot undo.')) return;
+ let users=getUsers(); delete users[currentFileKey]; localStorage.setItem('zondi_users',JSON.stringify(users));
+ delete locCache[currentFileKey]; if(currentFileData?.client_id) delete locCache[currentFileData.client_id];
+ localStorage.setItem('zondi_patrol_cache',JSON.stringify(locCache));
+ closeFile(); load();
+}
+
+function navigateFile(){ if(!currentFileData) return; window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentFileData.lat},${currentFileData.lng}`,'_blank'); }
+function copyFileLink(){ if(!currentFileData) return; let url=`https://www.google.com/maps?q=${currentFileData.lat},${currentFileData.lng}`; navigator.clipboard.writeText(url); alert('Copied: '+url); }
+
+function renderAllMap(){
+ if(!allMap){
+   allMap=L.map('allMap',{zoomControl:false}).setView([-25.7479,28.2293],12);
+   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(allMap);
+   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:22,opacity:.8}).addTo(allMap);
+ }
+ Object.values(allMarkers).forEach(m=>allMap.removeLayer(m)); allMarkers={};
+ Object.values(locCache).forEach(e=>{
+   let label=`<div style="background:${e.sos?'#FF453A':'#2D7FF9'};color:#fff;padding:5px 8px;border-radius:12px;font-size:10px;font-weight:800">${e.name||e.client_id||''} • ±${e.accuracy||'?'}m</div>`;
+   let m=L.marker([e.lat,e.lng],{icon:L.divIcon({html:label,className:''})}).addTo(allMap);
+   m.bindPopup(`<b>${e.name||e.client_id}</b><br>${e.phone||''}<br>±${e.accuracy||'?'}m`);
+   allMarkers[e.client_id||e.phone]=m;
+ });
+}
+
+function logout(){ localStorage.setItem('zondi_role',''); location.href='/login'; }
+
+load(); setInterval(load,3000);
+</script></body></html>
