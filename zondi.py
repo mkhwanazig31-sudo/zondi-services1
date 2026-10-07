@@ -58,7 +58,25 @@ def get_clients(): return JSONResponse(locations)
 async def verify_qr(request: Request):
     d = await request.json()
     return {"ok": True, "code": d.get("code")}
+# --- NEW: AUTH - ADDED WITHOUT TOUCHING WORKING CODE ---
+users_db = {} # { "phone": {password, role} }
 
+@app.post("/api/register")
+async def api_register(request: Request):
+    d = await request.json()
+    phone = d.get("phone") or d.get("email")
+    users_db[phone] = {"password": d.get("password"), "role": d.get("role","client"), "name": d.get("name","")}
+    return {"ok": True, "msg": "Registered", "role": users_db[phone]["role"]}
+
+@app.post("/api/login")
+async def api_login(request: Request):
+    d = await request.json()
+    phone = d.get("phone") or d.get("email")
+    u = users_db.get(phone)
+    if not u or u["password"]!= d.get("password"):
+        return JSONResponse({"ok": False, "msg": "Wrong login"}, status_code=401)
+    return {"ok": True, "role": u["role"], "name": u["name"]}
+    
 @app.get("/debug")
 def debug():
     return {"files": [p.name for p in BASE_DIR.glob("*.html")]}
