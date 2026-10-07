@@ -2,28 +2,37 @@
 <style>:root{--bg:#F9F7F2;--card:#fff;--ink:#121212;--blue:#2D7FF9;--gold:#E8B62A;--line:#EDE8E0;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}.box{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.08)}h2{margin:0 0 6px;text-align:center}p{color:var(--muted);font-size:13px;margin-bottom:18px;text-align:center}input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#FFFEFB;margin:8px 0}.btn{width:100%;padding:13px;border-radius:12px;border:none;font-weight:700;margin-top:14px;cursor:pointer}.blue{background:var(--blue);color:#fff}.footer{text-align:center;margin-top:24px;color:#999;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}</style></head><body>
 <div class="box">
 <h2>Create Account</h2><p>Join ZONDI Services</p>
-<input id="phone" placeholder="Phone or Email">
-<input id="pass" type="password" placeholder="Password">
+<input id="phone" placeholder="Phone or Email" autocomplete="username">
+<input id="pass" type="password" placeholder="Password" autocomplete="new-password">
 <select id="role"><option value="client">Client - Protection</option><option value="patrol">Patrol - Guard Unit</option></select>
 <button class="btn blue" id="btn" onclick="doReg()">Register</button>
 <div id="msg" style="margin-top:12px;font-size:13px;text-align:center"></div>
 <div class="footer">designed by mkhwanazi.gv — built with autonomous intelligence, directed by human intent</div>
 </div>
 <script>
+function normalizeKey(v){
+  v=v.trim();
+  if(v.includes('@')) return v.toLowerCase();
+  return v.replace(/\s+/g,'');
+}
 function doReg(){
  let btn=document.getElementById('btn'); btn.innerText='Creating...'; btn.disabled=true;
- let phone=document.getElementById('phone').value.trim();
+ let rawPhone=document.getElementById('phone').value;
+ let phone=normalizeKey(rawPhone);
  let password=document.getElementById('pass').value.trim();
  let role=document.getElementById('role').value;
  let msg=document.getElementById('msg');
  if(!phone||!password){msg.style.color='red';msg.innerText='Fill all';btn.innerText='Register';btn.disabled=false;return}
  let users=JSON.parse(localStorage.getItem('zondi_users')||'{}');
- if(users[phone]){msg.style.color='red';msg.innerText='User exists - login';btn.innerText='Register';btn.disabled=false;return}
+ // check duplicate case-insensitive
+ if(users[phone] || users[phone.toLowerCase()] || users[rawPhone.trim()]){msg.style.color='red';msg.innerText='User exists - login';btn.innerText='Register';btn.disabled=false;return}
  let status = role==='patrol'? 'pending' : 'approved';
- users[phone]={password,role,status,client_id:'ZONDI-'+phone.slice(-4)};
+ users[phone]={password,role,status,client_id:'ZONDI-'+phone.slice(-4).toUpperCase(),name:phone,phone:phone,created:Date.now()};
  localStorage.setItem('zondi_users', JSON.stringify(users));
+ // also set current so login remembers
+ localStorage.setItem('zondi_last_registered', phone);
  msg.style.color='green';
- if(role==='patrol'){ msg.innerText='✅ Registered as PATROL — Awaiting approval from Control Room'; btn.innerText='Done'; btn.disabled=false; }
- else { msg.innerText='✅ Registered — Redirecting'; setTimeout(()=>location.href='/login',800); }
+ if(role==='patrol'){ msg.innerText='✅ PATROL registered — Awaiting approval'; btn.innerText='Done'; btn.disabled=false; setTimeout(()=>location.href='/login',1500); }
+ else { msg.innerText='✅ Client registered — Redirecting'; setTimeout(()=>location.href='/login',800); }
 }
 </script></body></html>
