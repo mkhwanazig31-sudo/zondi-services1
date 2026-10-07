@@ -14,24 +14,16 @@
 <script>
 async function doLogin(){
  let btn=document.getElementById('loginBtn'); btn.innerText='Checking...'; btn.disabled=true;
- let phone=document.getElementById('phone').value.trim(); 
- let password=document.getElementById('pass').value.trim();
+ let phone=document.getElementById('phone').value.trim(); let password=document.getElementById('pass').value.trim();
  let msg=document.getElementById('msg');
- if(!phone || !password){ msg.style.color='red'; msg.innerText='Enter phone and password'; btn.innerText='Login'; btn.disabled=false; return}
+ if(!phone||!password){msg.style.color='red';msg.innerText='Enter phone and password';btn.innerText='Login';btn.disabled=false;return}
  try{
   let r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,password})});
   let j=await r.json();
-  if(!j.ok){ msg.style.color='red'; msg.innerText=j.msg || j.error || 'Login failed'; btn.innerText='Login'; btn.disabled=false; return}
-  localStorage.setItem('zondi_role',j.role); 
-  localStorage.setItem('zondi_user',phone);
-  localStorage.setItem('zondi_client_id', j.client_id || j.id || phone);
+  if(!j.ok){ msg.style.color='red'; msg.innerText=j.msg; btn.innerText='Login'; btn.disabled=false; return}
+  localStorage.setItem('zondi_role',j.role); localStorage.setItem('zondi_user',phone); localStorage.setItem('zondi_client_id', j.client_id || phone);
   msg.style.color='green'; msg.innerText='✅ Success - opening '+j.role;
-  setTimeout(()=>{
-    if(j.role==='patrol') location.href='/patrol'; 
-    else if(j.role==='dev') location.href='/dev-portal'; 
-    else location.href='/clients';
-  },400);
- }catch(e){ msg.style.color='red'; msg.innerText='Server error - try again'; btn.innerText='Login'; btn.disabled=false}
+  setTimeout(()=>{ if(j.role==='patrol') location.href='/patrol'; else if(j.role==='dev') location.href='/dev-portal'; else location.href='/clients'; },400);
+ }catch(e){ msg.style.color='red'; msg.innerText='Server error'; btn.innerText='Login'; btn.disabled=false}
 }
-</script>
-</body></html>
+</script></body></html>
