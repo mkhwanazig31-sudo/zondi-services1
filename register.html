@@ -1,36 +1,27 @@
-from http.server import BaseHTTPRequestHandler
-import json, os
-FILE='/tmp/zondi_users.json'
-def load():
-    if not os.path.exists(FILE): return {}
-    try:
-        with open(FILE,'r') as f: return json.load(f)
-    except: return {}
-def save(d):
-    with open(FILE,'w') as f: json.dump(d,f)
-
-class handler(BaseHTTPRequestHandler):
-    def do_POST(self):
-        self.send_response(200)
-        self.send_header('Content-type','application/json')
-        self.send_header('Access-Control-Allow-Origin','*')
-        self.end_headers()
-        length=int(self.headers.get('content-length',0))
-        try:
-            body=json.loads(self.rfile.read(length).decode())
-            phone=body.get('phone','').strip()
-            password=body.get('password','')
-            role=body.get('role','client')
-            if not phone or not password:
-                self.wfile.write(json.dumps({"ok":False,"msg":"Missing fields"}).encode()); return
-            users=load()
-            if phone in users or phone=='dev':
-                self.wfile.write(json.dumps({"ok":False,"msg":"User exists"}).encode()); return
-            status='pending' if role=='patrol' else 'approved'
-            users[phone]={"password":password,"role":role,"status":status,"client_id":f"ZONDI-{phone[-4:]}"}
-            save(users)
-            self.wfile.write(json.dumps({"ok":True,"role":role,"status":status}).encode())
-        except Exception as e:
-            self.wfile.write(json.dumps({"ok":False,"msg":str(e)}).encode())
-    def do_OPTIONS(self):
-        self.send_response(200); self.send_header('Access-Control-Allow-Origin','*'); self.end_headers()
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Register - ZONDI</title>
+<style>:root{--bg:#F9F7F2;--card:#fff;--ink:#121212;--blue:#2D7FF9;--gold:#E8B62A;--line:#EDE8E0;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}.box{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.08)}h2{margin:0 0 6px;text-align:center}p{color:var(--muted);font-size:13px;margin-bottom:18px;text-align:center}input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#FFFEFB;margin:8px 0}.btn{width:100%;padding:13px;border-radius:12px;border:none;font-weight:700;margin-top:14px;cursor:pointer}.blue{background:var(--blue);color:#fff}.footer{text-align:center;margin-top:24px;color:#999;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}</style></head><body>
+<div class="box">
+<h2>Create Account</h2><p>Join ZONDI Services</p>
+<input id="phone" placeholder="Phone or Email">
+<input id="pass" type="password" placeholder="Password">
+<select id="role"><option value="client">Client - Protection</option><option value="patrol">Patrol - Guard Unit</option></select>
+<button class="btn blue" id="btn" onclick="doReg()">Register</button>
+<div id="msg" style="margin-top:12px;font-size:13px;text-align:center"></div>
+<div class="footer">designed by mkhwanazi.gv — built with autonomous intelligence, directed by human intent</div>
+</div>
+<script>
+async function doReg(){
+ let btn=document.getElementById('btn'); btn.innerText='Creating...'; btn.disabled=true;
+ let phone=document.getElementById('phone').value.trim(); let password=document.getElementById('pass').value.trim(); let role=document.getElementById('role').value;
+ let msg=document.getElementById('msg');
+ try{
+  let r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,password,role})});
+  let j=await r.json();
+  if(!j.ok){ msg.style.color='red'; msg.innerText=j.msg; btn.innerText='Register'; btn.disabled=false; return}
+  msg.style.color='green';
+  if(role==='patrol'){ msg.innerText='✅ Registered as PATROL — Awaiting approval from Control Room'; }
+  else { msg.innerText='✅ Registered — Redirecting to login'; setTimeout(()=>location.href='/login',1200); }
+  btn.innerText='Done';
+ }catch(e){ msg.innerText='Server error'; btn.innerText='Register'; btn.disabled=false}
+}
+</script></body></html>
