@@ -1,26 +1,14 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Client - ZONDI</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<style>:root{--bg:#F9F7F2;--card:#fff;--gold:#E8B62A;--blue:#2D7FF9;--line:#EDE8E0;--ink:#121212;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg)}#top{background:#121212;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}#map{height:40vh}#panel{padding:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 0}.btn{padding:12px;border-radius:12px;border:none;font-weight:700;width:100%;margin-top:8px}.btn-blue{background:var(--blue);color:#fff}.footer{text-align:center;padding:22px;color:#999;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}</style>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Client Portal - ZONDI</title>
+<style>:root{--bg:#F9F7F2;--card:#fff;--ink:#121212;--blue:#2D7FF9;--line:#EDE8E0;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);color:var(--ink);padding:20px}.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}.btn{padding:12px;border-radius:10px;border:none;font-weight:700;cursor:pointer;width:100%}.blue{background:var(--blue);color:#fff}</style>
 <script>
-// --- NEW: AUTH GUARD - CLIENTS PORTAL ---
-let role = localStorage.getItem('zondi_role');
-let user = localStorage.getItem('zondi_user');
-if(!user){ location.href='/login'; }
+// AUTH GUARD
+let role=localStorage.getItem('zondi_role');
+if(role!=='client' && role!=='dev'){ location.href='/login'; }
 </script>
 </head><body>
-<div id="top"><b>ZONDI CLIENT</b><span onclick="localStorage.clear();location.href='/login'" style="font-size:12px;color:#999;cursor:pointer">Logout</span></div>
-<div id="map"></div>
-<div id="panel">
-<div class="card"><div id="qrcode" style="display:flex;justify-content:center"></div><div id="clientId" style="text-align:center;margin-top:10px;font-weight:800;letter-spacing:2px"></div><small style="color:var(--muted);display:block;text-align:center">Show this QR to Patrol</small></div>
-<div class="card"><b>Live Location</b><div id="locText" style="color:var(--muted);font-size:13px;margin-top:4px">Starting GPS...</div><button class="btn btn-blue" onclick="shareLocation()">🔴 Share My Location</button></div>
-</div>
-<div class="footer">designed by mkhwanazi.gv — built with autonomous intelligence, directed by human intent</div>
-<script>
-let clientId = localStorage.getItem('zondi_client_id') || 'ZONDI-'+Math.floor(1000+Math.random()*9000);
-localStorage.setItem('zondi_client_id',clientId);
-document.getElementById('clientId').innerText=clientId;
-new QRCode(document.getElementById("qrcode"),{text:clientId,width:160,height:160});
-let map=L.map('map').setView([-25.92,28.0],12);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);let marker;
-function shareLocation(){if(!navigator.geolocation){alert('No GPS');return}navigator.geolocation.watchPosition(async pos=>{let lat=pos.coords.latitude;let lng=pos.coords.longitude;document.getElementById('locText').innerText=lat.toFixed(5)+', '+lng.toFixed(5);if(!marker)marker=L.marker([lat,lng]).addTo(map);else marker.setLatLng([lat,lng]);map.setView([lat,lng],15);await fetch('/update_location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:clientId,lat,lng})});},e=>{alert('GPS denied')},{enableHighAccuracy:true});}
-</script></body></html>
+<h2>🛡️ Client Protection</h2>
+<p style="color:#8A857E;font-size:13px">ID: <span id="cid"></span></p>
+<div class="box"><h3>Request Patrol</h3><button class="btn blue">🚨 SOS Panic</button><p style="font-size:12px;color:#8A857E;margin-top:8px">Patrol unit will be dispatched to your live GPS</p></div>
+<div class="box"><button class="btn" style="background:#fff;border:1px solid #EDE8E0" onclick="localStorage.clear();location.href='/login'">Logout</button></div>
+<script>document.getElementById('cid').innerText=localStorage.getItem('zondi_client_id')||localStorage.getItem('zondi_user');</script>
+</body></html>
