@@ -1,111 +1,85 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Patrol - ZONDI</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>:root{--bg:#0B0B0F;--card:#17171D;--card2:#1F1F27;--line:#272731;--blue:#2D7FF9;--green:#00E676;--red:#FF453A;--muted:#8E8E93;--ink:#fff}*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:var(--bg);color:var(--ink);padding:0 0 90px 0}
-.top{position:sticky;top:0;z-index:10;background:rgba(11,11,15,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+.top{position:sticky;top:0;z-index:1000;background:rgba(11,11,15,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
 .pill{font-size:10px;letter-spacing:1px;padding:6px 10px;border-radius:20px;background:#1A2A1A;color:var(--green);border:1px solid #1F3A1F}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;margin:12px 14px;padding:14px}
-.mapWrap{border-radius:20px;overflow:hidden;height:52vh;position:relative;background:#101014;border:1px solid var(--line);margin:12px 14px}
-.mapWrap iframe{width:100%;height:100%;border:0}
-.fab{position:absolute;bottom:12px;right:12px;background:var(--ink);color:#000;border-radius:12px;padding:10px 12px;font-weight:800;font-size:12px;border:none;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.listItem{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0}
+#map{height:52vh;width:100%;background:#101014}
+.fab{position:absolute;bottom:24px;right:12px;z-index:500;background:#fff;color:#000;border-radius:12px;padding:10px 12px;font-weight:800;font-size:12px;border:none;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.listItem{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0;cursor:pointer}
 .btn{width:100%;padding:14px;border-radius:14px;border:none;font-weight:800;cursor:pointer}
-.blue{background:var(--blue);color:#fff}.dark{background:var(--card2);border:1px solid var(--line);color:#fff}
-.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(23,23,29,.92);backdrop-filter:blur(20px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 6px 22px 6px;z-index:20}
-.tab{flex:1;text-align:center;font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.5px}
-.tab.active{color:var(--ink)}.tab b{font-size:20px;display:block;margin-bottom:2px}
-.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}.green{background:var(--green);box-shadow:0 0 10px var(--green)}.red{background:var(--red);box-shadow:0 0 10px var(--red)}
-.badge{background:var(--red);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;margin-left:6px}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(23,23,29,.95);backdrop-filter:blur(20px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 6px 22px;z-index:2000}
+.tab{flex:1;text-align:center;font-size:10px;color:var(--muted);font-weight:700}.tab.active{color:var(--ink)}.tab b{font-size:20px;display:block;margin-bottom:2px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}.green{background:var(--green);box-shadow:0 0 10px var(--green)}.red{background:var(--red);box-shadow:0 0 10px var(--red)}.badge{background:var(--red);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;margin-left:6px}
 </style>
-<script>
-// AUTH - KEEP IT, DON'T MESS
-let role=localStorage.getItem('zondi_role');
-let uid=localStorage.getItem('zondi_user')||'PATROL-UNIT';
-if(role!=='patrol' && role!=='dev'){ location.href='/login'; }
-</script>
+<script>let role=localStorage.getItem('zondi_role');let uid=localStorage.getItem('zondi_user')||'PATROL-UNIT';if(role!=='patrol'&&role!=='dev'){location.href='/login'}</script>
 </head><body>
 <div class="top"><div><div style="font-weight:800;font-size:15px">🚓 PATROL UNIT</div><div style="font-size:11px;color:var(--muted)" id="uid"></div></div><div class="pill"><span class="dot green"></span> ON DUTY • LIVE</div></div>
 
-<!-- MAP TAB -->
 <div id="view-map">
-  <div class="mapWrap" id="mapWrap"><div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted)">📡 Waiting for client location...</div>
-  <button class="fab" onclick="openInGoogle()">🧭 NAVIGATE</button>
-  </div>
-  <div class="card"><div style="display:flex;justify-content:space-between"><b>Active Tracking</b><span style="font-size:11px;color:var(--muted)" id="lastUpdate">--</span></div><div id="activeClient" style="margin-top:8px;color:var(--muted);font-size:13px">No SOS yet — tracking all clients live</div></div>
+  <div style="position:relative"><div id="map"></div><button class="fab" onclick="openInGoogle()">🧭 NAVIGATE</button></div>
+  <div class="card"><div style="display:flex;justify-content:space-between"><b id="activeTitle">Active Tracking</b><span style="font-size:11px;color:var(--muted)" id="lastUpdate">--</span></div><div id="activeClient" style="margin-top:8px;font-size:13px;color:var(--muted)">📡 Waiting for client location...</div></div>
 </div>
 
-<!-- CLIENTS TAB -->
-<div id="view-clients" style="display:none"><div class="card"><b>Live Clients</b><small style="color:var(--muted);display:block;margin-top:4px">Never loses location — saved locally + server</small><div id="clientList" style="margin-top:12px"></div></div>
-<div class="card"><b style="color:var(--red)">🚨 SOS Queue</b><div id="sosList"></div></div>
-</div>
-
-<!-- RADIO TAB -->
+<div id="view-clients" style="display:none"><div class="card"><b>Live Clients</b><small style="color:var(--muted);display:block;margin-top:4px">Never loses — saved locally + server • Moves when client moves</small><div id="clientList" style="margin-top:12px"></div></div></div>
 <div id="view-radio" style="display:none"><div class="card" style="height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center"><b style="font-size:22px">📻 Radio</b><p style="color:var(--muted)">Coming soon — encrypted unit comms</p><div style="width:80px;height:80px;border-radius:50%;background:var(--card2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:32px;margin-top:12px">🔒</div></div></div>
-
-<!-- QR TAB -->
 <div id="view-qr" style="display:none"><div class="card" style="height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center"><b style="font-size:22px">🔳 QR Scanner</b><p style="color:var(--muted)">Coming soon — scan client property tags</p><div style="width:120px;height:120px;border-radius:16px;border:2px dashed var(--line);display:flex;align-items:center;justify-content:center;font-size:32px;margin-top:12px">📷</div></div></div>
 
 <div class="tabs"><div class="tab active" onclick="switchTab('map',this)"><b>🗺️</b>MAP</div><div class="tab" onclick="switchTab('clients',this)"><b>👥</b>CLIENTS</div><div class="tab" onclick="switchTab('radio',this)"><b>📻</b>RADIO</div><div class="tab" onclick="switchTab('qr',this)"><b>🔳</b>QR</div></div>
 
 <script>
 document.getElementById('uid').innerText=uid;
-let currentLat=null,currentLng=null,currentClientId=null;
-let savedLocs=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
+let map=L.map('map',{zoomControl:false}).setView([-25.7479,28.2293],18);
+// 1. ACCURACY + REAL HOUSES satellite
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:22,opacity:.85}).addTo(map);
 
-function saveCache(locs){
-  // NEVER LOSE - merge to local
-  Object.assign(savedLocs,locs);
-  localStorage.setItem('zondi_patrol_cache',JSON.stringify(savedLocs));
+let markers={}, currentId=null, currentData=null;
+let saved=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
+
+function saveCache(locs){ Object.assign(saved,locs); localStorage.setItem('zondi_patrol_cache',JSON.stringify(saved)); }
+
+function upsert(e){
+  // 2. USER INFO ON PIN + 3. MOVES WHEN THEY MOVE
+  let latlng=[e.lat,e.lng];
+  let label=`<div style="background:${e.sos?'#FF453A':'#2D7FF9'};color:#fff;padding:7px 12px;border-radius:20px;font-weight:800;font-size:11px;border:2px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.5);white-space:nowrap">${e.sos?'🚨 ':''}${e.name||e.client_id} • ±${e.accuracy||e.acc||'?'}m</div>`;
+  if(!markers[e.client_id]){
+    markers[e.client_id]=L.marker(latlng,{icon:L.divIcon({html:label,className:''})}).addTo(map);
+  }else{
+    markers[e.client_id].setLatLng(latlng); // THIS MAKES IT MOVE LIVE
+    markers[e.client_id].setIcon(L.divIcon({html:label,className:''}));
+  }
+  markers[e.client_id].bindPopup(`<div style="font-family:Inter"><b>👤 ${e.name||e.client_id}</b><br>📞 ${e.phone||'No phone'}<br>🆔 ${e.client_id}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 Accuracy: ±${e.accuracy||e.acc||'?'}m ${ (e.accuracy||99)<10?'• Excellent':(e.accuracy||99)<20?'• Good':''}<br>🕒 ${new Date(e.ts).toLocaleString()}<br>${e.sos?'<b style=color:red>🚨 SOS ACTIVE</b>':''}</div>`);
+
+  // auto navigate to recent / SOS
+  if(!currentId || e.sos || e.ts>(currentData?.ts||0)){
+    currentId=e.client_id; currentData=e;
+    map.setView(latlng,20,{animate:true});
+    document.getElementById('activeTitle').innerHTML=e.sos?`🚨 SOS — ${e.name||e.client_id}`:`📍 LIVE — ${e.name||e.client_id}`;
+    document.getElementById('activeClient').innerHTML=`<span class="dot ${e.sos?'red':'green'}"></span> <b>${e.phone||''}</b> • ${e.client_id}<br>👤 ${e.name||''}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${e.accuracy||e.acc||'?'}m ${ (e.accuracy||99)<10?'Excellent':(e.accuracy||99)<20?'Good':'Improving...'}<br>🕒 ${new Date(e.ts).toLocaleTimeString()} ${e.sos?'<span class=badge>SOS</span>':''}`;
+    document.getElementById('lastUpdate').innerText=new Date(e.ts).toLocaleTimeString();
+  }
 }
-
-function renderMap(lat,lng,clientId,isSOS){
-  currentLat=lat;currentLng=lng;currentClientId=clientId;
-  // Real houses = satellite view z=19 & t=k
-  document.getElementById('mapWrap').innerHTML=`<iframe src="https://maps.google.com/maps?q=${lat},${lng}&z=19&t=k&output=embed" loading="lazy"></iframe><button class="fab" onclick="openInGoogle()">🧭 NAVIGATE TO ${clientId}</button><div style="position:absolute;top:12px;left:12px;background:${isSOS?'#FF453A':'#1F1F27'};color:#fff;padding:8px 12px;border-radius:20px;font-size:11px;font-weight:800;border:1px solid #333">${isSOS?'🚨 SOS • '+clientId:'📍 LIVE • '+clientId}</div>`;
-  document.getElementById('lastUpdate').innerText=new Date().toLocaleTimeString();
-  document.getElementById('activeClient').innerHTML=`<span class="dot ${isSOS?'red':'green'}"></span> <b>${clientId}</b> — ${lat.toFixed(5)}, ${lng.toFixed(5)} ${isSOS?'<span class="badge">SOS</span>':''}`;
-}
-
-function openInGoogle(){ if(!currentLat) return; window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentLat},${currentLng}&travelmode=driving`,'_blank'); }
 
 async function fetchLive(){
   try{
     let r=await fetch('/api/location'); let locs=await r.json();
-    // also get local fallback (client on same phone test)
-    let localLast=localStorage.getItem('zondi_last_loc');
-    if(localLast){ let j=JSON.parse(localLast); locs[j.client_id]=j; }
-    // merge with cache so never lose
+    let local=localStorage.getItem('zondi_last_loc'); if(local){ let j=JSON.parse(local); locs[j.client_id]=j; }
     saveCache(locs);
-    let all=Object.keys(savedLocs).length?savedLocs:locs;
+    let all=Object.keys(saved).length?saved:locs;
     let entries=Object.values(all).sort((a,b)=>b.ts-a.ts);
-    // CLIENT LIST
     let list=document.getElementById('clientList'); list.innerHTML='';
     entries.forEach(e=>{
-      list.innerHTML+=`<div class="listItem" onclick="renderMap(${e.lat},${e.lng},'${e.client_id}',${e.sos})"><div><b>${e.client_id}</b><br><small style="color:var(--muted)">${e.lat.toFixed(5)}, ${e.lng.toFixed(5)} • ${new Date(e.ts).toLocaleTimeString()}</small></div><div>${e.sos?'<span class="dot red"></span> SOS':'<span class="dot green"></span> LIVE'}</div></div>`;
+      upsert(e);
+      list.innerHTML+=`<div class="listItem" onclick="map.setView([${e.lat},${e.lng}],20);switchTab('map',document.querySelector('.tab'))"><div><b>${e.name||e.client_id}</b><br><small style="color:var(--muted)">${e.phone||''} • ±${e.accuracy||e.acc||'?'}m • ${new Date(e.ts).toLocaleTimeString()}</small></div><div><span class="dot ${e.sos?'red':'green'}"></span></div></div>`;
     });
-    // AUTO NAVIGATE TO RECENT
-    if(entries[0] &&!currentLat){ renderMap(entries[0].lat,entries[0].lng,entries[0].client_id,entries[0].sos); }
-    // if new SOS more recent than current, jump
-    let sosEntries=entries.filter(e=>e.sos);
-    if(sosEntries[0] && sosEntries[0].client_id!==currentClientId){ renderMap(sosEntries[0].lat,sosEntries[0].lng,sosEntries[0].client_id,true); }
   }catch(e){}
-  // SOS queue
-  try{
-    let r2=await fetch('/tmp/sos.json').catch(()=>null); // will fail, so try api
-    let r3=await fetch('/api/sos').catch(()=>null);
-  }catch{}
 }
 
-function switchTab(name,el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active');
-  document.getElementById('view-map').style.display=name==='map'?'block':'none';
-  document.getElementById('view-clients').style.display=name==='clients'?'block':'none';
-  document.getElementById('view-radio').style.display=name==='radio'?'block':'none';
-  document.getElementById('view-qr').style.display=name==='qr'?'block':'none';
-}
+function openInGoogle(){ if(!currentData) return; window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentData.lat},${currentData.lng}&travelmode=driving`,'_blank'); }
+function switchTab(name,el){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); document.getElementById('view-map').style.display=name==='map'?'block':'none'; document.getElementById('view-clients').style.display=name==='clients'?'block':'none'; document.getElementById('view-radio').style.display=name==='radio'?'block':'none'; document.getElementById('view-qr').style.display=name==='qr'?'block':'none'; if(name==='map') setTimeout(()=>map.invalidateSize(),200); }
 
-// poll every 3 sec — never lose
-fetchLive(); setInterval(fetchLive,3000);
-// own GPS
-if(navigator.geolocation){ navigator.geolocation.watchPosition(()=>{},()=>{}, {enableHighAccuracy:true}) }
+fetchLive(); setInterval(fetchLive,2000);
 </script>
 </body></html>
