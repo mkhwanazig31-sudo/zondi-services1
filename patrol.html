@@ -1,19 +1,30 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Patrol - ZONDI</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PATROL - ZONDI</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<style>:root{--bg:#F9F7F2;--card:#fff;--gold:#E8B62A;--blue:#2D7FF9;--line:#EDE8E0;--ink:#121212;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);color:var(--ink)}#top{background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;justify-content:space-between;align-items:center}#map{height:52vh;border-bottom:1px solid var(--line)}.wrap{padding:14px}.client{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0;display:flex;justify-content:space-between;box-shadow:0 4px 18px rgba(0,0,0,.04)}.btn{width:100%;padding:13px;border:none;border-radius:20px;font-weight:800}.btn-blue{background:var(--blue);color:#fff}.footer{text-align:center;padding:22px;color:#999;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}</style></head><body>
-<div id="top"><b>🚔 PATROL</b><span onclick="location.href='/'" style="color:var(--muted);cursor:pointer;font-size:13px">HOME</span></div>
+<style>:root{--bg:#F9F7F2;--card:#fff;--gold:#E8B62A;--blue:#2D7FF9;--line:#EDE8E0;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg)}#top{position:sticky;top:0;z-index:10;background:#121212;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}#map{height:38vh}#map.leaflet-container{border-bottom:1px solid var(--line)}.wrap{padding:16px}.btn{padding:12px 14px;border-radius:12px;border:none;font-weight:700;cursor:pointer;width:100%;margin:6px 0}.btn-blue{background:var(--blue);color:#fff}.btn-gold{background:var(--gold);color:#121212}.footer{text-align:center;margin:24px 0;color:#999;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}</style>
+<script>
+// --- NEW: AUTH GUARD - ADDED WITHOUT TOUCHING MAP CODE ---
+let role = localStorage.getItem('zondi_role');
+let user = localStorage.getItem('zondi_user');
+if(!user){ location.href='/login'; }
+</script>
+</head><body>
+<div id="top"><b>🚓 PATROL</b><span onclick="location.href='/'" style="cursor:pointer">⌂</span></div>
 <div id="map"></div>
 <div class="wrap">
-<button class="btn btn-blue" onclick="startScan()">📷 SCAN CLIENT QR</button>
-<div id="reader" style="margin-top:10px;border-radius:12px;overflow:hidden"></div>
-<div id="scanResult" style="text-align:center;color:var(--blue);font-weight:700;margin:8px"></div>
-<h4 style="margin:14px 0 6px">Live Clients</h4><div id="list"></div>
+<button class="btn btn-blue" onclick="startScan()">📷 Scan Client QR</button>
+<div id="reader" style="margin-top:10px;border-radius:12px;overflow:hidden;display:none"></div>
+<div id="scanResult" style="text-align:center;color:green;font-weight:700;margin-top:8px"></div>
+<h4 style="margin:14px 0 6px">Live Clients</h4><div id="clientsList"></div>
+<button class="btn btn-gold" onclick="localStorage.clear();location.href='/login'">Logout</button>
 </div>
-<div class="footer">designed by mkhwanazi.gv — built with autonomous intelligence, directed by human intent<br><span style="font-size:9px;opacity:.6">ZONDI OS v1.0</span></div>
+<div class="footer">designed by mkhwanazi.gv — built with autonomous intelligence, directed by human intent</div>
 <script>
-let map=L.map('map').setView([-26.2041,28.0473],11);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);let markers={};
-async function refresh(){let r=await fetch('/get_clients');let d=await r.json();let list=document.getElementById('list');list.innerHTML='';for(let u in d){let l=d[u];let pos=[l.lat,l.lng];if(!markers[u])markers[u]=L.marker(pos).addTo(map).bindPopup(u);else markers[u].setLatLng(pos);let el=document.createElement('div');el.className='client';el.innerHTML=`<div><b>${u}</b><br><small style="color:#8A857E">${l.time}</small></div><div><a href="https://maps.google.com/?q=${l.lat},${l.lng}" target="_blank" style="color:var(--blue);text-decoration:none;font-weight:700">Navigate</a></div>`;list.appendChild(el);}}
+let map=L.map('map').setView([-26.2041,28.0473],11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+let markers={};
+async function refresh(){let r=await fetch('/get_clients');let d=await r.json();let list=document.getElementById('clientsList');list.innerHTML='';Object.keys(d).forEach(id=>{let c=d[id];if(!markers[id]){markers[id]=L.marker([c.lat,c.lng]).addTo(map).bindPopup(id)}else{markers[id].setLatLng([c.lat,c.lng])}list.innerHTML+=`<div style="background:#fff;border:1px solid #EDE8E0;border-radius:12px;padding:10px;margin:6px 0"><b>${id}</b><br><small>${c.lat.toFixed(5)}, ${c.lng.toFixed(5)}</small><br><button onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}','_blank')" style="margin-top:6px;padding:6px 10px;border-radius:8px;border:none;background:#2D7FF9;color:#fff">Navigate</button></div>`});}
 setInterval(refresh,2000);refresh();
-function startScan(){let qr=new Html5Qrcode("reader");qr.start({facingMode:"environment"},{fps:10,qrbox:250},(dec)=>{document.getElementById('scanResult').innerText='✅ Verified: '+dec;fetch('/verify_qr',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:dec})});qr.stop();},()=>{});}
+function startScan(){let qr=new Html5Qrcode("reader");document.getElementById('reader').style.display='block';qr.start({facingMode:"environment"},{fps:10,qrbox:250},(txt)=>{document.getElementById('scanResult').innerText='✅ Scanned: '+txt;qr.stop();document.getElementById('reader').style.display='none';},()=>{});}
 </script></body></html>
