@@ -1,27 +1,13 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Register - ZONDI</title>
-<style>:root{--bg:#F9F7F2;--card:#fff;--ink:#121212;--blue:#2D7FF9;--gold:#E8B62A;--line:#EDE8E0;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}.box{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.08)}h2{margin:0 0 6px;text-align:center}p{color:var(--muted);font-size:13px;margin-bottom:18px;text-align:center}input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#FFFEFB;margin:8px 0}.btn{width:100%;padding:13px;border-radius:12px;border:none;font-weight:700;margin-top:14px;cursor:pointer}.blue{background:var(--blue);color:#fff}.footer{text-align:center;margin-top:24px;color:#999;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}</style></head><body>
-<div class="box">
-<h2>Create Account</h2><p>Join ZONDI Services</p>
-<input id="phone" placeholder="Phone or Email">
-<input id="pass" type="password" placeholder="Password">
-<select id="role"><option value="client">Client - Protection</option><option value="patrol">Patrol - Guard Unit</option></select>
-<button class="btn blue" id="btn" onclick="doReg()">Register</button>
-<div id="msg" style="margin-top:12px;font-size:13px;text-align:center"></div>
-<div class="footer">designed by mkhwanazi.gv — built with autonomous intelligence, directed by human intent</div>
-</div>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Patrol - ZONDI</title>
+<style>:root{--bg:#0F0F0F;--card:#1A1A1A;--ink:#fff;--blue:#2D7FF9;--line:#2A2A2A;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);color:var(--ink);padding:20px}.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}.btn{padding:12px;border-radius:10px;border:none;font-weight:700;cursor:pointer;width:100%}.blue{background:var(--blue);color:#fff}</style>
 <script>
-async function doReg(){
- let btn=document.getElementById('btn'); btn.innerText='Creating...'; btn.disabled=true;
- let phone=document.getElementById('phone').value.trim(); let password=document.getElementById('pass').value.trim(); let role=document.getElementById('role').value;
- let msg=document.getElementById('msg');
- try{
-  let r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,password,role})});
-  let j=await r.json();
-  if(!j.ok){ msg.style.color='red'; msg.innerText=j.msg; btn.innerText='Register'; btn.disabled=false; return}
-  msg.style.color='green';
-  if(role==='patrol'){ msg.innerText='✅ Registered as PATROL — Awaiting approval from Control Room'; }
-  else { msg.innerText='✅ Registered — Redirecting to login'; setTimeout(()=>location.href='/login',1200); }
-  btn.innerText='Done';
- }catch(e){ msg.style.color='red'; msg.innerText='Server error'; btn.innerText='Register'; btn.disabled=false}
-}
-</script></body></html>
+let role=localStorage.getItem('zondi_role');
+if(role!=='patrol' && role!=='dev'){ location.href='/login'; }
+</script>
+</head><body>
+<h2>🚓 Patrol Unit</h2>
+<p style="color:#8A857E;font-size:13px">Unit: <span id="uid"></span></p>
+<div class="box"><h3>📍 Status: ON DUTY</h3><p style="font-size:12px;color:#8A857E">GPS sharing active</p><div id="map" style="height:250px;background:#111;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#555">Map here</div></div>
+<div class="box"><button class="btn" style="background:#1A1A1A;border:1px solid #2A2A2A;color:#fff" onclick="localStorage.clear();location.href='/login'">Logout</button></div>
+<script>document.getElementById('uid').innerText=localStorage.getItem('zondi_user');</script>
+</body></html>
