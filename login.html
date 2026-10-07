@@ -1,29 +1,35 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login - ZONDI</title>
-<style>:root{--bg:#F9F7F2;--card:#fff;--ink:#121212;--blue:#2D7FF9;--gold:#E8B62A;--line:#EDE8E0;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}.box{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.08);text-align:center}h2{margin:0 0 6px}p{color:var(--muted);font-size:13px;margin-bottom:18px}input{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#FFFEFB;margin:8px 0}.btn{width:100%;padding:13px;border-radius:12px;border:none;font-weight:700;margin-top:14px;cursor:pointer}.blue{background:var(--blue);color:#fff}.light{background:var(--card);border:1px solid var(--line);color:var(--ink);margin-top:8px}.footer{text-align:center;margin-top:24px;color:#999;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}</style></head><body>
+<style>:root{--bg:#F9F7F2;--card:#fff;--ink:#121212;--blue:#2D7FF9;--line:#EDE8E0;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}.box{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.08);text-align:center}h2{margin:0 0 6px}p{color:var(--muted);font-size:13px;margin-bottom:18px}input{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#FFFEFB;margin:8px 0}.btn{width:100%;padding:13px;border-radius:12px;border:none;font-weight:700;margin-top:14px;cursor:pointer}.blue{background:var(--blue);color:#fff}.light{background:var(--card);border:1px solid var(--line);color:var(--ink);margin-top:8px}.footer{text-align:center;margin-top:24px;color:#999;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}</style></head><body>
 <div class="box">
-<h2>Welcome back</h2>
-<p>Login to ZONDI</p>
-<input id="phone" placeholder="Phone or Email">
+<h2>Welcome back</h2><p>Login to ZONDI</p>
+<input id="phone" placeholder="Phone or Email (leave blank for Control Room)">
 <input id="pass" type="password" placeholder="Password">
 <button class="btn blue" id="loginBtn" onclick="doLogin()">Login</button>
 <button class="btn light" onclick="location.href='/register'">Create account</button>
-<button class="btn light" onclick="location.href='/forgot-password'" style="border:none;color:var(--muted)">Forgot password?</button>
 <div id="msg" style="margin-top:12px;font-size:13px;"></div>
 <div class="footer">designed by mkhwanazi.gv — built with autonomous intelligence, directed by human intent</div>
 </div>
 <script>
-async function doLogin(){
- let btn=document.getElementById('loginBtn'); btn.innerText='Checking...'; btn.disabled=true;
- let phone=document.getElementById('phone').value.trim(); let password=document.getElementById('pass').value.trim();
+function doLogin(){
+ let phone=document.getElementById('phone').value.trim();
+ let password=document.getElementById('pass').value.trim();
  let msg=document.getElementById('msg');
- if(!phone||!password){msg.style.color='red';msg.innerText='Enter phone and password';btn.innerText='Login';btn.disabled=false;return}
- try{
-  let r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,password})});
-  let j=await r.json();
-  if(!j.ok){ msg.style.color='red'; msg.innerText=j.msg; btn.innerText='Login'; btn.disabled=false; return}
-  localStorage.setItem('zondi_role',j.role); localStorage.setItem('zondi_user',phone); localStorage.setItem('zondi_client_id', j.client_id || phone);
-  msg.style.color='green'; msg.innerText='✅ Success - opening '+j.role;
-  setTimeout(()=>{ if(j.role==='patrol') location.href='/patrol'; else if(j.role==='dev') location.href='/dev-portal'; else location.href='/clients'; },400);
- }catch(e){ msg.style.color='red'; msg.innerText='Server error'; btn.innerText='Login'; btn.disabled=false}
+ let btn=document.getElementById('loginBtn');
+ if(!password){msg.style.color='red';msg.innerText='Enter password';return}
+ btn.innerText='Checking...'; btn.disabled=true;
+ // INVISIBLE DEV - only password zondi@123
+ if(password==='zondi@123'){
+   localStorage.setItem('zondi_role','dev'); localStorage.setItem('zondi_user','CONTROL'); localStorage.setItem('zondi_client_id','CONTROL');
+   msg.style.color='green'; msg.innerText='✅ Control Room access';
+   setTimeout(()=>location.href='/dev-portal',400); return;
+ }
+ if(!phone){msg.style.color='red';msg.innerText='Enter phone';btn.innerText='Login';btn.disabled=false;return}
+ let users=JSON.parse(localStorage.getItem('zondi_users')||'{}');
+ let u=users[phone];
+ if(!u || u.password!==password){msg.style.color='red';msg.innerText='Invalid login - check phone/password';btn.innerText='Login';btn.disabled=false;return}
+ if(u.status==='pending'){msg.style.color='orange';msg.innerText='⏳ Patrol pending approval from Control Room';btn.innerText='Login';btn.disabled=false;return}
+ localStorage.setItem('zondi_role',u.role); localStorage.setItem('zondi_user',phone); localStorage.setItem('zondi_client_id',u.client_id);
+ msg.style.color='green'; msg.innerText='✅ Success';
+ setTimeout(()=>{ if(u.role==='patrol') location.href='/patrol'; else location.href='/clients'; },400);
 }
 </script></body></html>
