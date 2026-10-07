@@ -9,17 +9,22 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE_DIR))
 app = FastAPI()
 
-# --- LIVE MEMORY (Vercel will keep it per instance) ---
 locations = {}
-# Example: {"client01": {"lat": -26.2, "lng": 28.0, "time": "14:22:10", "user": "client01"}}
 
+# --- PAGES - EVERY BUTTON NOW HAS A ROUTE ---
 @app.get("/", response_class=HTMLResponse)
+@app.get("/home", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/login", response_class=HTMLResponse)
 def login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
+
+@app.get("/register", response_class=HTMLResponse)
+@app.get("/registration", response_class=HTMLResponse) # both work
+def register(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request})
 
 @app.get("/clients", response_class=HTMLResponse)
 def clients(request: Request):
@@ -37,15 +42,11 @@ def dev_portal(request: Request):
 def forgot(request: Request):
     return templates.TemplateResponse("forgot-password.html", {"request": request})
 
-@app.get("/radio", response_class=HTMLResponse)
-def radio(request: Request):
-    return templates.TemplateResponse("radio.html", {"request": request})
-
 # --- TRACKING API ---
 @app.post("/update_location")
 async def update_location(request: Request):
     data = await request.json()
-    user = data.get("user", "anon_client")
+    user = data.get("user", "anon")
     locations[user] = {
         "lat": float(data["lat"]),
         "lng": float(data["lng"]),
@@ -60,12 +61,8 @@ async def update_location(request: Request):
 def get_clients():
     return JSONResponse(locations)
 
-# --- QR VERIFY (simple) ---
 @app.post("/verify_qr")
 async def verify_qr(request: Request):
     data = await request.json()
     qr = data.get("code", "")
-    # For now any QR containing ZONDI- is valid, later we link to DB
-    if "ZONDI" in qr.upper():
-        return {"ok": True, "msg": f"Verified {qr}"}
-    return {"ok": False, "msg": "Invalid QR"}
+    return {"ok": "ZONDI" in qr.upper(), "msg": qr}
