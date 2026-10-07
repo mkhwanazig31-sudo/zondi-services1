@@ -1,30 +1,27 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PATROL - ZONDI</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<style>:root{--bg:#F9F7F2;--card:#fff;--gold:#E8B62A;--blue:#2D7FF9;--line:#EDE8E0;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg)}#top{position:sticky;top:0;z-index:10;background:#121212;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}#map{height:38vh}#map.leaflet-container{border-bottom:1px solid var(--line)}.wrap{padding:16px}.btn{padding:12px 14px;border-radius:12px;border:none;font-weight:700;cursor:pointer;width:100%;margin:6px 0}.btn-blue{background:var(--blue);color:#fff}.btn-gold{background:var(--gold);color:#121212}.footer{text-align:center;margin:24px 0;color:#999;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}</style>
-<script>
-// --- NEW: AUTH GUARD - ADDED WITHOUT TOUCHING MAP CODE ---
-let role = localStorage.getItem('zondi_role');
-let user = localStorage.getItem('zondi_user');
-if(!user){ location.href='/login'; }
-</script>
-</head><body>
-<div id="top"><b>🚓 PATROL</b><span onclick="location.href='/'" style="cursor:pointer">⌂</span></div>
-<div id="map"></div>
-<div class="wrap">
-<button class="btn btn-blue" onclick="startScan()">📷 Scan Client QR</button>
-<div id="reader" style="margin-top:10px;border-radius:12px;overflow:hidden;display:none"></div>
-<div id="scanResult" style="text-align:center;color:green;font-weight:700;margin-top:8px"></div>
-<h4 style="margin:14px 0 6px">Live Clients</h4><div id="clientsList"></div>
-<button class="btn btn-gold" onclick="localStorage.clear();location.href='/login'">Logout</button>
-</div>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Register - ZONDI</title>
+<style>:root{--bg:#F9F7F2;--card:#fff;--ink:#121212;--blue:#2D7FF9;--gold:#E8B62A;--line:#EDE8E0;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}.box{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.08)}h2{margin:0 0 6px;text-align:center}p{color:var(--muted);font-size:13px;margin-bottom:18px;text-align:center}input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#FFFEFB;margin:8px 0}.btn{width:100%;padding:13px;border-radius:12px;border:none;font-weight:700;margin-top:14px;cursor:pointer}.blue{background:var(--blue);color:#fff}.footer{text-align:center;margin-top:24px;color:#999;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}</style></head><body>
+<div class="box">
+<h2>Create Account</h2><p>Join ZONDI Services</p>
+<input id="phone" placeholder="Phone or Email">
+<input id="pass" type="password" placeholder="Password">
+<select id="role"><option value="client">Client - Protection</option><option value="patrol">Patrol - Guard Unit</option></select>
+<button class="btn blue" id="btn" onclick="doReg()">Register</button>
+<div id="msg" style="margin-top:12px;font-size:13px;text-align:center"></div>
 <div class="footer">designed by mkhwanazi.gv — built with autonomous intelligence, directed by human intent</div>
+</div>
 <script>
-let map=L.map('map').setView([-26.2041,28.0473],11);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-let markers={};
-async function refresh(){let r=await fetch('/get_clients');let d=await r.json();let list=document.getElementById('clientsList');list.innerHTML='';Object.keys(d).forEach(id=>{let c=d[id];if(!markers[id]){markers[id]=L.marker([c.lat,c.lng]).addTo(map).bindPopup(id)}else{markers[id].setLatLng([c.lat,c.lng])}list.innerHTML+=`<div style="background:#fff;border:1px solid #EDE8E0;border-radius:12px;padding:10px;margin:6px 0"><b>${id}</b><br><small>${c.lat.toFixed(5)}, ${c.lng.toFixed(5)}</small><br><button onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}','_blank')" style="margin-top:6px;padding:6px 10px;border-radius:8px;border:none;background:#2D7FF9;color:#fff">Navigate</button></div>`});}
-setInterval(refresh,2000);refresh();
-function startScan(){let qr=new Html5Qrcode("reader");document.getElementById('reader').style.display='block';qr.start({facingMode:"environment"},{fps:10,qrbox:250},(txt)=>{document.getElementById('scanResult').innerText='✅ Scanned: '+txt;qr.stop();document.getElementById('reader').style.display='none';},()=>{});}
+async function doReg(){
+ let btn=document.getElementById('btn'); btn.innerText='Creating...'; btn.disabled=true;
+ let phone=document.getElementById('phone').value.trim(); let password=document.getElementById('pass').value.trim(); let role=document.getElementById('role').value;
+ let msg=document.getElementById('msg');
+ try{
+  let r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,password,role})});
+  let j=await r.json();
+  if(!j.ok){ msg.style.color='red'; msg.innerText=j.msg; btn.innerText='Register'; btn.disabled=false; return}
+  msg.style.color='green';
+  if(role==='patrol'){ msg.innerText='✅ Registered as PATROL — Awaiting approval from Control Room'; }
+  else { msg.innerText='✅ Registered — Redirecting to login'; setTimeout(()=>location.href='/login',1200); }
+  btn.innerText='Done';
+ }catch(e){ msg.style.color='red'; msg.innerText='Server error'; btn.innerText='Register'; btn.disabled=false}
+}
 </script></body></html>
