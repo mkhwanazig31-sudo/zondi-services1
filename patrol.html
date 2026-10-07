@@ -7,8 +7,8 @@
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;margin:12px 14px;padding:14px}
 #map{height:52vh;width:100%;background:#101014}
 .fab{position:absolute;bottom:24px;right:12px;z-index:500;background:#fff;color:#000;border-radius:12px;padding:10px 12px;font-weight:800;font-size:12px;border:none;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.fab2{position:absolute;bottom:24px;left:12px;z-index:500;background:#1F1F27;color:#fff;border:1px solid #333;border-radius:12px;padding:10px 12px;font-weight:700;font-size:11px;cursor:pointer}
 .listItem{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0;cursor:pointer}
-.btn{width:100%;padding:14px;border-radius:14px;border:none;font-weight:800;cursor:pointer}
 .tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(23,23,29,.95);backdrop-filter:blur(20px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 6px 22px;z-index:2000}
 .tab{flex:1;text-align:center;font-size:10px;color:var(--muted);font-weight:700}.tab.active{color:var(--ink)}.tab b{font-size:20px;display:block;margin-bottom:2px}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}.green{background:var(--green);box-shadow:0 0 10px var(--green)}.red{background:var(--red);box-shadow:0 0 10px var(--red)}.badge{background:var(--red);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;margin-left:6px}
@@ -18,7 +18,7 @@
 <div class="top"><div><div style="font-weight:800;font-size:15px">🚓 PATROL UNIT</div><div style="font-size:11px;color:var(--muted)" id="uid"></div></div><div class="pill"><span class="dot green"></span> ON DUTY • LIVE</div></div>
 
 <div id="view-map">
-  <div style="position:relative"><div id="map"></div><button class="fab" onclick="openInGoogle()">🧭 NAVIGATE</button></div>
+  <div style="position:relative"><div id="map"></div><button class="fab" onclick="openInGoogle()">🧭 NAVIGATE</button><button class="fab2" id="followBtn" onclick="follow=true;map.setView([currentData.lat,currentData.lng],20)">📍 Follow: OFF</button></div>
   <div class="card"><div style="display:flex;justify-content:space-between"><b id="activeTitle">Active Tracking</b><span style="font-size:11px;color:var(--muted)" id="lastUpdate">--</span></div><div id="activeClient" style="margin-top:8px;font-size:13px;color:var(--muted)">📡 Waiting for client location...</div></div>
 </div>
 
@@ -26,38 +26,46 @@
 <div id="view-radio" style="display:none"><div class="card" style="height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center"><b style="font-size:22px">📻 Radio</b><p style="color:var(--muted)">Coming soon — encrypted unit comms</p><div style="width:80px;height:80px;border-radius:50%;background:var(--card2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:32px;margin-top:12px">🔒</div></div></div>
 <div id="view-qr" style="display:none"><div class="card" style="height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center"><b style="font-size:22px">🔳 QR Scanner</b><p style="color:var(--muted)">Coming soon — scan client property tags</p><div style="width:120px;height:120px;border-radius:16px;border:2px dashed var(--line);display:flex;align-items:center;justify-content:center;font-size:32px;margin-top:12px">📷</div></div></div>
 
-<div class="tabs"><div class="tab active" onclick="switchTab('map',this)"><b>🗺️</b>MAP</div><div class="tab" onclick="switchTab('clients',this)"><b>👥</b>CLIENTS</div><div class="tab" onclick="switchTab('radio',this)"><b>📻</b>RADIO</div><div class="tab" onclick="switchTab('qr',this)"><b>🔳</b>QR</div></div>
+<div class="tabs"><div class="tab active" id="tab-map" onclick="switchTab('map',this)"><b>🗺️</b>MAP</div><div class="tab" id="tab-clients" onclick="switchTab('clients',this)"><b>👥</b>CLIENTS</div><div class="tab" onclick="switchTab('radio',this)"><b>📻</b>RADIO</div><div class="tab" onclick="switchTab('qr',this)"><b>🔳</b>QR</div></div>
 
 <script>
 document.getElementById('uid').innerText=uid;
 let map=L.map('map',{zoomControl:false}).setView([-25.7479,28.2293],18);
-// 1. ACCURACY + REAL HOUSES satellite
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:22,opacity:.85}).addTo(map);
 
-let markers={}, currentId=null, currentData=null;
+let markers={}, currentId=null, currentData=null, follow=true;
 let saved=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
-
 function saveCache(locs){ Object.assign(saved,locs); localStorage.setItem('zondi_patrol_cache',JSON.stringify(saved)); }
 
+// FIX 1: don't jump when user drags — only auto-follow if follow=true
+map.on('dragstart',()=>{ follow=false; document.getElementById('followBtn').innerText='📍 Follow: OFF'; });
+
 function upsert(e){
-  // 2. USER INFO ON PIN + 3. MOVES WHEN THEY MOVE
   let latlng=[e.lat,e.lng];
-  let label=`<div style="background:${e.sos?'#FF453A':'#2D7FF9'};color:#fff;padding:7px 12px;border-radius:20px;font-weight:800;font-size:11px;border:2px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.5);white-space:nowrap">${e.sos?'🚨 ':''}${e.name||e.client_id} • ±${e.accuracy||e.acc||'?'}m</div>`;
+  let label=`<div style="background:${e.sos?'#FF453A':'#2D7FF9'};color:#fff;padding:7px 12px;border-radius:20px;font-weight:800;font-size:11px;border:2px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.5);white-space:nowrap">${e.sos?'🚨 ':''}${(e.name||e.client_id).slice(0,14)} • ±${e.accuracy||e.acc||'?'}m</div>`;
   if(!markers[e.client_id]){
     markers[e.client_id]=L.marker(latlng,{icon:L.divIcon({html:label,className:''})}).addTo(map);
   }else{
-    markers[e.client_id].setLatLng(latlng); // THIS MAKES IT MOVE LIVE
+    markers[e.client_id].setLatLng(latlng);
     markers[e.client_id].setIcon(L.divIcon({html:label,className:''}));
   }
-  markers[e.client_id].bindPopup(`<div style="font-family:Inter"><b>👤 ${e.name||e.client_id}</b><br>📞 ${e.phone||'No phone'}<br>🆔 ${e.client_id}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 Accuracy: ±${e.accuracy||e.acc||'?'}m ${ (e.accuracy||99)<10?'• Excellent':(e.accuracy||99)<20?'• Good':''}<br>🕒 ${new Date(e.ts).toLocaleString()}<br>${e.sos?'<b style=color:red>🚨 SOS ACTIVE</b>':''}</div>`);
+  markers[e.client_id].bindPopup(`<div style="font-family:Inter"><b>👤 ${e.name||e.client_id}</b><br>📞 ${e.phone||''}<br>🆔 ${e.client_id}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${e.accuracy||e.acc||'?'}m ${(e.accuracy||99)<10?'• Excellent':(e.accuracy||99)<15?'• Good':''}<br>🕒 ${new Date(e.ts).toLocaleString()}<br>${e.sos?'<b style=color:red>🚨 SOS ACTIVE</b>':''}</div>`);
 
-  // auto navigate to recent / SOS
-  if(!currentId || e.sos || e.ts>(currentData?.ts||0)){
-    currentId=e.client_id; currentData=e;
+  // auto center only first time or SOS, not every ping
+  let isNewSOS = e.sos && e.client_id!==currentId;
+  if(!currentId || isNewSOS){
+    currentId=e.client_id; currentData=e; follow=true;
     map.setView(latlng,20,{animate:true});
+    document.getElementById('followBtn').innerText='📍 Follow: ON';
+  } else if(e.client_id===currentId){
+    currentData=e; // update active data
+    if(follow) map.panTo(latlng,{animate:true}); // gentle pan, not jump
+  }
+  // update active card always
+  if(e.client_id===currentId){
     document.getElementById('activeTitle').innerHTML=e.sos?`🚨 SOS — ${e.name||e.client_id}`:`📍 LIVE — ${e.name||e.client_id}`;
-    document.getElementById('activeClient').innerHTML=`<span class="dot ${e.sos?'red':'green'}"></span> <b>${e.phone||''}</b> • ${e.client_id}<br>👤 ${e.name||''}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${e.accuracy||e.acc||'?'}m ${ (e.accuracy||99)<10?'Excellent':(e.accuracy||99)<20?'Good':'Improving...'}<br>🕒 ${new Date(e.ts).toLocaleTimeString()} ${e.sos?'<span class=badge>SOS</span>':''}`;
+    document.getElementById('activeClient').innerHTML=`<span class="dot ${e.sos?'red':'green'}"></span> <b>${e.phone||''}</b> • ${e.client_id}<br>👤 ${e.name||''}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${e.accuracy||e.acc||'?'}m ${(e.accuracy||99)<10?'Excellent':(e.accuracy||99)<15?'Good':'Improving...'}<br>🕒 ${new Date(e.ts).toLocaleTimeString()} ${e.sos?'<span class=badge>SOS</span>':''}`;
     document.getElementById('lastUpdate').innerText=new Date(e.ts).toLocaleTimeString();
   }
 }
@@ -72,14 +80,12 @@ async function fetchLive(){
     let list=document.getElementById('clientList'); list.innerHTML='';
     entries.forEach(e=>{
       upsert(e);
-      list.innerHTML+=`<div class="listItem" onclick="map.setView([${e.lat},${e.lng}],20);switchTab('map',document.querySelector('.tab'))"><div><b>${e.name||e.client_id}</b><br><small style="color:var(--muted)">${e.phone||''} • ±${e.accuracy||e.acc||'?'}m • ${new Date(e.ts).toLocaleTimeString()}</small></div><div><span class="dot ${e.sos?'red':'green'}"></span></div></div>`;
+      list.innerHTML+=`<div class="listItem" onclick="currentId='${e.client_id}';currentData={lat:${e.lat},lng:${e.lng}};follow=true;map.setView([${e.lat},${e.lng}],20);switchTab('map',document.getElementById('tab-map'))"><div><b>${e.name||e.client_id}</b><br><small style="color:var(--muted)">${e.phone||''} • ±${e.accuracy||e.acc||'?'}m • ${new Date(e.ts).toLocaleTimeString()}</small></div><div><span class="dot ${e.sos?'red':'green'}"></span></div></div>`;
     });
   }catch(e){}
 }
-
 function openInGoogle(){ if(!currentData) return; window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentData.lat},${currentData.lng}&travelmode=driving`,'_blank'); }
 function switchTab(name,el){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); document.getElementById('view-map').style.display=name==='map'?'block':'none'; document.getElementById('view-clients').style.display=name==='clients'?'block':'none'; document.getElementById('view-radio').style.display=name==='radio'?'block':'none'; document.getElementById('view-qr').style.display=name==='qr'?'block':'none'; if(name==='map') setTimeout(()=>map.invalidateSize(),200); }
 
 fetchLive(); setInterval(fetchLive,2000);
-</script>
-</body></html>
+</script></body></html>
