@@ -1,92 +1,92 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Client - ZONDI</title><link rel="manifest" href="/manifest.json">
-<style>:root{--bg:#F9F7F2;--card:#fff;--blue:#2D7FF9;--red:#FF3B30;--line:#EDE8E0;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);padding:16px;padding-bottom:90px}.top{display:flex;justify-content:space-between;align-items:center}.dot{width:10px;height:10px;border-radius:50%;background:#00C851;display:inline-block;animation:pulse 1.5s infinite}@keyframes pulse{0%{opacity:1}50%{opacity:.4}100%{opacity:1}}.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0}.btn{width:100%;padding:16px;border-radius:14px;border:none;font-weight:800;font-size:16px;cursor:pointer}.blue{background:var(--blue);color:#fff}.red{background:var(--red);color:#fff;box-shadow:0 10px 30px rgba(255,59,48,.4)}#map{width:100%;height:280px;border-radius:14px;background:#E9E6E0;display:flex;align-items:center;justify-content:center;color:var(--muted)}small{color:var(--muted);font-size:11px}.acc{font-size:12px;padding:6px 10px;border-radius:20px;display:inline-block;margin-top:6px}.acc.good{background:#E6F4EA;color:#137333}.acc.bad{background:#FCE8E6;color:#A50E0E}</style>
-<script>
-let role=localStorage.getItem('zondi_role');
-let user=localStorage.getItem('zondi_user');
-if(role!=='client' && role!=='dev'){ location.href='/login'; }
-</script>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Client - ZONDI</title><link rel="manifest" href="/manifest.json">
+<style>:root{--bg:#F5F2ED;--card:#fff;--line:#E9E2D8;--blue:#2D7FF9;--red:#FF3B30;--green:#00C851;--muted:#8A857E;--ink:#111}*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:var(--bg);padding:14px 14px 100px;color:var(--ink)}
+.header{display:flex;justify-content:space-between;align-items:center;padding:8px 2px}
+.avatar{width:44px;height:44px;border-radius:14px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;margin:12px 0;box-shadow:0 4px 20px rgba(0,0,0,.04)}
+.statusCard{background:#0F0F0F;color:#fff;border-color:#1A1A1A;display:flex;justify-content:space-between;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;animation:pulse 1.5s infinite}.green{background:var(--green)}@keyframes pulse{0%{opacity:1}50%{opacity:.4}100%{opacity:1}}
+.bigSOS{width:100%;height:150px;border-radius:28px;border:none;background:linear-gradient(180deg,#FF5A52,#FF2D20);color:#fff;font-weight:900;font-size:21px;letter-spacing:.5px;box-shadow:0 18px 40px rgba(255,59,48,.35);cursor:pointer}
+.bigSOS:active{transform:scale(.97)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mini{border-radius:18px;padding:14px;border:1px solid var(--line);background:var(--card)}
+.btn{width:100%;padding:14px;border-radius:14px;border:1px solid var(--line);background:#fff;font-weight:700;cursor:pointer}
+.badge{font-size:11px;padding:6px 10px;border-radius:20px;display:inline-block}.good{background:#E6F4EA;color:#137333}.bad{background:#FCE8E6;color:#A50E0E}
+</style>
+<script>let role=localStorage.getItem('zondi_role');let user=localStorage.getItem('zondi_user');if(role!=='client'&&role!=='dev'){location.href='/login';}</script>
 </head><body>
-<div class="top"><div><b>ZONDI PROTECTION</b><br><small id="cid"></small><br><small id="phone"></small></div><div><span class="dot"></span> <small id="status">LIVE</small></div></div>
 
-<div class="box"><div id="map">📍 Locating you...</div><div id="coords" style="margin-top:8px;font-size:12px">Waiting for GPS...</div><div id="accBadge"></div></div>
+<div class="header"><div><div style="font-weight:900;font-size:19px;letter-spacing:-.5px">ZONDI</div><div style="font-size:12px;color:var(--muted)" id="welcome">Protection Active</div></div><div class="avatar" id="av">C</div></div>
 
-<div class="box"><button class="btn red" onclick="sendSOS()">🚨 EMERGENCY — SEND PATROL</button><small>Long press 3 sec also triggers SOS. Location sent automatically on login.</small></div>
+<div class="card statusCard">
+<div><div style="font-size:10px;letter-spacing:1px;opacity:.6">LIVE PROTECTION</div><div style="font-weight:800;margin-top:4px;font-size:14px"><span class="dot green"></span> <span id="status">ON DUTY • TRACKING</span></div><div style="font-size:11px;margin-top:6px;opacity:.6" id="coordsLine">Locating...</div></div>
+<div style="text-align:right"><div style="font-size:10px;opacity:.5">CLIENT</div><div style="font-size:12px;font-weight:700" id="cid">--</div><div style="font-size:11px;margin-top:4px;opacity:.6" id="phoneLine"></div></div>
+</div>
 
-<div class="box"><b>Tracking</b><br><small>Your live location is shared with Patrol Unit. Keep location ON.</small><br><br><label><input type="checkbox" id="keepTrack" checked> Keep tracking after logout</label></div>
+<button class="bigSOS" id="sosBtn" onclick="sendSOS()" ontouchstart="startHold()" ontouchend="endHold()">🚨 HOLD FOR SOS</button>
+<div style="text-align:center;font-size:11px;color:var(--muted);margin:8px 0">Tap = SOS • Hold 3s = Silent SOS • Patrol sees live</div>
 
-<div class="box"><button class="btn" style="background:#fff;border:1px solid var(--line)" onclick="logout()">Logout</button></div>
+<div class="grid">
+<div class="mini"><div style="font-size:11px;color:var(--muted)">GPS ACCURACY</div><div style="font-weight:900;font-size:20px;margin-top:6px" id="accBig">--m</div><div id="accBadge"><span class="badge bad">Locating...</span></div></div>
+<div class="mini"><div style="font-size:11px;color:var(--muted)">PATROL LINK</div><div style="font-weight:800;font-size:14px;margin-top:6px;color:var(--green)">Connected</div><div style="font-size:11px;color:var(--muted)" id="lastSent">last: --</div><div style="font-size:11px;color:var(--muted)" id="liveMove">Moves when you move</div></div>
+</div>
+
+<div class="card"><div style="display:flex;justify-content:space-between"><b>Quick Actions</b><span style="font-size:11px;color:var(--muted)">No map — phone dashboard</span></div>
+<div class="grid" style="margin-top:12px"><button class="btn" onclick="callPatrol()">📞 Call Patrol</button><button class="btn" onclick="shareLoc()">📍 Share Link</button></div>
+<label style="display:flex;gap:10px;margin-top:14px;font-size:13px"><input type="checkbox" id="keepTrack" checked> Keep tracking after logout (widget mode)</label>
+</div>
+
+<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><b>Account</b><button onclick="logout()" style="border:none;background:#F5F2ED;padding:8px 12px;border-radius:10px;font-weight:700">Logout</button></div><div style="font-size:12px;color:var(--muted);margin-top:8px" id="accountInfo"></div></div>
 
 <script>
 const CLIENT_ID=localStorage.getItem('zondi_client_id')||localStorage.getItem('zondi_user')||'CLIENT-'+Date.now();
-const PHONE=localStorage.getItem('zondi_user')||'';
-document.getElementById('cid').innerText=CLIENT_ID;
-document.getElementById('phone').innerText=PHONE;
-
-let bestAcc=9999;
+const PHONE=(localStorage.getItem('zondi_user')||'').trim();
+document.getElementById('cid').innerText=CLIENT_ID.slice(0,16);
+document.getElementById('phoneLine').innerText=PHONE;
+document.getElementById('welcome').innerText=PHONE;
+document.getElementById('av').innerText=PHONE.charAt(0).toUpperCase();
+document.getElementById('accountInfo').innerText=PHONE+' • '+CLIENT_ID+' • password saved locally';
 
 async function postLocation(lat,lng,acc,sos=false){
-  // 1. ACCURACY — reject bad fix
+  // ACCURACY filter — reject bad fix (your video showed ±4m, we keep that)
   if(!sos && acc>25){
-    document.getElementById('coords').innerText=`Improving accuracy... ±${Math.round(acc)}m — step outside for better lock`;
-    document.getElementById('accBadge').innerHTML=`<span class="acc bad">⚠️ Low accuracy ±${Math.round(acc)}m</span>`;
+    document.getElementById('accBig').innerText=Math.round(acc)+'m';
+    document.getElementById('accBadge').innerHTML=`<span class="badge bad">⚠️ Low ±${Math.round(acc)}m</span>`;
+    document.getElementById('coordsLine').innerText=`Improving... step outside`;
     return;
   }
-  if(acc<bestAcc) bestAcc=acc;
-  // 2. USER INFO ON PIN
   let users=JSON.parse(localStorage.getItem('zondi_users')||'{}');
-  let myInfo=users[PHONE]||{};
-  const payload={
-    client_id:CLIENT_ID,
-    phone:PHONE,
-    name:myInfo.name||CLIENT_ID,
-    lat,lng,
-    acc:Math.round(acc),
-    accuracy:Math.round(acc),
-    sos,ts:Date.now()
-  };
+  let me=users[PHONE]||users[PHONE.toLowerCase()]||{};
+  const payload={client_id:CLIENT_ID,phone:PHONE,name:me.name||PHONE,lat,lng,acc:Math.round(acc),accuracy:Math.round(acc),sos,ts:Date.now()};
   localStorage.setItem('zondi_last_loc',JSON.stringify(payload));
   localStorage.setItem('zondi_tracking','on');
-  
-  // 3. MOVES WHEN THEY MOVE — updates map instantly
-  document.getElementById('coords').innerText=`${lat.toFixed(7)}, ${lng.toFixed(7)} — ${new Date().toLocaleTimeString()}`;
-  document.getElementById('accBadge').innerHTML=`<span class="acc ${acc<15?'good':'bad'}">🎯 ±${Math.round(acc)}m ${acc<10?'Excellent':acc<15?'Good':'Improving'}</span><br><small>👤 ${payload.name} • 📞 ${PHONE} • ${CLIENT_ID}</small>`;
-  document.getElementById('map').innerHTML=`<iframe width="100%" height="100%" style="border:0;border-radius:14px" src="https://maps.google.com/maps?q=${lat},${lng}&z=21&t=k&output=embed"></iframe>`;
-  
+  document.getElementById('accBig').innerText='±'+Math.round(acc)+'m';
+  document.getElementById('accBadge').innerHTML=`<span class="badge ${acc<15?'good':'bad'}">${acc<10?'🎯 Excellent':acc<15?'✅ Good':'Improving'}</span>`;
+  document.getElementById('coordsLine').innerText=`${lat.toFixed(5)}, ${lng.toFixed(5)} • ±${Math.round(acc)}m`;
+  document.getElementById('lastSent').innerText='last: '+new Date().toLocaleTimeString();
+  document.getElementById('liveMove').innerText='📍 Live — moves when you move';
   try{ await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}) }catch(e){}
 }
-
 function startTracking(){
-  if(!navigator.geolocation){document.getElementById('coords').innerText='GPS not supported';return}
-  // LIVE MOVE — watchPosition moves pin in real time
-  navigator.geolocation.watchPosition(pos=>{
-    postLocation(pos.coords.latitude,pos.coords.longitude,pos.coords.accuracy,false);
-  },err=>{
-    document.getElementById('coords').innerText='GPS error: '+err.message+' — enable Precise Location';
-  },{enableHighAccuracy:true,maximumAge:0,timeout:20000});
-  // re-lock every 5 sec
-  setInterval(()=>{ navigator.geolocation.getCurrentPosition(p=>postLocation(p.coords.latitude,p.coords.longitude,p.coords.accuracy,false),()=>{}, {enableHighAccuracy:true,maximumAge:0,timeout:20000}) },5000);
+  if(!navigator.geolocation) return;
+  navigator.geolocation.watchPosition(p=>postLocation(p.coords.latitude,p.coords.longitude,p.coords.accuracy,false),()=>{}, {enableHighAccuracy:true,maximumAge:0,timeout:20000});
+  setInterval(()=>navigator.geolocation.getCurrentPosition(p=>postLocation(p.coords.latitude,p.coords.longitude,p.coords.accuracy,false),()=>{}, {enableHighAccuracy:true,maximumAge:0}),5000);
 }
-
 function sendSOS(){
   navigator.geolocation.getCurrentPosition(pos=>{
     postLocation(pos.coords.latitude,pos.coords.longitude,pos.coords.accuracy,true);
-    document.getElementById('status').innerText='SOS SENT'; document.getElementById('status').style.color='#FF3B30';
-    alert('🚨 SOS Sent! Patrol dispatched');
-    fetch('/api/sos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({client_id:CLIENT_ID,phone:PHONE,lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:Math.round(pos.coords.accuracy),ts:Date.now()})});
+    document.getElementById('status').innerText='SOS SENT • PATROL COMING';
+    fetch('/api/sos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({client_id:CLIENT_ID,phone:PHONE,lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:Math.round(pos.coords.accuracy),ts:Date.now(),sos:true})});
+    alert('🚨 SOS Sent — Patrol sees your live dot');
   },()=>{}, {enableHighAccuracy:true});
 }
-
-let pressTimer; const sosBtn=document.querySelector('.red');
-sosBtn.addEventListener('touchstart',()=>{pressTimer=setTimeout(sendSOS,3000)});
-sosBtn.addEventListener('touchend',()=>clearTimeout(pressTimer));
-
-startTracking();
-
+let holdTimer=null; function startHold(){holdTimer=setTimeout(sendSOS,3000)} function endHold(){clearTimeout(holdTimer)}
+function callPatrol(){ window.open('tel:'); }
+function shareLoc(){ let l=localStorage.getItem('zondi_last_loc'); if(!l) return alert('Wait for GPS lock ±'); let j=JSON.parse(l); let url=`https://www.google.com/maps?q=${j.lat},${j.lng}`; navigator.clipboard.writeText(url); alert('Copied: '+url); }
 function logout(){
   let keep=document.getElementById('keepTrack').checked;
-  if(keep){ localStorage.setItem('zondi_tracking','on'); localStorage.removeItem('zondi_role'); localStorage.removeItem('zondi_user'); alert('Tracking stays ON. Add to home screen as widget.'); location.href='/login'; }
-  else{ localStorage.clear(); location.href='/login'; }
+  // FIX: never clear zondi_users — this was why password forgets
+  if(keep){ localStorage.removeItem('zondi_role'); localStorage.removeItem('zondi_user'); location.href='/login'; }
+  else{ let users=localStorage.getItem('zondi_users'); localStorage.clear(); if(users) localStorage.setItem('zondi_users',users); location.href='/login'; }
 }
-if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js'); }
-</script>
-</body></html>
+startTracking();
+</script></body></html>
