@@ -2,43 +2,27 @@
 <style>:root{--bg:#0F0F0F;--card:#1A1A1A;--ink:#fff;--blue:#2D7FF9;--gold:#E8B62A;--line:#2A2A2A;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);color:var(--ink);padding:20px}h2{margin:0 0 4px}.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}.btn{padding:10px 14px;border-radius:10px;border:none;font-weight:700;cursor:pointer}.gold{background:var(--gold);color:#000}.blue{background:var(--blue);color:#fff}.small{font-size:12px;color:var(--muted)}</style>
 <script>if(localStorage.getItem('zondi_role')!=='dev'){location.href='/login'}</script>
 </head><body>
-<h2>🛰️ ZONDI Control Room</h2><p class="small">Logged as CONTROL • dev invisible • zondi@123</p>
-
-<div class="box">
-<h3>🛡️ Pending Patrol Approvals</h3>
-<div id="pending"></div>
-<p class="small" id="pendingCount"></p>
-</div>
-
-<div class="box">
-<h3>📍 Live Patrol Units</h3>
-<div id="map" style="height:300px;background:#111;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#555">Map loads here — your existing map code stays</div>
-</div>
-
-<div class="box">
-<button class="btn blue" onclick="localStorage.clear();location.href='/login'">Logout</button>
-</div>
-
+<h2>🛰️ ZONDI Control Room</h2><p class="small">Access: zondi@123 invisible — no phone needed</p>
+<div class="box"><h3>🛡️ Pending Patrol Approvals</h3><div id="pending"></div></div>
+<div class="box"><h3>👥 All Users</h3><div id="all"></div></div>
+<div class="box"><button class="btn blue" onclick="localStorage.setItem('zondi_role','');location.href='/login'">Logout</button></div>
 <script>
-async function loadPending(){
- try{
-  let r=await fetch('/api/get_pending');
-  let list=await r.json();
-  let d=document.getElementById('pending');
-  let c=document.getElementById('pendingCount');
-  d.innerHTML='';
-  if(list.length==0){ d.innerHTML='<small style="color:#8A857E">No pending approvals</small>'; c.innerText=''; return}
-  c.innerText=list.length+' waiting';
-  list.forEach(u=>{
-    d.innerHTML+=`<div style="background:#222;border:1px solid #333;border-radius:12px;padding:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center"><span><b style="color:#fff">${u.phone}</b><br><small style="color:#8A857E">${u.role} • ${u.status}</small></span><button class="btn gold" onclick="approve('${u.phone}')">Approve</button></div>`
-  })
- }catch(e){}
+function load(){
+ let users=JSON.parse(localStorage.getItem('zondi_users')||'{}');
+ let pend=document.getElementById('pending'); pend.innerHTML='';
+ let all=document.getElementById('all'); all.innerHTML='';
+ let hasPending=false;
+ Object.keys(users).forEach(phone=>{
+   let u=users[phone];
+   all.innerHTML+=`<div style="background:#222;border:1px solid #333;border-radius:10px;padding:10px;margin:6px 0;display:flex;justify-content:space-between"><span><b>${phone}</b><br><small style="color:#8A857E">${u.role} • ${u.status}</small></span>${u.status==='pending'?`<button class="btn gold" onclick="approve('${phone}')">Approve</button>`:`<small style="color:#2D7FF9">${u.status}</small>`}</div>`;
+   if(u.status==='pending'){hasPending=true; pend.innerHTML+=`<div style="background:#222;border:1px solid #333;border-radius:10px;padding:10px;margin:6px 0;display:flex;justify-content:space-between;align-items:center"><span><b>${phone}</b><br><small style="color:#8A857E">Patrol unit</small></span><button class="btn gold" onclick="approve('${phone}')">Approve</button></div>`}
+ });
+ if(!hasPending) pend.innerHTML='<small style="color:#8A857E">No pending</small>';
 }
-async function approve(phone){
- await fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone})});
- loadPending();
+function approve(phone){
+ let users=JSON.parse(localStorage.getItem('zondi_users')||'{}');
+ if(users[phone]){users[phone].status='approved'; localStorage.setItem('zondi_users',JSON.stringify(users)); load();}
 }
-loadPending();
-setInterval(loadPending,3000);
+load();
 </script>
 </body></html>
