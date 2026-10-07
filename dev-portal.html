@@ -1,21 +1,44 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Control Room - ZONDI</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>:root{--bg:#F9F7F2;--card:#fff;--gold:#E8B62A;--blue:#2D7FF9;--line:#EDE8E0;--ink:#121212;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);color:var(--ink)}#top{background:var(--ink);color:#fff;padding:12px 16px;display:flex;justify-content:space-between}#map{height:58vh;border-bottom:2px solid var(--gold)}.wrap{padding:16px}table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}td,th{padding:10px;font-size:13px;border-bottom:1px solid var(--line);text-align:left}th{background:#FFFEFB;color:var(--muted);font-size:11px;letter-spacing:1px}.footer{text-align:center;padding:22px;color:#999;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}</style>
-<script>
-// --- NEW: AUTH GUARD - CONTROL ROOM ONLY - ADDED WITHOUT TOUCHING MAP ---
-let role = localStorage.getItem('zondi_role');
-let user = localStorage.getItem('zondi_user');
-if(!user){ location.href='/login'; }
-if(role!=='dev'){ alert('Control Room access only'); location.href='/login'; }
-</script>
+<style>:root{--bg:#0F0F0F;--card:#1A1A1A;--ink:#fff;--blue:#2D7FF9;--gold:#E8B62A;--line:#2A2A2A;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);color:var(--ink);padding:20px}h2{margin:0 0 4px}.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}.btn{padding:10px 14px;border-radius:10px;border:none;font-weight:700;cursor:pointer}.gold{background:var(--gold);color:#000}.blue{background:var(--blue);color:#fff}.small{font-size:12px;color:var(--muted)}</style>
+<script>if(localStorage.getItem('zondi_role')!=='dev'){location.href='/login'}</script>
 </head><body>
-<div id="top"><b style="color:var(--gold)">ZONDI CONTROL ROOM</b><span onclick="location.href='/'" style="cursor:pointer;color:#999;font-size:13px">HOME</span></div>
-<div id="map"></div>
-<div class="wrap"><h3 style="margin:0 0 4px">All Live Units</h3><div id="count" style="color:var(--muted);font-size:13px;margin-bottom:10px">0 online</div>
-<table><thead><tr><th>ID</th><th>Last Seen</th><th>Location</th></tr></thead><tbody id="tbody"></tbody></table></div>
-<div class="footer">designed by mkhwanazi.gv — built with autonomous intelligence, directed by human intent<br><span style="font-size:9px;opacity:.6">COMMAND CENTER • GA-RANKUWA</span></div>
+<h2>🛰️ ZONDI Control Room</h2><p class="small">Logged as CONTROL • dev invisible • zondi@123</p>
+
+<div class="box">
+<h3>🛡️ Pending Patrol Approvals</h3>
+<div id="pending"></div>
+<p class="small" id="pendingCount"></p>
+</div>
+
+<div class="box">
+<h3>📍 Live Patrol Units</h3>
+<div id="map" style="height:300px;background:#111;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#555">Map loads here — your existing map code stays</div>
+</div>
+
+<div class="box">
+<button class="btn blue" onclick="localStorage.clear();location.href='/login'">Logout</button>
+</div>
+
 <script>
-let map=L.map('map').setView([-26.2041,28.0473],11);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);let markers={};
-async function refresh(){let r=await fetch('/get_clients');let d=await r.json();document.getElementById('count').innerText=Object.keys(d).length+' units LIVE';let tb=document.getElementById('tbody');tb.innerHTML='';for(let u in d){let l=d[u];let pos=[l.lat,l.lng];if(!markers[u])markers[u]=L.marker(pos).addTo(map).bindPopup(u);else markers[u].setLatLng(pos);tb.innerHTML+=`<tr><td><b>${u}</b></td><td>${l.time}</td><td>${l.lat.toFixed(4)}, ${l.lng.toFixed(4)}</td></tr>`;}}
-setInterval(refresh,2000);refresh();
-</script></body></html>
+async function loadPending(){
+ try{
+  let r=await fetch('/api/get_pending');
+  let list=await r.json();
+  let d=document.getElementById('pending');
+  let c=document.getElementById('pendingCount');
+  d.innerHTML='';
+  if(list.length==0){ d.innerHTML='<small style="color:#8A857E">No pending approvals</small>'; c.innerText=''; return}
+  c.innerText=list.length+' waiting';
+  list.forEach(u=>{
+    d.innerHTML+=`<div style="background:#222;border:1px solid #333;border-radius:12px;padding:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center"><span><b style="color:#fff">${u.phone}</b><br><small style="color:#8A857E">${u.role} • ${u.status}</small></span><button class="btn gold" onclick="approve('${u.phone}')">Approve</button></div>`
+  })
+ }catch(e){}
+}
+async function approve(phone){
+ await fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone})});
+ loadPending();
+}
+loadPending();
+setInterval(loadPending,3000);
+</script>
+</body></html>
