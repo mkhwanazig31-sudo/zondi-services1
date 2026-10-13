@@ -43,7 +43,7 @@
 <script>
 document.getElementById('pPhone').innerText=phone; document.getElementById('profPhone').innerText=phone;
 let clientId = localStorage.getItem('zondi_client_id')||'CLIENT-'+Date.now().toString().slice(-5); localStorage.setItem('zondi_client_id',clientId); document.getElementById('profId').innerText=clientId;
-let map=L.map('map',{zoomControl:false}).setView([-25.7479,28.2293],18);
+window.clientMap = L.map('clientMap')
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:22,opacity:.8}).addTo(map);
 let meMarker=null, patrolMarkers={}, watchId=null, sos=false, sosTimer=null, myLoc=null;
