@@ -22,7 +22,10 @@
 </head><body>
 <div class="top"><div style="display:flex;align-items:center;gap:10px"><img class="logo" src="/logo.png" onerror="this.src='https://via.placeholder.com/38'"><div><div style="font-weight:900;font-size:13px">ZONDI PATROL</div><div style="font-size:10px;color:var(--muted)" id="uid">UNIT</div></div></div><div style="font-size:10px;padding:6px 10px;border-radius:20px;background:#1A2A1A;color:var(--green);border:1px solid #1F3A1F"><span class="dot green"></span> ON DUTY • LIVE</div></div>
 
-<div id="view-map"><div style="position:relative"><div id="map"></div><button class="fab2" id="followBtn">📍 Follow: ON</button>
+<div id="view-map"><div style="position:relative"><div id="map"></div><button class="fab2" id="followBtn" style="top:12px;left:12px">📍 Follow: ON</button>
+<button class="fab" id="locateBtn" style="top:12px;right:12px;background:#17171D;color:#fff;border:1px solid #333" onclick="locateMe()">🎯 Me</button>
+<button class="fab" id="zoomInBtn" style="top:120px;right:12px;bottom:auto">➕</button>
+<button class="fab" id="zoomOutBtn" style="top:160px;right:12px;bottom:auto">➖</button>
 <div id="targetInfo" style="position:absolute;top:12px;left:12px;right:12px;z-index:1000;background:#15151A;border:1px solid #272731;border-radius:14px;padding:10px;display:none"><b id="targetName">Target</b><br><small id="targetDist" style="color:#8E8E93">Calculating...</small></div>
 <div id="navBar" style="position:absolute;bottom:14px;left:12px;right:12px;z-index:1000;display:flex;gap:8px"><button class="btn blue" style="flex:1" onclick="navGoogle()">🗺️ Google</button><button class="btn gray" style="flex:1;background:#33CCFF;color:#000" onclick="navWaze()">🚗 Waze</button><button class="btn gray" style="flex:1" onclick="navInApp()">📍 Route</button></div>
 </div>
@@ -35,6 +38,7 @@
 <script>
 document.getElementById('uid').innerText=uid;
 let map=L.map('map',{zoomControl:false}).setView([-25.7479,28.2293],18);
+L.control.zoom({position:'bottomright'}).addTo(map);
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:22,opacity:.85}).addTo(map);
 let markers={}, currentId=null, currentData=null, follow=true, myLoc=null;
@@ -57,6 +61,20 @@ function setNavigationTarget(lat,lng,name='Client'){
   else document.getElementById('targetDist').innerText=`📍 ${lat.toFixed(6)}, ${lng.toFixed(6)} • Tap Google/Waze to navigate`;
   navInApp();
 }
+  function locateMe(){
+  if(!myLoc) return alert('Waiting for your GPS...');
+  follow=true;
+  document.getElementById('followBtn').innerText='📍 Follow: ON';
+  map.setView([myLoc.lat,myLoc.lng],19,{animate:true});
+}
+
+// Zoom buttons
+document.getElementById('zoomInBtn').onclick = ()=> map.zoomIn();
+document.getElementById('zoomOutBtn').onclick = ()=> map.zoomOut();
+
+// Also fix locateMe on load
+setTimeout(locateMe, 2000);
+  
 function navGoogle(){ if(!activeTarget) return alert('Tap a client first'); window.open(`https://www.google.com/maps/dir/?api=1&destination=${activeTarget.lat},${activeTarget.lng}&travelmode=driving`,'_blank'); }
 function navWaze(){ if(!activeTarget) return alert('Tap a client first'); window.open(`https://waze.com/ul?ll=${activeTarget.lat},${activeTarget.lng}&navigate=yes`,'_blank'); }
 function navInApp(){
