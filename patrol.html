@@ -6,42 +6,30 @@
 .logo{width:38px;height:38px;border-radius:10px;object-fit:cover;background:#000;border:1px solid var(--line)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;margin:12px 14px;padding:14px}
 #map{height:54vh;width:100%;background:#101014}
-.fab{position:absolute;bottom:24px;right:12px;z-index:500;background:#fff;color:#000;border-radius:12px;padding:10px 12px;font-weight:800;font-size:12px;border:none;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.fab2{position:absolute;bottom:24px;left:12px;z-index:500;background:#1F1F27;color:#fff;border:1px solid #333;border-radius:12px;padding:10px 12px;font-weight:700;font-size:11px;cursor:pointer}
+.fab{position:absolute;top:90px;right:12px;z-index:500;background:#fff;color:#000;border-radius:12px;padding:10px 12px;font-weight:800;font-size:12px;border:none;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.fab2{position:absolute;top:90px;left:12px;z-index:500;background:#1F1F27;color:#fff;border:1px solid #333;border-radius:12px;padding:10px 12px;font-weight:700;font-size:11px;cursor:pointer}
 .listItem{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0;cursor:pointer}
 .tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(23,23,29,.95);backdrop-filter:blur(20px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 6px 22px;z-index:2000}
 .tab{flex:1;text-align:center;font-size:10px;color:var(--muted);font-weight:700}.tab.active{color:var(--ink)}.tab b{font-size:20px;display:block;margin-bottom:2px}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}.green{background:var(--green);box-shadow:0 0 10px var(--green)}.red{background:var(--red);box-shadow:0 0 10px var(--red)}
 .pin{width:36px;height:48px;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 6px 12px rgba(0,0,0,.8))}
 .pin-head{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2px solid #fff;color:#fff;font-weight:900;font-size:13px}
-.pin-head span{transform:rotate(45deg)}
-.pin-label{background:#0B0B0F;color:#fff;padding:4px 8px;border-radius:10px;font-size:9px;font-weight:800;border:1px solid #2A2A2A;white-space:nowrap;margin-top:4px}
-.sos-bounce{animation:bounce 0.7s infinite}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.pin-head span{transform:rotate(45deg)} .pin-label{background:#0B0B0F;color:#fff;padding:4px 8px;border-radius:10px;font-size:9px;font-weight:800;border:1px solid #2A2A2A;white-space:nowrap;margin-top:4px}
+.sos-bounce{animation:bounce 0.7s infinite} @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.btn{padding:12px 16px;border-radius:14px;border:none;font-weight:800;cursor:pointer}.blue{background:var(--blue);color:#fff}.gray{background:var(--card2);color:#fff;border:1px solid var(--line)}
 </style>
 <script>let role=localStorage.getItem('zondi_role');let uid=localStorage.getItem('zondi_user')||'PATROL-UNIT';if(role!=='patrol'&&role!=='dev'){location.href='/login'}</script>
 </head><body>
-<div class="top"><div style="display:flex;align-items:center;gap:10px"><img class="logo" src="/logo.png" onerror="this.src='https://via.placeholder.com/38'"><div><div style="font-weight:900;font-size:13px;letter-spacing:.5px">ZONDI PATROL</div><div style="font-size:10px;color:var(--muted)" id="uid">UNIT</div></div></div><div style="font-size:10px;padding:6px 10px;border-radius:20px;background:#1A2A1A;color:var(--green);border:1px solid #1F3A1F"><span class="dot green"></span> ON DUTY • LIVE</div></div>
+<div class="top"><div style="display:flex;align-items:center;gap:10px"><img class="logo" src="/logo.png" onerror="this.src='https://via.placeholder.com/38'"><div><div style="font-weight:900;font-size:13px">ZONDI PATROL</div><div style="font-size:10px;color:var(--muted)" id="uid">UNIT</div></div></div><div style="font-size:10px;padding:6px 10px;border-radius:20px;background:#1A2A1A;color:var(--green);border:1px solid #1F3A1F"><span class="dot green"></span> ON DUTY • LIVE</div></div>
 
-<div id="view-map"><div style="position:relative"><div id="map"></div><button class="fab" onclick="openInGoogle()">🧭 NAVIGATE</button><button class="fab2" id="followBtn">📍 Follow: ON</button></div>
-<div id="navBar" style="position:absolute;bottom:20px;left:12px;right:12px;z-index:1000;display:flex;gap:8px">
-  <button class="btn blue" style="flex:1;padding:14px" onclick="navGoogle()">🗺️ Google Maps</button>
-  <button class="btn gray" style="flex:1;padding:14px;background:#33CCFF;color:#000" onclick="navWaze()">🚗 Waze</button>
-  <button class="btn gray" style="flex:1;padding:14px" onclick="navInApp()">📍 In-App</button>
+<div id="view-map"><div style="position:relative"><div id="map"></div><button class="fab2" id="followBtn">📍 Follow: ON</button>
+<div id="targetInfo" style="position:absolute;top:12px;left:12px;right:12px;z-index:1000;background:#15151A;border:1px solid #272731;border-radius:14px;padding:10px;display:none"><b id="targetName">Target</b><br><small id="targetDist" style="color:#8E8E93">Calculating...</small></div>
+<div id="navBar" style="position:absolute;bottom:14px;left:12px;right:12px;z-index:1000;display:flex;gap:8px"><button class="btn blue" style="flex:1" onclick="navGoogle()">🗺️ Google</button><button class="btn gray" style="flex:1;background:#33CCFF;color:#000" onclick="navWaze()">🚗 Waze</button><button class="btn gray" style="flex:1" onclick="navInApp()">📍 Route</button></div>
 </div>
+<div class="card"><div style="display:flex;justify-content:space-between"><b id="activeTitle">Active Tracking</b><span style="font-size:11px;color:var(--muted)" id="lastUpdate">--</span></div><div id="activeClient" style="margin-top:8px;font-size:13px;color:var(--muted)">📡 Waiting for client location...</div></div></div>
 
-<div id="targetInfo" style="position:absolute;top:60px;left:12px;right:12px;z-index:1000;background:#15151A;border:1px solid #272731;border-radius:14px;padding:10px;display:none">
-  <b id="targetName">Target</b><br>
-  <small id="targetDist" style="color:#8E8E93">Calculating...</small>
-</div>
-  <div class="card"><div style="display:flex;justify-content:space-between"><b id="activeTitle">Active Tracking</b><span style="font-size:11px;color:var(--muted)" id="lastUpdate">--</span></div><div id="activeClient" style="margin-top:8px;font-size:13px;color:var(--muted)">📡 Waiting for client location...</div></div></div>
-
-<div id="view-clients" style="display:none"><div class="card"><b>📍 Live Clients</b><small style="color:var(--muted);display:block;margin-top:4px">🔵 Client • 🟡 Patrol • 🔴 SOS • Tap to fly</small><div id="clientList" style="margin-top:12px"></div></div></div>
-
-<div id="view-about" style="display:none">
-<div class="card" style="padding:0;overflow:hidden"><img src="/about.png" style="width:100%;display:block"><div style="padding:14px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><img src="/logo.png" class="logo"><b>ZONDI PATROL SERVICE</b></div><p style="color:var(--muted);font-size:12px;line-height:1.6">VIGILANT. DISCIPLINED. DEDICATED.<br>ALWAYS PROTECTED.<br><br>PROFESSIONAL • RELIABLE • TRUSTED<br><br>🛡️ Armed Response<br>🚨 Alarm System<br>🚓 Patrolling<br>📹 CCTV Installation & Monitoring<br>💂 Armed & Unarmed Guarding<br>🚗 Vehicle Tracing & Recovery<br>👔 VIP Protection<br>🕵️ Private Investigations<br><br><b style="color:#fff">YOUR SAFETY IS OUR MISSION</b><br><br>📞 071 536 3253 • 074 774 3521<br>✉️ patrolzondi@gmail.com<br>📱 @ZondiPatrol</p></div></div>
-</div>
-
+<div id="view-clients" style="display:none"><div class="card"><b>📍 Live Clients</b><small style="color:var(--muted);display:block;margin-top:4px">🔵 Client • 🔴 SOS • Tap to navigate</small><div id="clientList" style="margin-top:12px"></div></div></div>
+<div id="view-about" style="display:none"><div class="card" style="padding:0;overflow:hidden"><img src="/about.png" style="width:100%;display:block"><div style="padding:14px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><img src="/logo.png" class="logo"><b>ZONDI PATROL SERVICE</b></div><p style="color:var(--muted);font-size:12px;line-height:1.6">VIGILANT. DISCIPLINED. DEDICATED.<br>YOUR SAFETY IS OUR MISSION<br><br>📞 071 536 3253 • 074 774 3521</p></div></div></div>
 <div class="tabs"><div class="tab active" id="tab-map" onclick="switchTab('map',this)"><b>🗺️</b>MAP</div><div class="tab" onclick="switchTab('clients',this)"><b>📍</b>CLIENTS</div><div class="tab" onclick="switchTab('about',this)"><b>🦁</b>ABOUT</div></div>
 
 <script>
@@ -49,39 +37,52 @@ document.getElementById('uid').innerText=uid;
 let map=L.map('map',{zoomControl:false}).setView([-25.7479,28.2293],18);
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:22,opacity:.85}).addTo(map);
-let markers={}, currentId=null, currentData=null, follow=true;
+let markers={}, currentId=null, currentData=null, follow=true, myLoc=null;
 let saved=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
 function saveCache(l){Object.assign(saved,l);localStorage.setItem('zondi_patrol_cache',JSON.stringify(saved));}
 map.on('dragstart',()=>{follow=false;document.getElementById('followBtn').innerText='📍 Follow: OFF';});
 document.getElementById('followBtn').onclick=()=>{follow=true;document.getElementById('followBtn').innerText='📍 Follow: ON'; if(currentData) map.setView([currentData.lat,currentData.lng],20);};
 
-function getPin(color, label, isSOS){
-  let bounce = isSOS ? 'sos-bounce' : '';
-  return L.divIcon({className:'', html:`<div class="pin ${bounce}"><div class="pin-head" style="background:${color}"><span>${isSOS?'!':label.charAt(0)}</span></div><div class="pin-label" style="background:${isSOS?'#FF453A':'#0B0B0F'};border-color:${isSOS?'#FF453A':'#2A2A2A'}">${label.slice(0,12)} • ±${'X'}m</div></div>`.replace('±X', '±'+'{acc}'), iconSize:[36,52], iconAnchor:[18,48]});
+// PATROL GPS FOR NAVIGATION
+navigator.geolocation.watchPosition(p=>{myLoc={lat:p.coords.latitude,lng:p.coords.longitude};},null,{enableHighAccuracy:true});
+
+// --- NAVIGATION SYSTEM ---
+let activeTarget=null, routingLine=null;
+function getDistance(lat1,lon1,lat2,lon2){const R=6371;const dLat=(lat2-lat1)*Math.PI/180;const dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+function setNavigationTarget(lat,lng,name='Client'){
+  activeTarget={lat,lng,name};
+  document.getElementById('targetInfo').style.display='block';
+  document.getElementById('targetName').innerText='🎯 '+name;
+  if(myLoc){let d=getDistance(myLoc.lat,myLoc.lng,lat,lng); document.getElementById('targetDist').innerText=`${d.toFixed(2)} km • ~${Math.max(1,Math.round(d*2.5))} min drive • Tap Google/Waze`;}
+  else document.getElementById('targetDist').innerText=`📍 ${lat.toFixed(6)}, ${lng.toFixed(6)} • Tap Google/Waze to navigate`;
+  navInApp();
+}
+function navGoogle(){ if(!activeTarget) return alert('Tap a client first'); window.open(`https://www.google.com/maps/dir/?api=1&destination=${activeTarget.lat},${activeTarget.lng}&travelmode=driving`,'_blank'); }
+function navWaze(){ if(!activeTarget) return alert('Tap a client first'); window.open(`https://waze.com/ul?ll=${activeTarget.lat},${activeTarget.lng}&navigate=yes`,'_blank'); }
+function navInApp(){
+  if(!activeTarget) return;
+  if(routingLine) map.removeLayer(routingLine);
+  let start = myLoc ? [myLoc.lat,myLoc.lng] : [activeTarget.lat, activeTarget.lng];
+  routingLine = L.polyline([start,[activeTarget.lat,activeTarget.lng]],{color:'#2D7FF9',weight:5,dashArray:'10,10'}).addTo(map);
+  map.fitBounds(routingLine.getBounds(),{padding:[60,60]});
 }
 
 function upsert(e){
-  let latlng=[e.lat,e.lng];
-  let isSOS = !!e.sos;
-  let color = isSOS ? '#FF453A' : '#2D7FF9';
-  let label = (e.name||e.client_id||'C').slice(0,12);
-  let acc = e.accuracy||e.acc||'?';
-  let html = `<div class="pin ${isSOS?'sos-bounce':''}"><div class="pin-head" style="background:${color}"><span>${isSOS?'!':label.charAt(0).toUpperCase()}</span></div><div class="pin-label" style="background:${isSOS?'#FF453A':'#0B0B0F'};border-color:${isSOS?'#FF453A':'#333'}">${label} • ±${acc}m</div></div>`;
-  let icon = L.divIcon({html:html,className:'',iconSize:[40,56],iconAnchor:[20,48]});
-  if(!markers[e.client_id]){ markers[e.client_id]=L.marker(latlng,{icon:icon}).addTo(map); }
+  let latlng=[e.lat,e.lng]; let isSOS=!!e.sos; let color=isSOS?'#FF453A':'#2D7FF9'; let label=(e.name||e.client_id||'C').slice(0,12); let acc=e.accuracy||e.acc||'?';
+  let html=`<div class="pin ${isSOS?'sos-bounce':''}"><div class="pin-head" style="background:${color}"><span>${isSOS?'!':label.charAt(0).toUpperCase()}</span></div><div class="pin-label" style="background:${isSOS?'#FF453A':'#0B0B0F'}">${label} • ±${acc}m</div></div>`;
+  let icon=L.divIcon({html:html,className:'',iconSize:[40,56],iconAnchor:[20,48]});
+  if(!markers[e.client_id]){ markers[e.client_id]=L.marker(latlng,{icon:icon}).addTo(map).on('click',()=>{ setNavigationTarget(e.lat,e.lng,e.name||e.client_id); currentId=e.client_id; currentData=e; }); }
   else{ markers[e.client_id].setLatLng(latlng); markers[e.client_id].setIcon(icon); }
-  markers[e.client_id].bindPopup(`<div style="font-family:Inter"><b>${isSOS?'🚨 SOS — ':''}${e.name||e.client_id}</b><br>📞 ${e.phone||''}<br>🆔 ${e.client_id}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${acc}m<br>🕒 ${new Date(e.ts).toLocaleString()}<br>${isSOS?'<b style=color:red>🚨 SOS ACTIVE</b>':''}</div>`);
-  let isNewSOS = isSOS && e.client_id!==currentId;
-  if(!currentId || isNewSOS){ currentId=e.client_id; currentData=e; follow=true; map.setView(latlng,20,{animate:true}); document.getElementById('followBtn').innerText='📍 Follow: ON'; }
-  else if(e.client_id===currentId){ currentData=e; if(follow) map.panTo(latlng,{animate:true}); }
+  markers[e.client_id].bindPopup(`<div style="font-family:Inter"><b>${isSOS?'🚨 SOS — ':''}${e.name||e.client_id}</b><br>📞 ${e.phone||''}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${acc}m<br><button onclick="setNavigationTarget(${e.lat},${e.lng},'${e.client_id}')" style="margin-top:6px;padding:6px 10px;border-radius:8px;background:#2D7FF9;color:#fff;border:none">Navigate</button></div>`);
+  if(!currentId || (isSOS && e.client_id!==currentId)){ currentId=e.client_id; currentData=e; setNavigationTarget(e.lat,e.lng,e.name||e.client_id); }
   if(e.client_id===currentId){
     document.getElementById('activeTitle').innerHTML=e.sos?`🚨 SOS — ${e.name||e.client_id}`:`📍 LIVE — ${e.name||e.client_id}`;
-    document.getElementById('activeClient').innerHTML=`<span class="dot ${e.sos?'red':'green'}"></span> <b>${e.phone||''}</b> • ${e.client_id}<br>👤 ${e.name||''}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${e.accuracy||e.acc||'?'}m<br>🕒 ${new Date(e.ts).toLocaleTimeString()} ${e.sos?'<span style="background:#FF453A;color:#fff;padding:2px 6px;border-radius:10px;font-size:10px">SOS</span>':''}`;
+    document.getElementById('activeClient').innerHTML=`<span class="dot ${e.sos?'red':'green'}"></span> <b>${e.phone||''}</b> • ${e.client_id}<br>👤 ${e.name||''}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${acc}m<br>🕒 ${new Date(e.ts).toLocaleTimeString()}`;
     document.getElementById('lastUpdate').innerText=new Date(e.ts).toLocaleTimeString();
+    if(follow) map.panTo(latlng,{animate:true});
   }
 }
-async function fetchLive(){ try{ let r=await fetch('/api/location'); let locs=await r.json(); let local=localStorage.getItem('zondi_last_loc'); if(local){ let j=JSON.parse(local); locs[j.client_id]=j; } saveCache(locs); let all=Object.keys(saved).length?saved:locs; let entries=Object.values(all).sort((a,b)=>b.ts-a.ts); let list=document.getElementById('clientList'); list.innerHTML=''; entries.forEach(e=>{ upsert(e); list.innerHTML+=`<div class="listItem" onclick="currentId='${e.client_id}';currentData={lat:${e.lat},lng:${e.lng}};follow=true;map.setView([${e.lat},${e.lng}],20);switchTab('map',document.getElementById('tab-map'))"><div><b>${e.sos?'🚨':'📍'} ${e.name||e.client_id}</b><br><small style="color:var(--muted)">${e.phone||''} • ±${e.accuracy||e.acc||'?'}m ${e.sos?'• SOS':''}</small></div><span class="dot ${e.sos?'red':'green'}"></span></div>`; }); }catch(e){} }
-function openInGoogle(){ if(!currentData) return; window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentData.lat},${currentData.lng}&travelmode=driving`,'_blank'); }
+async function fetchLive(){ try{ let r=await fetch('/api/location'); let locs=await r.json(); let local=localStorage.getItem('zondi_last_loc'); if(local){ let j=JSON.parse(local); locs[j.client_id]=j; } saveCache(locs); let all=Object.keys(saved).length?saved:locs; let entries=Object.values(all).sort((a,b)=>b.ts-a.ts); let list=document.getElementById('clientList'); list.innerHTML=''; entries.forEach(e=>{ upsert(e); list.innerHTML+=`<div class="listItem" onclick="setNavigationTarget(${e.lat},${e.lng},'${e.name||e.client_id}');currentId='${e.client_id}';currentData={lat:${e.lat},lng:${e.lng}};follow=true;map.setView([${e.lat},${e.lng}],20);switchTab('map',document.getElementById('tab-map'))"><div><b>${e.sos?'🚨':'📍'} ${e.name||e.client_id}</b><br><small style="color:var(--muted)">${e.phone||''} • ±${e.accuracy||e.acc||'?'}m ${e.sos?'• SOS':''}</small></div><span class="dot ${e.sos?'red':'green'}"></span></div>`; }); }catch(e){} }
 function switchTab(n,el){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); document.getElementById('view-map').style.display=n==='map'?'block':'none'; document.getElementById('view-clients').style.display=n==='clients'?'block':'none'; document.getElementById('view-about').style.display=n==='about'?'block':'none'; if(n==='map') setTimeout(()=>map.invalidateSize(),200); }
 fetchLive(); setInterval(fetchLive,2000);
 </script></body></html>
