@@ -1,209 +1,58 @@
-<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>ZONDI - Phone Dashboard</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>
-:root{--bg:#0A0A0B;--card:#17171D;--card2:#1F1F27;--line:#272731;--blue:#2D7FF9;--gold:#E8B62A;--green:#00E676;--red:#FF3B30;--muted:#8E8E93;--ink:#fff}
-*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:var(--bg);color:var(--ink);padding-bottom:90px}
-.top{position:sticky;top:0;z-index:1000;background:rgba(10,10,11,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
-.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px}
-.sCard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
-.sCard b{font-size:18px;display:block}.sCard span{font-size:9px;color:var(--muted);letter-spacing:.8px}
-.tabs{position:sticky;top:58px;z-index:900;background:var(--bg);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
-.tab{padding:12px 6px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-weight:800;font-size:11px;text-align:center;cursor:pointer}
-.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
-.box{padding:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;cursor:pointer;position:relative;overflow:hidden}
-.card b{font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card small{color:var(--muted);font-size:11px}
-.iconBox{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:8px;background:var(--card2);border:1px solid var(--line)}
-.card.live{border-color:var(--green)}.card.sos{border-color:var(--red);background:#1A0F0F}
-.btn{padding:10px 12px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:12px}.gold{background:var(--gold);color:#000}.blue{background:var(--blue);color:#fff}.red{background:var(--red);color:#fff}.gray{background:var(--card2);color:#fff;border:1px solid var(--line)}
-.btn.small{padding:7px 10px;font-size:11px}
-.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:#fff;margin-bottom:10px}
-#fileModal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:5000;display:none;padding:10px;overflow:auto}
-.file{background:var(--card);border:1px solid var(--line);border-radius:20px;max-width:520px;margin:10px auto;overflow:hidden}
-.fileHeader{padding:14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
-#fileMap{height:200px;width:100%;background:#101014}.tag{font-size:10px;padding:4px 8px;border-radius:20px;border:1px solid var(--line);display:inline-block;margin-right:6px;margin-bottom:4px}
-.select{width:100%;padding:11px;border-radius:10px;background:#101014;border:1px solid var(--line);color:#fff}
-.camGridBtn{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center;cursor:pointer}
-.appIcon{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 8px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px}
-#appWindow{position:fixed;inset:0;background:#000;z-index:9999;display:none;flex-direction:column}
-#appFrame{flex:1;border:none;width:100%;background:#0A0A0B}
-/* ZONDI APP GRID - TECNO STYLE */
-.app-drawer{position:fixed;inset:0;z-index:5000;background:rgba(8,8,10,.98);backdrop-filter:blur(30px);display:none;flex-direction:column;padding:20px 16px 100px;overflow-y:auto}
-.app-drawer.open{display:flex}
-.drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.grid-size{display:flex;gap:8px;background:#17171D;border:1px solid #272731;border-radius:20px;padding:4px}
-.grid-size button{padding:6px 12px;border-radius:14px;border:none;background:transparent;color:#8E8E93;font-weight:800;font-size:11px;cursor:pointer}
-.grid-size button.active{background:#fff;color:#000}
-.app-grid{display:grid;gap:18px;transition:.2s}
-.app-grid.grid-4{grid-template-columns:repeat(4,1fr)}
-.app-grid.grid-5{grid-template-columns:repeat(5,1fr)}
-.app-grid.grid-6{grid-template-columns:repeat(6,1fr)}
-.app-icon{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
-.app-icon.icon{width:58px;height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:26px;background:var(--card2);border:1px solid var(--line);box-shadow:0 8px 20px rgba(0,0,0,.3);transition:.15s}
-.app-icon:active.icon{transform:scale(0.9)}
-.app-icon b{font-size:10px;font-weight:700;color:#fff;text-align:center;letter-spacing:.3px}
-.app-icon small{font-size:9px;color:var(--muted);margin-top:-4px}
-.fab-grid{position:fixed;bottom:90px;right:14px;z-index:4000;width:56px;height:56px;border-radius:18px;background:#fff;color:#000;border:none;font-size:24px;font-weight:900;box-shadow:0 12px 30px rgba(0,0,0,.5);cursor:pointer}
-</style>
-</head><body>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>ZONDI - Phone Dashboard</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>:root{--bg:#0A0A0B;--card:#17171D;--card2:#1F1F27;--line:#272731;--blue:#2D7FF9;--gold:#E8B62A;--green:#00E676;--red:#FF3B30;--muted:#8E8E93;--ink:#fff}*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:var(--bg);color:var(--ink);padding-bottom:90px}.top{position:sticky;top:0;z-index:1000;background:rgba(10,10,11,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px}.sCard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}.sCard b{font-size:18px;display:block}.sCard span{font-size:9px;color:var(--muted);letter-spacing:.8px}.tabs{position:sticky;top:58px;z-index:900;background:var(--bg);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}.tab{padding:12px 6px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-weight:800;font-size:11px;text-align:center;cursor:pointer}.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}.box{padding:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;cursor:pointer;position:relative;overflow:hidden}.card b{font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card small{color:var(--muted);font-size:11px}.iconBox{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:8px;background:var(--card2);border:1px solid var(--line)}.card.live{border-color:var(--green)}.card.sos{border-color:var(--red);background:#1A0F0F}.btn{padding:10px 12px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:12px}.gold{background:var(--gold);color:#000}.blue{background:var(--blue);color:#fff}.red{background:var(--red);color:#fff}.gray{background:var(--card2);color:#fff;border:1px solid var(--line)}.btn.small{padding:7px 10px;font-size:11px}.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:#fff;margin-bottom:10px}#fileModal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:5000;display:none;padding:10px;overflow:auto}.file{background:var(--card);border:1px solid var(--line);border-radius:20px;max-width:520px;margin:10px auto;overflow:hidden}.fileHeader{padding:14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}#fileMap{height:200px;width:100%;background:#101014}.tag{font-size:10px;padding:4px 8px;border-radius:20px;border:1px solid var(--line);display:inline-block;margin-right:6px;margin-bottom:4px}.select{width:100%;padding:11px;border-radius:10px;background:#101014;border:1px solid var(--line);color:#fff}.camGridBtn{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center;cursor:pointer}.appIcon{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 8px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px}#appWindow{position:fixed;inset:0;background:#000;z-index:9999;display:none;flex-direction:column}#appFrame{flex:1;border:none;width:100%;background:#0A0A0B}
+.app-drawer{position:fixed;inset:0;z-index:6000;background:rgba(8,8,10,.98);backdrop-filter:blur(30px);display:none;flex-direction:column;padding:20px 16px 100px;overflow-y:auto}.app-drawer.open{display:flex}.drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.grid-size{display:flex;gap:8px;background:#17171D;border:1px solid #272731;border-radius:20px;padding:4px}.grid-size button{padding:6px 12px;border-radius:14px;border:none;background:transparent;color:#8E8E93;font-weight:800;font-size:11px;cursor:pointer}.grid-size button.active{background:#fff;color:#000}.app-grid{display:grid;gap:18px;transition:.2s}.app-grid.grid-4{grid-template-columns:repeat(4,1fr)}.app-grid.grid-5{grid-template-columns:repeat(5,1fr)}.app-grid.grid-6{grid-template-columns:repeat(6,1fr)}.app-icon{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}.app-icon.icon{width:58px;height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:26px;background:var(--card2);border:1px solid var(--line)}.fab-grid{position:fixed;bottom:20px;right:14px;z-index:4000;width:56px;height:56px;border-radius:18px;background:#fff;color:#000;border:none;font-size:24px;font-weight:900;box-shadow:0 12px 30px rgba(0,0,0,.5);cursor:pointer}
+</style></head><body>
 <div class="top"><div><div style="font-weight:900;font-size:15px">🛰️ ZONDI DASHBOARD</div><div style="font-size:10px;color:var(--muted)">Phone Grid • In-App Launcher</div></div><button class="btn blue small" onclick="logout()">Logout</button></div>
 <div class="stats"><div class="sCard"><b id="cTotal">0</b><span>CLIENTS</span></div><div class="sCard"><b id="pTotal">0</b><span>PATROLS</span></div><div class="sCard"><b id="pPending" style="color:var(--gold)">0</b><span>PENDING</span></div><div class="sCard"><b id="liveNow" style="color:var(--green)">0</b><span>LIVE</span></div></div>
 <div class="tabs"><div class="tab active" id="tab-clients" onclick="switchTab('clients')">📁 CLIENTS</div><div class="tab" id="tab-patrols" onclick="switchTab('patrols')">🚓 PATROLS</div><div class="tab" id="tab-cams" onclick="switchTab('cams')">📷 CAMS</div><div class="tab" id="tab-map" onclick="switchTab('map')">🗺️ MAP</div></div>
 <div class="box" id="view-clients"><input id="searchClient" class="search" placeholder="🔍 Search client..." oninput="render()"><div class="grid" id="clients"></div></div>
 <div class="box" id="view-patrols" style="display:none"><input id="searchPatrol" class="search" placeholder="🔍 Search patrol..." oninput="render()"><div class="grid" id="patrols"></div><div style="margin-top:14px"><h4 style="margin:0 0 8px">🛡️ Pending Approvals</h4><div class="grid" id="pending"></div></div></div>
 <div class="box" id="view-cams" style="display:none"><h4 style="margin:0 0 8px">📷 Camera Apps - Tap to Open Inside ZONDI</h4><div class="grid3" id="camApps"></div><div style="margin-top:16px"><h4 style="margin:0 0 8px">🏠 Clients by Camera</h4><div class="grid" id="clientsByCam"></div></div></div>
-<div class="box" id="view-map" style="display:none">
-  <div style="position:relative">
-    <div id="allMap" style="height:60vh;border-radius:16px;background:#101014;border:1px solid var(--line)"></div>
-    
-    <!-- NAV BUTTONS ADDED -->
-    <div style="position:absolute;top:12px;right:12px;z-index:500;display:flex;flex-direction:column;gap:8px;">
-      <button onclick="mapZoomIn()" style="width:38px;height:38px;background:#18181b;color:white;border:1px solid #27272a;border-radius:10px;cursor:pointer;font-weight:700">+</button>
-      <button onclick="mapZoomOut()" style="width:38px;height:38px;background:#18181b;color:white;border:1px solid #27272a;border-radius:10px;cursor:pointer;font-weight:700">−</button>
-      <button onclick="mapMyLocation()" style="width:38px;height:38px;background:#18181b;color:white;border:1px solid #27272a;border-radius:10px;cursor:pointer">📍</button>
-      <button onclick="mapReset()" style="width:38px;height:38px;background:white;color:black;border:none;border-radius:10px;cursor:pointer;font-weight:700">⌖</button>
-      <button onclick="mapFullscreen()" style="width:38px;height:38px;background:#18181b;color:white;border:1px solid #27272a;border-radius:10px;cursor:pointer">⛶</button>
-    </div>
+<div class="box" id="view-map" style="display:none"><div style="position:relative"><div id="allMap" style="height:60vh;border-radius:16px;background:#101014;border:1px solid var(--line)"></div><div style="position:absolute;bottom:12px;left:12px;z-index:500;display:flex;gap:6px;background:#18181b;padding:6px;border-radius:20px;border:1px solid #27272a"><button onclick="centerAll()" style="border:none;background:#facc15;color:black;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:700">All</button><button onclick="mapMyLocation()" style="border:none;background:#27272a;color:white;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px">📍 Me</button></div></div></div>
 
-    <div style="position:absolute;bottom:12px;left:12px;z-index:500;display:flex;gap:6px;background:#18181b;padding:6px;border-radius:20px;border:1px solid #27272a">
-      <button onclick="showAllClientsOnMap()" style="border:none;background:#facc15;color:black;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:700">All Clients</button>
-      <button onclick="showPatrolsOnMap()" style="border:none;background:#27272a;color:white;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px">Patrols</button>
-    </div>
-  </div>
-</div>
+<button class="fab-grid" onclick="toggleDrawer()">⊞</button>
+<div class="app-drawer" id="appDrawer"><div class="drawer-head"><div><b style="font-size:18px">ZONDI APPS</b><br><small style="color:#8E8E93">Tap to open • Grid size like TECNO</small></div><div class="grid-size"><button onclick="setGrid(4)" id="g4">4x</button><button onclick="setGrid(5)" id="g5" class="active">5x</button><button onclick="setGrid(6)" id="g6">6x</button></div><button onclick="toggleDrawer()" style="background:#27272a;color:#fff;border:none;padding:8px 14px;border-radius:20px">✕</button></div><div class="app-grid grid-5" id="appGrid"></div></div>
+
 <div id="fileModal" onclick="if(event.target.id==='fileModal')closeFile()"><div class="file"><div class="fileHeader"><div><b id="fName">File</b><br><small id="fPhone" style="color:var(--muted)"></small></div><button class="btn gray small" onclick="closeFile()">✕</button></div><div id="fileMap"></div><div style="padding:12px"><div id="fTags"></div><div id="fInfo" style="font-size:12px;line-height:1.6;color:#C7C7CC;margin-top:8px"></div>
 <div style="margin-top:12px;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:14px"><b style="font-size:11px">✏️ EDIT</b><input id="editName" class="search" placeholder="Name" style="margin-top:8px"><input id="editId" class="search" placeholder="Client ID / Badge ID" style="margin-top:8px"><select id="editRole" class="select" style="margin-top:8px"><option value="client">client</option><option value="patrol">patrol</option></select><input id="editPhone" class="search" placeholder="Phone / Key" style="margin-top:8px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px"><button class="btn blue" onclick="saveEdit()">💾 Save Edit</button><button class="btn red" onclick="deleteFile()">🗑️ Delete</button></div></div>
 <div style="margin-top:12px;padding:12px;background:var(--card2);border:1px solid var(--line);border-radius:14px"><b style="font-size:11px">📷 CAMERA SETUP</b><div class="grid3" style="margin-top:8px"><div class="camGridBtn" onclick="setBrand('V380 Pro')"><div>📹</div><b>V380 Pro</b></div><div class="camGridBtn" onclick="setBrand('Yoosee')"><div>👁️</div><b>Yoosee</b></div><div class="camGridBtn" onclick="setBrand('CareCamPro')"><div>🛡️</div><b>CareCam</b></div><div class="camGridBtn" onclick="setBrand('Yi IoT')"><div>⚪</div><b>Yi IoT</b></div><div class="camGridBtn" onclick="setBrand('UBox')"><div>📦</div><b>UBox</b></div><div class="camGridBtn" onclick="setBrand('V380 Mini')"><div>🔵</div><b>V380 Mini</b></div></div><select id="camBrand" class="select" style="margin-top:10px"><option>V380 Pro</option><option>Yoosee</option><option>CareCamPro</option><option>Yi IoT</option><option>UBox</option><option>V380 Mini</option><option>Other</option></select><input id="camId" class="search" placeholder="Camera ID" style="margin-top:8px"><input id="camUrl" class="search" placeholder="Web URL (optional)" style="margin-top:8px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px"><button class="btn blue" onclick="openCameraAppInside()">📱 OPEN INSIDE</button><button class="btn gray" onclick="saveCam()">💾 Save Cam</button></div></div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button class="btn blue" onclick="navigateFile()">🧭 Navigate</button><button class="btn gray" onclick="copyFileLink()">📋 Copy</button></div>
 </div></div></div>
 <div id="appWindow"><div style="height:56px;background:#17171D;border-bottom:1px solid #272731;display:flex;align-items:center;justify-content:space-between;padding:0 14px"><button onclick="closeInside()" style="background:#272731;color:#fff;border:none;padding:8px 14px;border-radius:20px;font-weight:800">✕ Back to ZONDI</button><div style="text-align:center"><div id="appWindowTitle" style="font-weight:900;font-size:13px">V380 Pro</div><div id="appWindowSub" style="font-size:10px;color:var(--muted)">Running inside ZONDI</div></div><button onclick="openInStore()" style="background:none;border:none;color:var(--blue);font-weight:800;font-size:12px">Store ↗</button></div><iframe id="appFrame" allow="camera; microphone; fullscreen" allowfullscreen></iframe></div>
+
 <script>
 let usersData=JSON.parse(localStorage.getItem('zondi_users')||'{}');
 let locData=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
 let allMap=null, allMarkers={}, currentKey=null, currentLive=null, currentBrand=null;
-const APP_LINKS={
-  'V380 Pro':{pkg:'com.macrovideo.v380pro', store:'https://play.google.com/store/apps/details?id=com.macrovideo.v380pro', icon:'📹', web:'https://v380.org'},
-  'Yoosee':{pkg:'com.yoosee', store:'https://play.google.com/store/apps/details?id=com.yoosee', icon:'👁️', web:'https://www.yoosee.co'},
-  'CareCamPro':{pkg:'com.huiyun.care.viewerpro.googleplay', store:'https://play.google.com/store/apps/details?id=com.huiyun.care.viewerpro.googleplay', icon:'🛡️', web:'https://v380.org'},
-  'Yi IoT':{pkg:'com.kmxc.yilink', store:'https://play.google.com/store/apps/details?id=com.kmxc.yilink', icon:'⚪', web:'https://www.yoosee.co'},
-  'UBox':{pkg:'com.ubox', store:'https://play.google.com/store/apps/details?id=com.ubox.uboxcamera', icon:'📦', web:'https://v380.org'},
-  'V380 Mini':{pkg:'com.macrovideo.v380s', store:'https://play.google.com/store/apps/details?id=com.macrovideo.v380s', icon:'🔵', web:'https://v380.org'},
-};
+const APP_LINKS={'V380 Pro':{pkg:'com.macrovideo.v380pro',store:'https://play.google.com/store/apps/details?id=com.macrovideo.v380pro',icon:'📹',web:'https://v380.org'},'Yoosee':{pkg:'com.yoosee',store:'https://play.google.com/store/apps/details?id=com.yoosee',icon:'👁️',web:'https://www.yoosee.co'},'CareCamPro':{pkg:'com.huiyun.care.viewerpro.googleplay',store:'https://play.google.com/store/apps/details?id=com.huiyun.care.viewerpro.googleplay',icon:'🛡️',web:'https://v380.org'},'Yi IoT':{pkg:'com.kmxc.yilink',store:'https://play.google.com/store/apps/details?id=com.kmxc.yilink',icon:'⚪',web:'https://www.yoosee.co'},'UBox':{pkg:'com.ubox',store:'https://play.google.com/store/apps/details?id=com.ubox.uboxcamera',icon:'📦',web:'https://v380.org'},'V380 Mini':{pkg:'com.macrovideo.v380s',store:'https://play.google.com/store/apps/details?id=com.macrovideo.v380s',icon:'🔵',web:'https://v380.org'},};
 let currentTab='clients';
 function switchTab(t){currentTab=t;document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');document.getElementById('view-clients').style.display=t==='clients'?'block':'none';document.getElementById('view-patrols').style.display=t==='patrols'?'block':'none';document.getElementById('view-cams').style.display=t==='cams'?'block':'none';document.getElementById('view-map').style.display=t==='map'?'block':'none';if(t==='map') setTimeout(()=>{allMap&&allMap.invalidateSize();renderMap();},200);if(t==='cams') renderCamGrid();}
-function render(){
-  let cSearch=(document.getElementById('searchClient').value||'').toLowerCase();
-  let pSearch=(document.getElementById('searchPatrol').value||'').toLowerCase();
-  let cDiv=document.getElementById('clients');cDiv.innerHTML='';let pDiv=document.getElementById('patrols');pDiv.innerHTML='';let pend=document.getElementById('pending');pend.innerHTML='';
-  let cCount=0,pCount=0,pendCount=0;
-  Object.keys(usersData).forEach(k=>{let u=usersData[k];if(!u) return;if(u.role==='client') cCount++;if(u.role==='patrol'&&u.status!=='pending') pCount++;if(u.status==='pending'){pendCount++;let card=document.createElement('div');card.className='card';card.innerHTML=`<div class="iconBox">🚓</div><b>${k}</b><small>pending • ${u.client_id||''}</small><div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px"><button class="btn gold small" onclick="event.stopPropagation(); approvePatrol('${k}')">✓ Approve</button><button class="btn red small" onclick="event.stopPropagation(); deletePatrol('${k}')">Del</button></div>`;card.onclick=()=>openFile(k);pend.appendChild(card);}});
-  Object.keys(usersData).forEach(k=>{let u=usersData[k];let live=locData[k];if(u.role==='client'){if(cSearch&&!(`${k} ${u.client_id||''} ${u.name||''} ${u.camBrand||''}`.toLowerCase().includes(cSearch))) return;let card=document.createElement('div');card.className='card '+(live?.sos?'sos':live?'live':'');card.innerHTML=`<div class="iconBox">${APP_LINKS[u.camBrand]?.icon||'👤'}</div><b>${u.name||k}</b><small>${u.client_id||''}<br>${u.camBrand||'No Cam'}</small><div style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px"><button class="btn blue small" onclick="event.stopPropagation(); openFile('${k}')">✏️ Edit</button><button class="btn gray small" onclick="event.stopPropagation(); openInside('${u.camBrand||'V380 Pro'}','${k}')">📱 Open</button></div>`;card.onclick=()=>openFile(k);cDiv.appendChild(card);}if(u.role==='patrol'&&u.status!=='pending'){if(pSearch&&!k.toLowerCase().includes(pSearch)) return;let card=document.createElement('div');card.className='card '+(locData[k]?'live':'');card.innerHTML=`<div class="iconBox">🚓</div><b>${k}</b><small>${u.client_id||''} • ${u.status||'active'}</small><div style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px"><button class="btn blue small" onclick="event.stopPropagation(); openFile('${k}')">✏️ Edit</button><button class="btn red small" onclick="event.stopPropagation(); deletePatrol('${k}')">🗑️ Del</button></div>`;card.onclick=()=>openFile(k);pDiv.appendChild(card);}});
-  document.getElementById('cTotal').textContent=cCount;document.getElementById('pTotal').textContent=pCount;document.getElementById('pPending').textContent=pendCount;document.getElementById('liveNow').textContent=Object.keys(locData).length;renderCamGrid();
-}
-async function approvePatrol(key){ try{ await fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})}); }catch(e){} if(usersData[key]) usersData[key].status='active'; localStorage.setItem('zondi_users',JSON.stringify(usersData)); render(); }
-async function deletePatrol(key){ if(!confirm('Delete '+key+'?')) return; try{ await fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})}); }catch(e){} delete usersData[key]; localStorage.setItem('zondi_users',JSON.stringify(usersData)); render(); closeFile(); }
-function deleteFile(){ deletePatrol(currentKey); }
-async function saveEdit(){ let old_phone=currentKey; let newName=document.getElementById('editName').value.trim(); let newId=document.getElementById('editId').value.trim(); let newRole=document.getElementById('editRole').value; let newPhone=document.getElementById('editPhone').value.trim(); try{ await fetch('/api/edit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({old_phone,new_phone:newPhone,name:newName,client_id:newId,role:newRole})}); }catch(e){} let u=usersData[old_phone]; if(!u) return; u.name=newName||u.name; u.client_id=newId||u.client_id; u.role=newRole; if(newPhone && newPhone!==old_phone){ usersData[newPhone]=u; delete usersData[old_phone]; currentKey=newPhone; } localStorage.setItem('zondi_users',JSON.stringify(usersData)); render(); alert('✅ Saved'); openFile(currentKey); }
+function render(){let cSearch=(document.getElementById('searchClient').value||'').toLowerCase();let pSearch=(document.getElementById('searchPatrol').value||'').toLowerCase();let cDiv=document.getElementById('clients');cDiv.innerHTML='';let pDiv=document.getElementById('patrols');pDiv.innerHTML='';let pend=document.getElementById('pending');pend.innerHTML='';let cCount=0,pCount=0,pendCount=0;Object.keys(usersData).forEach(k=>{let u=usersData[k];if(!u) return;if(u.role==='client') cCount++;if(u.role==='patrol'&&u.status!=='pending') pCount++;if(u.status==='pending'){pendCount++;let card=document.createElement('div');card.className='card';card.innerHTML=`<div class="iconBox">🚓</div><b>${k}</b><small>pending • ${u.client_id||''}</small><div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px"><button class="btn gold small" onclick="event.stopPropagation(); approvePatrol('${k}')">✓ Approve</button><button class="btn red small" onclick="event.stopPropagation(); deletePatrol('${k}')">Del</button></div>`;card.onclick=()=>openFile(k);pend.appendChild(card);}});Object.keys(usersData).forEach(k=>{let u=usersData[k];let live=locData[k];if(u.role==='client'){if(cSearch&&!(`${k} ${u.client_id||''} ${u.name||''} ${u.camBrand||''}`.toLowerCase().includes(cSearch))) return;let card=document.createElement('div');card.className='card '+(live?.sos?'sos':live?'live':'');card.innerHTML=`<div class="iconBox">${APP_LINKS[u.camBrand]?.icon||'👤'}</div><b>${u.name||k}</b><small>${u.client_id||''}<br>${u.camBrand||'No Cam'}</small><div style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px"><button class="btn blue small" onclick="event.stopPropagation(); openFile('${k}')">✏️ Edit</button><button class="btn gray small" onclick="event.stopPropagation(); openInside('${u.camBrand||'V380 Pro'}','${k}')">📱 Open</button></div>`;card.onclick=()=>openFile(k);cDiv.appendChild(card);}if(u.role==='patrol'&&u.status!=='pending'){if(pSearch&&!k.toLowerCase().includes(pSearch)) return;let card=document.createElement('div');card.className='card '+(locData[k]?'live':'');card.innerHTML=`<div class="iconBox">🚓</div><b>${k}</b><small>${u.client_id||''} • ${u.status||'active'}</small><div style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px"><button class="btn blue small" onclick="event.stopPropagation(); openFile('${k}')">✏️ Edit</button><button class="btn red small" onclick="event.stopPropagation(); deletePatrol('${k}')">🗑️ Del</button></div>`;card.onclick=()=>openFile(k);pDiv.appendChild(card);}});document.getElementById('cTotal').textContent=cCount;document.getElementById('pTotal').textContent=pCount;document.getElementById('pPending').textContent=pendCount;document.getElementById('liveNow').textContent=Object.keys(locData).length;renderCamGrid();}
+async function approvePatrol(key){try{await fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})});}catch(e){} if(usersData[key]) usersData[key].status='active'; localStorage.setItem('zondi_users',JSON.stringify(usersData)); render();}
+async function deletePatrol(key){if(!confirm('Delete '+key+'?')) return;try{await fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})});}catch(e){} delete usersData[key]; localStorage.setItem('zondi_users',JSON.stringify(usersData)); render(); closeFile();}
+function deleteFile(){deletePatrol(currentKey);}
+async function saveEdit(){let old_phone=currentKey;let newName=document.getElementById('editName').value.trim();let newId=document.getElementById('editId').value.trim();let newRole=document.getElementById('editRole').value;let newPhone=document.getElementById('editPhone').value.trim();try{await fetch('/api/edit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({old_phone,new_phone:newPhone,name:newName,client_id:newId,role:newRole})});}catch(e){} let u=usersData[old_phone];if(!u) return;u.name=newName||u.name;u.client_id=newId||u.client_id;u.role=newRole;if(newPhone&&newPhone!==old_phone){usersData[newPhone]=u;delete usersData[old_phone];currentKey=newPhone;} localStorage.setItem('zondi_users',JSON.stringify(usersData));render();alert('✅ Saved');openFile(currentKey);}
 function renderCamGrid(){let appsDiv=document.getElementById('camApps');appsDiv.innerHTML='';Object.keys(APP_LINKS).forEach(brand=>{let info=APP_LINKS[brand];let count=Object.values(usersData).filter(u=>u.camBrand===brand).length;let d=document.createElement('div');d.className='appIcon';d.innerHTML=`<div style="font-size:32px">${info.icon}</div><b>${brand}</b><small>${count} clients</small>`;d.onclick=()=>openInside(brand);appsDiv.appendChild(d);});let byCam=document.getElementById('clientsByCam');byCam.innerHTML='';Object.keys(usersData).forEach(k=>{let u=usersData[k];if(u.role!=='client'||!u.camBrand) return;let card=document.createElement('div');card.className='card';card.innerHTML=`<div class="iconBox">${APP_LINKS[u.camBrand]?.icon||'📷'}</div><b>${u.name||k}</b><small>${u.camBrand}<br>${u.camId||''}</small><button class="btn blue small" style="width:100%;margin-top:8px" onclick="event.stopPropagation(); openInside('${u.camBrand}','${k}')">📱 OPEN INSIDE</button>`;card.onclick=()=>openFile(k);byCam.appendChild(card);});}
-function openInside(brand,clientKey){
-  currentBrand=brand;
-  let info=APP_LINKS[brand];
-  let client=clientKey?usersData[clientKey]:null;
-  let customUrl=(client?.camUrl||'').trim();
-
-  // If client has real http link (not play store) -> open inside ZONDI
-  if(customUrl && customUrl.startsWith('http') &&!customUrl.includes('play.google.com')){
-    document.getElementById('appWindowTitle').textContent=client?`${client.name||clientKey} - ${brand}`:brand;
-    document.getElementById('appWindowSub').textContent=client?.camId?`ID: ${client.camId} • Live inside ZONDI`:'Live inside ZONDI';
-    document.getElementById('appFrame').src=customUrl;
-    document.getElementById('appWindow').style.display='flex';
-    document.body.style.overflow='hidden';
-    return;
-  }
-
-  // No real URL -> launch real camera app (like your screenshot)
-  let pkg=info?.pkg||'';
-  window.location.href=`intent://#Intent;package=${pkg};end`;
-  setTimeout(()=>{
-    window.open(info.store,'_blank');
-  },1200);
-}
-  // MAP NAV HELPERS - ADDED
-function getMap(){ return window.allMap || window.map || window.mapInstance || null; }
-function mapZoomIn(){ let m=getMap(); if(m) m.zoomIn(); }
-function mapZoomOut(){ let m=getMap(); if(m) m.zoomOut(); }
-function mapReset(){ let m=getMap(); if(m) m.setView([-25.876, 29.22], 13); }
-function mapMyLocation(){
-  if(!navigator.geolocation) return alert('No GPS');
-  navigator.geolocation.getCurrentPosition(p=>{
-    let m=getMap(); if(!m) return;
-    let lat=p.coords.latitude, lng=p.coords.longitude;
-    m.setView([lat,lng],16);
-    L.marker([lat,lng]).addTo(m).bindPopup('You are here').openPopup();
-  });
-}
-function mapFullscreen(){
-  let el=document.getElementById('allMap').parentElement;
-  if(!document.fullscreenElement) el.requestFullscreen();
-  else document.exitFullscreen();
-}
-function showAllClientsOnMap(){
-  let m=getMap(); if(!m) return alert('Map not loaded');
-  let group=new L.featureGroup();
-  Object.values(window.usersData||{}).forEach(c=>{
-    if(c.lat && c.lng) group.addLayer(L.marker([c.lat,c.lng]));
-  });
-  if(group.getLayers().length) m.fitBounds(group.getBounds().pad(0.2));
-  else alert('No client lat/lng yet');
-}
-function showPatrolsOnMap(){ alert('Patrols filter - will show active patrol markers'); }
+function openInside(brand,clientKey){currentBrand=brand;let info=APP_LINKS[brand];let client=clientKey?usersData[clientKey]:null;let customUrl=(client?.camUrl||'').trim();if(customUrl&&customUrl.startsWith('http')&&!customUrl.includes('play.google.com')){document.getElementById('appWindowTitle').textContent=client?`${client.name||clientKey} - ${brand}`:brand;document.getElementById('appWindowSub').textContent=client?.camId?`ID: ${client.camId} • Live inside ZONDI`:'Live inside ZONDI';document.getElementById('appFrame').src=customUrl;document.getElementById('appWindow').style.display='flex';document.body.style.overflow='hidden';return;}let pkg=info?.pkg||'';window.location.href=`intent://#Intent;package=${pkg};end`;setTimeout(()=>{window.open(info.store,'_blank');},1200);}
 function closeInside(){document.getElementById('appWindow').style.display='none';document.getElementById('appFrame').src='about:blank';document.body.style.overflow='';}
 function openInStore(){let info=APP_LINKS[currentBrand];if(info) window.open(info.store,'_blank');}
 function openCameraAppInside(){let brand=document.getElementById('camBrand').value;let cid=document.getElementById('camId').value;let curl=document.getElementById('camUrl').value;if(currentKey){usersData[currentKey].camBrand=brand;usersData[currentKey].camId=cid;usersData[currentKey].camUrl=curl;localStorage.setItem('zondi_users',JSON.stringify(usersData));}closeFile();setTimeout(()=>openInside(brand,currentKey),300);}
-function renderMap(){
-  if(!allMap){
-    allMap = L.map('allMap',{zoomControl:false}).setView([-29.08,26.15],12);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(allMap);
-    
-    window.allMap = allMap; // FIX 1: MAKE GLOBAL - NOW BUTTONS FIND IT
-
-    // FIX 2: ADD NAV CONTROLS ONCE (inside map so clicks work)
-    L.Control.Nav = L.Control.extend({
-      onAdd: function(){
-        let div = L.DomUtil.create('div');
-        div.style.display='flex'; div.style.flexDirection='column'; div.style.gap='6px';
-        L.DomEvent.disableClickPropagation(div);
-        div.innerHTML = `
-          <button onclick="allMap.zoomIn()" style="width:38px;height:38px;background:#18181b;color:white;border:1px solid #27272a;border-radius:10px;cursor:pointer">+</button>
-          <button onclick="allMap.zoomOut()" style="width:38px;height:38px;background:#18181b;color:white;border:1px solid #27272a;border-radius:10px;cursor:pointer">−</button>
-          <button onclick="navigator.geolocation.getCurrentPosition(p=>allMap.setView([p.coords.latitude,p.coords.longitude],16))" style="width:38px;height:38px;background:#18181b;color:white;border:1px solid #27272a;border-radius:10px;cursor:pointer">📍</button>
-          <button onclick="allMap.setView([-29.08,26.15],12)" style="width:38px;height:38px;background:white;color:black;border:none;border-radius:10px;cursor:pointer">⌖</button>
-        `;
-        return div;
-      }
-    });
-    L.control.nav = function(opts){ return new L.Control.Nav(opts); }
-    L.control.nav({position:'topright'}).addTo(allMap);
-  }
-
-  Object.values(allMarkers).forEach(m=>allMap.removeLayer(m));
-  allMarkers={};
-  Object.values(locData).forEach(e=>{
-    if(!e.lat) return;
-    let m=L.marker([e.lat,e.lng]).addTo(allMap);
-    allMarkers[e.phone||e.client_id]=m;
-  });
-}
-function openFile(key){currentKey=key;let u=usersData[key];if(!u) return;currentLive=locData[key]||{lat:-29.08,lng:26.15};document.getElementById('fName').textContent=(u.name||key);document.getElementById('fPhone').textContent=key+' • '+u.role;document.getElementById('fTags').innerHTML=`<span class="tag">${u.role}</span> ${u.camBrand?`<span class="tag">📷 ${u.camBrand}</span>`:''} ${u.status?`<span class="tag">${u.status}</span>`:''}`;document.getElementById('fInfo').innerHTML=`<b>ID:</b> ${u.client_id||''}<br><b>Cam:</b> ${u.camBrand||'Not set'} - ${u.camId||''}<br><b>URL:</b> ${u.camUrl||''}<br><b>Status:</b> ${u.status||'active'}`;document.getElementById('editName').value=u.name||'';document.getElementById('editId').value=u.client_id||'';document.getElementById('editRole').value=u.role||'client';document.getElementById('editPhone').value=key;document.getElementById('camBrand').value=u.camBrand||'V380 Pro';document.getElementById('camId').value=u.camId||'';document.getElementById('camUrl').value=u.camUrl||'';document.getElementById('fileModal').style.display='block';setTimeout(()=>{if(window.fileMap) window.fileMap.remove();window.fileMap=L.map('fileMap',{zoomControl:false}).setView([currentLive.lat, currentLive.lng], 16);L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(window.fileMap);if(locData[key]) L.marker([currentLive.lat,currentLive.lng]).addTo(window.fileMap);},100);}
-function closeFile(){document.getElementById('fileModal').style.display='none';}
+function renderMap(){if(!allMap){allMap=L.map('allMap',{zoomControl:true}).setView([-29.08,26.15],12);L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(allMap);window.allMap=allMap;}Object.values(allMarkers).forEach(m=>allMap.removeLayer(m));allMarkers={};Object.values(locData).forEach(e=>{if(!e.lat) return;let m=L.marker([e.lat,e.lng]).addTo(allMap);allMarkers[e.phone||e.client_id]=m;});}
+function mapMyLocation(){if(!navigator.geolocation) return alert('No GPS');navigator.geolocation.getCurrentPosition(p=>{if(!allMap) return;allMap.setView([p.coords.latitude,p.coords.longitude],16);L.marker([p.coords.latitude,p.coords.longitude]).addTo(allMap).bindPopup('You are here').openPopup();});}
+function centerAll(){let vals=Object.values(locData);if(!vals.length) return;let b=L.latLngBounds(vals.map(v=>[v.lat,v.lng]));allMap.fitBounds(b.pad(0.3));}
+// FIXED SINGLE openFile
+function openFile(key){currentKey=key;let u=usersData[key];if(!u) return;currentLive=locData[key]||{lat:-29.08,lng:26.15,accuracy:'?'};document.getElementById('fName').textContent=(u.name||key);document.getElementById('fPhone').textContent=key+' • '+u.role;document.getElementById('fTags').innerHTML=`<span class="tag">${u.role}</span> ${u.camBrand?`<span class="tag">📷 ${u.camBrand}</span>`:''} ${u.status?`<span class="tag">${u.status}</span>`:''}`;document.getElementById('fInfo').innerHTML=`<b>ID:</b> ${u.client_id||''}<br><b>Cam:</b> ${u.camBrand||'Not set'} - ${u.camId||''}<br><b>URL:</b> ${u.camUrl||''}<br><b>Live:</b> ${currentLive.lat.toFixed(5)}, ${currentLive.lng.toFixed(5)} • ±${currentLive.accuracy||'?'}m`;document.getElementById('editName').value=u.name||'';document.getElementById('editId').value=u.client_id||'';document.getElementById('editRole').value=u.role||'client';document.getElementById('editPhone').value=key;document.getElementById('camBrand').value=u.camBrand||'V380 Pro';document.getElementById('camId').value=u.camId||'';document.getElementById('camUrl').value=u.camUrl||'';document.getElementById('fileModal').style.display='block';setTimeout(()=>{if(window.fileMap){window.fileMap.remove();window.fileMap=null;}window.fileMap=L.map('fileMap',{zoomControl:false}).setView([currentLive.lat,currentLive.lng],16);L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(window.fileMap);L.marker([currentLive.lat,currentLive.lng]).addTo(window.fileMap);setTimeout(()=>window.fileMap.invalidateSize(),200);},120);}
+function closeFile(){document.getElementById('fileModal').style.display='none';if(window.fileMap){window.fileMap.remove();window.fileMap=null;}}
 function setBrand(b){document.getElementById('camBrand').value=b;}
 function saveCam(){let brand=document.getElementById('camBrand').value;let cid=document.getElementById('camId').value;let curl=document.getElementById('camUrl').value;if(usersData[currentKey]){usersData[currentKey].camBrand=brand;usersData[currentKey].camId=cid;usersData[currentKey].camUrl=curl;localStorage.setItem('zondi_users',JSON.stringify(usersData));render();alert('✅ Saved to '+brand);}}
 function navigateFile(){if(currentLive) window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentLive.lat},${currentLive.lng}`,'_blank');}
-function copyFileLink(){if(currentLive) navigator.clipboard.writeText(`https://www.google.com/maps?q=${currentLive.lat},${currentLive.lng}`);}
-function centerAll(){let vals=Object.values(locData);if(!vals.length) return;let b=L.latLngBounds(vals.map(v=>[v.lat,v.lng]));allMap.fitBounds(b.pad(0.3));}
+function copyFileLink(){if(currentLive) navigator.clipboard.writeText(`https://www.google.com/maps?q=${currentLive.lat},${currentLive.lng}`).then(()=>alert('Copied')); }
 function logout(){localStorage.removeItem('zondi_role');sessionStorage.removeItem('zondi_token');location.href='/login';}
-render();
+// ICON GRID SYSTEM
+let currentGrid=parseInt(localStorage.getItem('zondi_grid')||5);
+function toggleDrawer(){let d=document.getElementById('appDrawer');d.classList.toggle('open');renderGrid();}
+function setGrid(n){currentGrid=n;localStorage.setItem('zondi_grid',n);document.querySelectorAll('.grid-size button').forEach(b=>b.classList.remove('active'));document.getElementById('g'+n).classList.add('active');let grid=document.getElementById('appGrid');grid.className='app-grid grid-'+n;}
+function renderGrid(){let list=[{icon:'📁',name:'Clients',bg:'#2D7FF9',act:()=>{toggleDrawer();switchTab('clients')}},{icon:'🚓',name:'Patrols',bg:'#E8B62A',act:()=>{toggleDrawer();switchTab('patrols')}},{icon:'📷',name:'Cams',bg:'#00E676',act:()=>{toggleDrawer();switchTab('cams')}},{icon:'🗺️',name:'Map',bg:'#17171D',act:()=>{toggleDrawer();switchTab('map')}},{icon:'🎯',name:'Center All',bg:'#1F1F27',act:()=>{toggleDrawer();centerAll()}},{icon:'📍',name:'My Location',bg:'#1F1F27',act:()=>{toggleDrawer();mapMyLocation()}},{icon:'⚙️',name:'Settings',bg:'#1F1F27',act:()=>{toggleDrawer();}},{icon:'🚨',name:'SOS Alerts',bg:'#FF3B30',act:()=>{toggleDrawer();}}];let grid=document.getElementById('appGrid');grid.innerHTML='';grid.className='app-grid grid-'+currentGrid;document.getElementById('g'+currentGrid).classList.add('active');list.forEach(app=>{let div=document.createElement('div');div.className='app-icon';div.onclick=app.act;div.innerHTML=`<div class="icon" style="background:${app.bg}">${app.icon}</div><b>${app.name}</b>`;grid.appendChild(div);});}
+setGrid(currentGrid); render();
 </script></body></html>
