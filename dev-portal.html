@@ -50,12 +50,12 @@ let usersData=JSON.parse(localStorage.getItem('zondi_users')||'{}');
 let locData=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
 let allMap=null, allMarkers={}, currentKey=null, currentLive=null, currentBrand=null;
 const APP_LINKS={
-  'V380 Pro':{pkg:'com.macrovideo.v380pro', store:'https://play.google.com/store/apps/details?id=com.macrovideo.v380pro', icon:'📹', web:'https://www.v380.com'},
+  'V380 Pro':{pkg:'com.macrovideo.v380pro', store:'https://play.google.com/store/apps/details?id=com.macrovideo.v380pro', icon:'📹', web:'https://v380.org'},
   'Yoosee':{pkg:'com.yoosee', store:'https://play.google.com/store/apps/details?id=com.yoosee', icon:'👁️', web:'https://www.yoosee.co'},
-  'CareCamPro':{pkg:'com.carecam.pro', store:'https://play.google.com/store/apps/details?id=com.carecam.pro', icon:'🛡️', web:'https://www.carecam.com'},
-  'Yi IoT':{pkg:'com.kmxc.yilink', store:'https://play.google.com/store/apps/details?id=com.kmxc.yilink', icon:'⚪', web:'https://www.yitechnology.com'},
-  'UBox':{pkg:'com.ubox.ubicam', store:'https://play.google.com/store/apps/details?id=com.ubox', icon:'📦', web:'https://www.u-tec.com'},
-  'V380 Mini':{pkg:'com.macrovideo.v380mini', store:'https://play.google.com/store/apps/details?id=com.macrovideo.v380mini', icon:'🔵', web:'https://www.v380.com'},
+  'CareCamPro':{pkg:'com.huiyun.care.viewerpro.googleplay', store:'https://play.google.com/store/apps/details?id=com.huiyun.care.viewerpro.googleplay', icon:'🛡️', web:'https://v380.org'},
+  'Yi IoT':{pkg:'com.kmxc.yilink', store:'https://play.google.com/store/apps/details?id=com.kmxc.yilink', icon:'⚪', web:'https://www.yoosee.co'},
+  'UBox':{pkg:'com.ubox', store:'https://play.google.com/store/apps/details?id=com.ubox.uboxcamera', icon:'📦', web:'https://v380.org'},
+  'V380 Mini':{pkg:'com.macrovideo.v380s', store:'https://play.google.com/store/apps/details?id=com.macrovideo.v380s', icon:'🔵', web:'https://v380.org'},
 };
 let currentTab='clients';
 function switchTab(t){currentTab=t;document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');document.getElementById('view-clients').style.display=t==='clients'?'block':'none';document.getElementById('view-patrols').style.display=t==='patrols'?'block':'none';document.getElementById('view-cams').style.display=t==='cams'?'block':'none';document.getElementById('view-map').style.display=t==='map'?'block':'none';if(t==='map') setTimeout(()=>{allMap&&allMap.invalidateSize();renderMap();},200);if(t==='cams') renderCamGrid();}
