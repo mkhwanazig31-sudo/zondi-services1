@@ -2,7 +2,7 @@
 <style>:root{--bg:#F9F7F2;--card:#fff;--ink:#121212;--blue:#2D7FF9;--line:#EDE8E0;--muted:#8A857E}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}.box{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.08);text-align:center}h2{margin:0 0 6px}p{color:var(--muted);font-size:13px;margin-bottom:18px}input{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#FFFEFB;margin:8px 0}.btn{width:100%;padding:13px;border-radius:12px;border:none;font-weight:700;margin-top:14px;cursor:pointer}.blue{background:var(--blue);color:#fff}.light{background:var(--card);border:1px solid var(--line);color:var(--ink);margin-top:8px}.footer{text-align:center;margin-top:24px;color:#999;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}</style></head><body>
 <div class="box">
 <h2>Welcome back</h2><p>Login to ZONDI</p>
-<input id="phone" placeholder="Phone or Email (leave blank for Control Room)" autocomplete="username">
+<input id="phone" placeholder="Phone or Email" autocomplete="username">
 <input id="pass" type="password" placeholder="Password" autocomplete="current-password">
 <button class="btn blue" id="loginBtn" onclick="doLogin()">Login</button>
 <button class="btn light" onclick="location.href='/register'">Create account</button>
@@ -10,33 +10,62 @@
 <div class="footer">designed by mkhwanazi.gv — built with autonomous intelligence, directed by human intent</div>
 </div>
 <script>
+const API_URL = "/api/auth"; // <-- create this API route on Vercel
+
 function normalizeKey(v){
   v=v.trim();
-  if(v.includes('@')) return v.toLowerCase(); // emails lowercased
-  return v.replace(/\s+/g,''); // phones remove spaces
+  if(v.includes('@')) return v.toLowerCase();
+  return v.replace(/\s+/g,'');
 }
-function doLogin(){
+
+async function doLogin(){
  let rawPhone=document.getElementById('phone').value;
  let phone=normalizeKey(rawPhone);
  let password=document.getElementById('pass').value.trim();
  let msg=document.getElementById('msg');
  let btn=document.getElementById('loginBtn');
- if(!password){msg.style.color='red';msg.innerText='Enter password';return}
+ if(!phone ||!password){msg.style.color='red';msg.innerText='Enter phone and password';return}
+
  btn.innerText='Checking...'; btn.disabled=true;
- // INVISIBLE DEV - only password zondi@123
- if(password==='zondi@123'){
-   localStorage.setItem('zondi_role','dev'); localStorage.setItem('zondi_user','CONTROL'); localStorage.setItem('zondi_client_id','CONTROL');
-   msg.style.color='green'; msg.innerText='✅ Control Room access';
-   setTimeout(()=>location.href='/dev-portal',400); return;
+
+ try {
+   // Try backend first
+   const res = await fetch(API_URL, {
+     method: 'POST',
+     headers: {'Content-Type':'application/json'},
+     body: JSON.stringify({action:'login', phone, password})
+   });
+   const data = await res.json();
+
+   if(!res.ok) throw new Error(data.error || 'Login failed');
+
+   // SUCCESS - save session (not user list)
+   localStorage.setItem('zondi_role', data.role);
+   localStorage.setItem('zondi_user', phone);
+   localStorage.setItem('zondi_client_id', data.client_id || phone);
+   localStorage.setItem('zondi_token', data.token); // for API auth
+
+   msg.style.color='green'; msg.innerText='✅ Success';
+   setTimeout(()=>{
+     if(data.role==='patrol') location.href='/patrol';
+     else if(data.role==='dev') location.href='/dev-portal';
+     else location.href='/clients';
+   },400);
+
+ } catch(err) {
+   // Fallback to localStorage for offline dev only
+   let users=JSON.parse(localStorage.getItem('zondi_users')||'{}');
+   let u=users[phone];
+   if(u && u.password===password){
+     localStorage.setItem('zondi_role',u.role);
+     localStorage.setItem('zondi_user',phone);
+     msg.style.color='orange'; msg.innerText='⚠️ Offline mode - using local data';
+     setTimeout(()=>location.href=u.role==='patrol'?'/patrol':'/clients',600);
+   } else {
+     msg.style.color='red'; msg.innerText=err.message;
+     btn.innerText='Login'; btn.disabled=false;
+   }
  }
- if(!phone){msg.style.color='red';msg.innerText='Enter phone';btn.innerText='Login';btn.disabled=false;return}
- let users=JSON.parse(localStorage.getItem('zondi_users')||'{}');
- let u=users[phone] || users[phone.toLowerCase()] || users[rawPhone.trim()];
- if(!u || u.password!==password){msg.style.color='red';msg.innerText='Invalid login - check phone/password';btn.innerText='Login';btn.disabled=false;return}
- if(u.status==='pending'){msg.style.color='orange';msg.innerText='⏳ Patrol pending approval from Control Room';btn.innerText='Login';btn.disabled=false;return}
- localStorage.setItem('zondi_role',u.role); localStorage.setItem('zondi_user',phone); localStorage.setItem('zondi_client_id',u.client_id||phone);
- msg.style.color='green'; msg.innerText='✅ Success';
- setTimeout(()=>{ if(u.role==='patrol') location.href='/patrol'; else location.href='/clients'; },400);
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
 </script></body></html>
