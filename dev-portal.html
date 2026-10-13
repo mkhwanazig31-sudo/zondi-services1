@@ -73,7 +73,29 @@ async function deletePatrol(key){ if(!confirm('Delete '+key+'?')) return; try{ a
 function deleteFile(){ deletePatrol(currentKey); }
 async function saveEdit(){ let old_phone=currentKey; let newName=document.getElementById('editName').value.trim(); let newId=document.getElementById('editId').value.trim(); let newRole=document.getElementById('editRole').value; let newPhone=document.getElementById('editPhone').value.trim(); try{ await fetch('/api/edit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({old_phone,new_phone:newPhone,name:newName,client_id:newId,role:newRole})}); }catch(e){} let u=usersData[old_phone]; if(!u) return; u.name=newName||u.name; u.client_id=newId||u.client_id; u.role=newRole; if(newPhone && newPhone!==old_phone){ usersData[newPhone]=u; delete usersData[old_phone]; currentKey=newPhone; } localStorage.setItem('zondi_users',JSON.stringify(usersData)); render(); alert('✅ Saved'); openFile(currentKey); }
 function renderCamGrid(){let appsDiv=document.getElementById('camApps');appsDiv.innerHTML='';Object.keys(APP_LINKS).forEach(brand=>{let info=APP_LINKS[brand];let count=Object.values(usersData).filter(u=>u.camBrand===brand).length;let d=document.createElement('div');d.className='appIcon';d.innerHTML=`<div style="font-size:32px">${info.icon}</div><b>${brand}</b><small>${count} clients</small>`;d.onclick=()=>openInside(brand);appsDiv.appendChild(d);});let byCam=document.getElementById('clientsByCam');byCam.innerHTML='';Object.keys(usersData).forEach(k=>{let u=usersData[k];if(u.role!=='client'||!u.camBrand) return;let card=document.createElement('div');card.className='card';card.innerHTML=`<div class="iconBox">${APP_LINKS[u.camBrand]?.icon||'📷'}</div><b>${u.name||k}</b><small>${u.camBrand}<br>${u.camId||''}</small><button class="btn blue small" style="width:100%;margin-top:8px" onclick="event.stopPropagation(); openInside('${u.camBrand}','${k}')">📱 OPEN INSIDE</button>`;card.onclick=()=>openFile(k);byCam.appendChild(card);});}
-function openInside(brand,clientKey){currentBrand=brand;let info=APP_LINKS[brand];let client=clientKey?usersData[clientKey]:null;let customUrl=client?.camUrl||'';let urlToLoad=customUrl||(info?info.web:'https://www.google.com');document.getElementById('appWindowTitle').textContent=client?`${client.name||clientKey} - ${brand}`:brand;document.getElementById('appWindowSub').textContent=client?.camId?`ID: ${client.camId} • Running inside ZONDI`:'Running inside ZONDI';document.getElementById('appFrame').src=urlToLoad;document.getElementById('appWindow').style.display='flex';document.body.style.overflow='hidden';}
+function openInside(brand,clientKey){
+  currentBrand=brand;
+  let info=APP_LINKS[brand];
+  let client=clientKey?usersData[clientKey]:null;
+  let customUrl=(client?.camUrl||'').trim();
+
+  // If client has real http link (not play store) -> open inside ZONDI
+  if(customUrl && customUrl.startsWith('http') &&!customUrl.includes('play.google.com')){
+    document.getElementById('appWindowTitle').textContent=client?`${client.name||clientKey} - ${brand}`:brand;
+    document.getElementById('appWindowSub').textContent=client?.camId?`ID: ${client.camId} • Live inside ZONDI`:'Live inside ZONDI';
+    document.getElementById('appFrame').src=customUrl;
+    document.getElementById('appWindow').style.display='flex';
+    document.body.style.overflow='hidden';
+    return;
+  }
+
+  // No real URL -> launch real camera app (like your screenshot)
+  let pkg=info?.pkg||'';
+  window.location.href=`intent://#Intent;package=${pkg};end`;
+  setTimeout(()=>{
+    window.open(info.store,'_blank');
+  },1200);
+}
 function closeInside(){document.getElementById('appWindow').style.display='none';document.getElementById('appFrame').src='about:blank';document.body.style.overflow='';}
 function openInStore(){let info=APP_LINKS[currentBrand];if(info) window.open(info.store,'_blank');}
 function openCameraAppInside(){let brand=document.getElementById('camBrand').value;let cid=document.getElementById('camId').value;let curl=document.getElementById('camUrl').value;if(currentKey){usersData[currentKey].camBrand=brand;usersData[currentKey].camId=cid;usersData[currentKey].camUrl=curl;localStorage.setItem('zondi_users',JSON.stringify(usersData));}closeFile();setTimeout(()=>openInside(brand,currentKey),300);}
