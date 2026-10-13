@@ -146,7 +146,40 @@ function showPatrolsOnMap(){ alert('Patrols filter - will show active patrol mar
 function closeInside(){document.getElementById('appWindow').style.display='none';document.getElementById('appFrame').src='about:blank';document.body.style.overflow='';}
 function openInStore(){let info=APP_LINKS[currentBrand];if(info) window.open(info.store,'_blank');}
 function openCameraAppInside(){let brand=document.getElementById('camBrand').value;let cid=document.getElementById('camId').value;let curl=document.getElementById('camUrl').value;if(currentKey){usersData[currentKey].camBrand=brand;usersData[currentKey].camId=cid;usersData[currentKey].camUrl=curl;localStorage.setItem('zondi_users',JSON.stringify(usersData));}closeFile();setTimeout(()=>openInside(brand,currentKey),300);}
-function renderMap(){if(!allMap){allMap=L.map('allMap',{zoomControl:false}).setView([-29.08,26.15],12);L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(allMap);}Object.values(allMarkers).forEach(m=>allMap.removeLayer(m));allMarkers={};Object.values(locData).forEach(e=>{if(!e.lat) return;let m=L.marker([e.lat,e.lng]).addTo(allMap);allMarkers[e.phone||e.client_id]=m;});}
+function renderMap(){
+  if(!allMap){
+    allMap = L.map('allMap',{zoomControl:false}).setView([-29.08,26.15],12);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(allMap);
+    
+    window.allMap = allMap; // FIX 1: MAKE GLOBAL - NOW BUTTONS FIND IT
+
+    // FIX 2: ADD NAV CONTROLS ONCE (inside map so clicks work)
+    L.Control.Nav = L.Control.extend({
+      onAdd: function(){
+        let div = L.DomUtil.create('div');
+        div.style.display='flex'; div.style.flexDirection='column'; div.style.gap='6px';
+        L.DomEvent.disableClickPropagation(div);
+        div.innerHTML = `
+          <button onclick="allMap.zoomIn()" style="width:38px;height:38px;background:#18181b;color:white;border:1px solid #27272a;border-radius:10px;cursor:pointer">+</button>
+          <button onclick="allMap.zoomOut()" style="width:38px;height:38px;background:#18181b;color:white;border:1px solid #27272a;border-radius:10px;cursor:pointer">−</button>
+          <button onclick="navigator.geolocation.getCurrentPosition(p=>allMap.setView([p.coords.latitude,p.coords.longitude],16))" style="width:38px;height:38px;background:#18181b;color:white;border:1px solid #27272a;border-radius:10px;cursor:pointer">📍</button>
+          <button onclick="allMap.setView([-29.08,26.15],12)" style="width:38px;height:38px;background:white;color:black;border:none;border-radius:10px;cursor:pointer">⌖</button>
+        `;
+        return div;
+      }
+    });
+    L.control.nav = function(opts){ return new L.Control.Nav(opts); }
+    L.control.nav({position:'topright'}).addTo(allMap);
+  }
+
+  Object.values(allMarkers).forEach(m=>allMap.removeLayer(m));
+  allMarkers={};
+  Object.values(locData).forEach(e=>{
+    if(!e.lat) return;
+    let m=L.marker([e.lat,e.lng]).addTo(allMap);
+    allMarkers[e.phone||e.client_id]=m;
+  });
+}
 function openFile(key){currentKey=key;let u=usersData[key];if(!u) return;currentLive=locData[key]||{lat:-29.08,lng:26.15};document.getElementById('fName').textContent=(u.name||key);document.getElementById('fPhone').textContent=key+' • '+u.role;document.getElementById('fTags').innerHTML=`<span class="tag">${u.role}</span> ${u.camBrand?`<span class="tag">📷 ${u.camBrand}</span>`:''} ${u.status?`<span class="tag">${u.status}</span>`:''}`;document.getElementById('fInfo').innerHTML=`<b>ID:</b> ${u.client_id||''}<br><b>Cam:</b> ${u.camBrand||'Not set'} - ${u.camId||''}<br><b>URL:</b> ${u.camUrl||''}<br><b>Status:</b> ${u.status||'active'}`;document.getElementById('editName').value=u.name||'';document.getElementById('editId').value=u.client_id||'';document.getElementById('editRole').value=u.role||'client';document.getElementById('editPhone').value=key;document.getElementById('camBrand').value=u.camBrand||'V380 Pro';document.getElementById('camId').value=u.camId||'';document.getElementById('camUrl').value=u.camUrl||'';document.getElementById('fileModal').style.display='block';setTimeout(()=>{if(window.fileMap) window.fileMap.remove();window.fileMap=L.map('fileMap',{zoomControl:false}).setView([currentLive.lat, currentLive.lng], 16);L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(window.fileMap);if(locData[key]) L.marker([currentLive.lat,currentLive.lng]).addTo(window.fileMap);},100);}
 function closeFile(){document.getElementById('fileModal').style.display='none';}
 function setBrand(b){document.getElementById('camBrand').value=b;}
