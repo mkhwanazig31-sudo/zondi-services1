@@ -38,7 +38,26 @@
 <div class="box" id="view-clients"><input id="searchClient" class="search" placeholder="🔍 Search client..." oninput="render()"><div class="grid" id="clients"></div></div>
 <div class="box" id="view-patrols" style="display:none"><input id="searchPatrol" class="search" placeholder="🔍 Search patrol..." oninput="render()"><div class="grid" id="patrols"></div><div style="margin-top:14px"><h4 style="margin:0 0 8px">🛡️ Pending Approvals</h4><div class="grid" id="pending"></div></div></div>
 <div class="box" id="view-cams" style="display:none"><h4 style="margin:0 0 8px">📷 Camera Apps - Tap to Open Inside ZONDI</h4><div class="grid3" id="camApps"></div><div style="margin-top:16px"><h4 style="margin:0 0 8px">🏠 Clients by Camera</h4><div class="grid" id="clientsByCam"></div></div></div>
-<div class="box" id="view-map" style="display:none"><div id="allMap" style="height:60vh;border-radius:16px;background:#101014;border:1px solid var(--line)"></div></div>
+<div class="box" id="view-map" style="display:none">
+  <div style="position:relative">
+    <div id="allMap" style="height:60vh;border-radius:16px;background:#101014;border:1px solid var(--line)"></div>
+    
+    <!-- NAV BUTTONS ADDED -->
+    <div style="position:absolute;top:12px;right:12px;z-index:500;display:flex;flex-direction:column;gap:8px;">
+      <button onclick="mapZoomIn()" style="width:38px;height:38px;background:#18181b;color:white;border:1px solid #27272a;border-radius:10px;cursor:pointer;font-weight:700">+</button>
+      <button onclick="mapZoomOut()" style="width:38px;height:38px;background:#18181b;color:white;border:1px solid #27272a;border-radius:10px;cursor:pointer;font-weight:700">−</button>
+      <button onclick="mapMyLocation()" style="width:38px;height:38px;background:#18181b;color:white;border:1px solid #27272a;border-radius:10px;cursor:pointer">📍</button>
+      <button onclick="mapReset()" style="width:38px;height:38px;background:white;color:black;border:none;border-radius:10px;cursor:pointer;font-weight:700">⌖</button>
+      <button onclick="mapFullscreen()" style="width:38px;height:38px;background:#18181b;color:white;border:1px solid #27272a;border-radius:10px;cursor:pointer">⛶</button>
+    </div>
+
+    <div style="position:absolute;bottom:12px;left:12px;z-index:500;display:flex;gap:6px;background:#18181b;padding:6px;border-radius:20px;border:1px solid #27272a">
+      <button onclick="getMap()?.setView([-25.876,29.22],13)" style="border:none;background:#27272a;color:white;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px">Emalahleni</button>
+      <button onclick="showAllClientsOnMap()" style="border:none;background:#facc15;color:black;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px;font-weight:700">All Clients</button>
+      <button onclick="showPatrolsOnMap()" style="border:none;background:#27272a;color:white;padding:6px 12px;border-radius:15px;cursor:pointer;font-size:12px">Patrols</button>
+    </div>
+  </div>
+</div>
 <div id="fileModal" onclick="if(event.target.id==='fileModal')closeFile()"><div class="file"><div class="fileHeader"><div><b id="fName">File</b><br><small id="fPhone" style="color:var(--muted)"></small></div><button class="btn gray small" onclick="closeFile()">✕</button></div><div id="fileMap"></div><div style="padding:12px"><div id="fTags"></div><div id="fInfo" style="font-size:12px;line-height:1.6;color:#C7C7CC;margin-top:8px"></div>
 <div style="margin-top:12px;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:14px"><b style="font-size:11px">✏️ EDIT</b><input id="editName" class="search" placeholder="Name" style="margin-top:8px"><input id="editId" class="search" placeholder="Client ID / Badge ID" style="margin-top:8px"><select id="editRole" class="select" style="margin-top:8px"><option value="client">client</option><option value="patrol">patrol</option></select><input id="editPhone" class="search" placeholder="Phone / Key" style="margin-top:8px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px"><button class="btn blue" onclick="saveEdit()">💾 Save Edit</button><button class="btn red" onclick="deleteFile()">🗑️ Delete</button></div></div>
 <div style="margin-top:12px;padding:12px;background:var(--card2);border:1px solid var(--line);border-radius:14px"><b style="font-size:11px">📷 CAMERA SETUP</b><div class="grid3" style="margin-top:8px"><div class="camGridBtn" onclick="setBrand('V380 Pro')"><div>📹</div><b>V380 Pro</b></div><div class="camGridBtn" onclick="setBrand('Yoosee')"><div>👁️</div><b>Yoosee</b></div><div class="camGridBtn" onclick="setBrand('CareCamPro')"><div>🛡️</div><b>CareCam</b></div><div class="camGridBtn" onclick="setBrand('Yi IoT')"><div>⚪</div><b>Yi IoT</b></div><div class="camGridBtn" onclick="setBrand('UBox')"><div>📦</div><b>UBox</b></div><div class="camGridBtn" onclick="setBrand('V380 Mini')"><div>🔵</div><b>V380 Mini</b></div></div><select id="camBrand" class="select" style="margin-top:10px"><option>V380 Pro</option><option>Yoosee</option><option>CareCamPro</option><option>Yi IoT</option><option>UBox</option><option>V380 Mini</option><option>Other</option></select><input id="camId" class="search" placeholder="Camera ID" style="margin-top:8px"><input id="camUrl" class="search" placeholder="Web URL (optional)" style="margin-top:8px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px"><button class="btn blue" onclick="openCameraAppInside()">📱 OPEN INSIDE</button><button class="btn gray" onclick="saveCam()">💾 Save Cam</button></div></div>
@@ -96,6 +115,35 @@ function openInside(brand,clientKey){
     window.open(info.store,'_blank');
   },1200);
 }
+  // MAP NAV HELPERS - ADDED
+function getMap(){ return window.allMap || window.map || window.mapInstance || null; }
+function mapZoomIn(){ let m=getMap(); if(m) m.zoomIn(); }
+function mapZoomOut(){ let m=getMap(); if(m) m.zoomOut(); }
+function mapReset(){ let m=getMap(); if(m) m.setView([-25.876, 29.22], 13); }
+function mapMyLocation(){
+  if(!navigator.geolocation) return alert('No GPS');
+  navigator.geolocation.getCurrentPosition(p=>{
+    let m=getMap(); if(!m) return;
+    let lat=p.coords.latitude, lng=p.coords.longitude;
+    m.setView([lat,lng],16);
+    L.marker([lat,lng]).addTo(m).bindPopup('You are here').openPopup();
+  });
+}
+function mapFullscreen(){
+  let el=document.getElementById('allMap').parentElement;
+  if(!document.fullscreenElement) el.requestFullscreen();
+  else document.exitFullscreen();
+}
+function showAllClientsOnMap(){
+  let m=getMap(); if(!m) return alert('Map not loaded');
+  let group=new L.featureGroup();
+  Object.values(window.usersData||{}).forEach(c=>{
+    if(c.lat && c.lng) group.addLayer(L.marker([c.lat,c.lng]));
+  });
+  if(group.getLayers().length) m.fitBounds(group.getBounds().pad(0.2));
+  else alert('No client lat/lng yet');
+}
+function showPatrolsOnMap(){ alert('Patrols filter - will show active patrol markers'); }
 function closeInside(){document.getElementById('appWindow').style.display='none';document.getElementById('appFrame').src='about:blank';document.body.style.overflow='';}
 function openInStore(){let info=APP_LINKS[currentBrand];if(info) window.open(info.store,'_blank');}
 function openCameraAppInside(){let brand=document.getElementById('camBrand').value;let cid=document.getElementById('camId').value;let curl=document.getElementById('camUrl').value;if(currentKey){usersData[currentKey].camBrand=brand;usersData[currentKey].camId=cid;usersData[currentKey].camUrl=curl;localStorage.setItem('zondi_users',JSON.stringify(usersData));}closeFile();setTimeout(()=>openInside(brand,currentKey),300);}
