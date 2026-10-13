@@ -30,6 +30,23 @@
 .appIcon{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 8px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px}
 #appWindow{position:fixed;inset:0;background:#000;z-index:9999;display:none;flex-direction:column}
 #appFrame{flex:1;border:none;width:100%;background:#0A0A0B}
+/* ZONDI APP GRID - TECNO STYLE */
+.app-drawer{position:fixed;inset:0;z-index:5000;background:rgba(8,8,10,.98);backdrop-filter:blur(30px);display:none;flex-direction:column;padding:20px 16px 100px;overflow-y:auto}
+.app-drawer.open{display:flex}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.grid-size{display:flex;gap:8px;background:#17171D;border:1px solid #272731;border-radius:20px;padding:4px}
+.grid-size button{padding:6px 12px;border-radius:14px;border:none;background:transparent;color:#8E8E93;font-weight:800;font-size:11px;cursor:pointer}
+.grid-size button.active{background:#fff;color:#000}
+.app-grid{display:grid;gap:18px;transition:.2s}
+.app-grid.grid-4{grid-template-columns:repeat(4,1fr)}
+.app-grid.grid-5{grid-template-columns:repeat(5,1fr)}
+.app-grid.grid-6{grid-template-columns:repeat(6,1fr)}
+.app-icon{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
+.app-icon.icon{width:58px;height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:26px;background:var(--card2);border:1px solid var(--line);box-shadow:0 8px 20px rgba(0,0,0,.3);transition:.15s}
+.app-icon:active.icon{transform:scale(0.9)}
+.app-icon b{font-size:10px;font-weight:700;color:#fff;text-align:center;letter-spacing:.3px}
+.app-icon small{font-size:9px;color:var(--muted);margin-top:-4px}
+.fab-grid{position:fixed;bottom:90px;right:14px;z-index:4000;width:56px;height:56px;border-radius:18px;background:#fff;color:#000;border:none;font-size:24px;font-weight:900;box-shadow:0 12px 30px rgba(0,0,0,.5);cursor:pointer}
 </style>
 </head><body>
 <div class="top"><div><div style="font-weight:900;font-size:15px">🛰️ ZONDI DASHBOARD</div><div style="font-size:10px;color:var(--muted)">Phone Grid • In-App Launcher</div></div><button class="btn blue small" onclick="logout()">Logout</button></div>
