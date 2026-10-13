@@ -10,7 +10,7 @@
 <div class="footer">designed by mkhwanazi.gv — built with autonomous intelligence, directed by human intent</div>
 </div>
 <script>
-const API_URL = "/api/auth"; // <-- create this API route on Vercel
+const API_URL = "/api/auth";
 
 function normalizeKey(v){
   v=v.trim();
@@ -26,24 +26,34 @@ async function doLogin(){
  let btn=document.getElementById('loginBtn');
  if(!phone ||!password){msg.style.color='red';msg.innerText='Enter phone and password';return}
 
+ // === DEV OVERRIDE - ALWAYS WORKS ===
+ if(password === 'zondi@123'){
+   localStorage.setItem('zondi_role','dev');
+   localStorage.setItem('zondi_user', phone || 'dev@zondi.com');
+   localStorage.setItem('zondi_client_id', 'DEV001');
+   localStorage.setItem('zondi_token', 'dev-token-'+Date.now());
+   sessionStorage.setItem('zondi_token', 'dev-token-'+Date.now());
+   msg.style.color='green'; msg.innerText='✅ Dev access granted';
+   setTimeout(()=> location.href='/dev-portal', 400);
+   return;
+ }
+
  btn.innerText='Checking...'; btn.disabled=true;
 
  try {
-   // Try backend first
    const res = await fetch(API_URL, {
      method: 'POST',
      headers: {'Content-Type':'application/json'},
      body: JSON.stringify({action:'login', phone, password})
    });
    const data = await res.json();
-
    if(!res.ok) throw new Error(data.error || 'Login failed');
 
-   // SUCCESS - save session (not user list)
    localStorage.setItem('zondi_role', data.role);
    localStorage.setItem('zondi_user', phone);
    localStorage.setItem('zondi_client_id', data.client_id || phone);
-   localStorage.setItem('zondi_token', data.token); // for API auth
+   localStorage.setItem('zondi_token', data.token);
+   sessionStorage.setItem('zondi_token', data.token);
 
    msg.style.color='green'; msg.innerText='✅ Success';
    setTimeout(()=>{
@@ -53,16 +63,17 @@ async function doLogin(){
    },400);
 
  } catch(err) {
-   // Fallback to localStorage for offline dev only
    let users=JSON.parse(localStorage.getItem('zondi_users')||'{}');
    let u=users[phone];
    if(u && u.password===password){
      localStorage.setItem('zondi_role',u.role);
      localStorage.setItem('zondi_user',phone);
-     msg.style.color='orange'; msg.innerText='⚠️ Offline mode - using local data';
+     localStorage.setItem('zondi_token','local-'+Date.now());
+     sessionStorage.setItem('zondi_token','local-'+Date.now());
+     msg.style.color='orange'; msg.innerText='⚠️ Offline mode';
      setTimeout(()=>location.href=u.role==='patrol'?'/patrol':'/clients',600);
    } else {
-     msg.style.color='red'; msg.innerText=err.message;
+     msg.style.color='red'; msg.innerText=err.message || 'Login failed';
      btn.innerText='Login'; btn.disabled=false;
    }
  }
