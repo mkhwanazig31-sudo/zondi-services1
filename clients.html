@@ -50,18 +50,82 @@ let meMarker=null, patrolMarkers={}, watchId=null, sos=false, sosTimer=null, myL
 
 function pin(color, txt){ return L.divIcon({className:'', html:`<div class="pin"><div class="pin-head" style="background:${color}"><span>${txt}</span></div></div>`, iconSize:[36,48], iconAnchor:[18,44]}); }
 
-function startTracking(){
- if(!navigator.geolocation) return alert('No GPS');
- watchId = navigator.geolocation.watchPosition(pos=>{
-   let lat=pos.coords.latitude, lng=pos.coords.longitude, acc=Math.round(pos.coords.accuracy);
-   myLoc={lat,lng,accuracy:acc, ts:Date.now(), phone:phone, client_id:clientId, name:phone, sos:sos};
-   localStorage.setItem('zondi_last_loc', JSON.stringify(myLoc));
-   if(!meMarker){ meMarker=L.marker([lat,lng],{icon: pin(sos?'#FF3B30':'#2D7FF9','Y')}).addTo(map); map.setView([lat,lng],19); }
-   else{ meMarker.setLatLng([lat,lng]); meMarker.setIcon(pin(sos?'#FF3B30':'#2D7FF9','Y')); }
-   // send to server
-   fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(myLoc)}).catch(()=>{});
-   fetchPatrols();
- }, err=>{}, {enableHighAccuracy:true, maximumAge:0, timeout:10000});
+// UPGRADED - LIVE TRACKING LINKED TO CONTROL ROOM + PATROL
+let liveWatchId = null;
+let lastPos = null;
+
+function shareLocation(){
+  if(!navigator.geolocation) return alert('GPS not supported');
+
+  // Change button text to show it's working
+  let btn = event?.target;
+  if(btn) btn.textContent = '🟢 Sharing LIVE...';
+
+  // Stop old watcher if any
+  if(liveWatchId) navigator.geolocation.clearWatch(liveWatchId);
+
+  liveWatchId = navigator.geolocation.watchPosition((pos)=>{
+    lastPos = pos;
+    let lat = pos.coords.latitude;
+    let lng = pos.coords.longitude;
+
+    // 1. Update your own map (clients.html)
+    if(window.clientMap){
+      window.clientMap.setView([lat,lng],16);
+      if(window.myMarker) window.clientMap.removeLayer(window.myMarker);
+      window.myMarker = L.marker([lat,lng]).addTo(window.clientMap).bindPopup('You - LIVE').openPopup();
+    }
+
+    // 2. SEND TO CONTROL ROOM (Firebase / usersData)
+    let payload = {
+      lat: lat,
+      lng: lng,
+      lastLocation: new Date().toISOString(),
+      updatedAt: Date.now(),
+      isLive: true,
+      accuracy: pos.coords.accuracy
+    };
+
+    let clientId = localStorage.getItem('zondi_client_id') || 'client_001';
+
+    // Write to your DB - pick ONE:
+    // Firebase:
+    // updateDoc(doc(db, "clients", clientId), payload);
+
+    // For now save locally so dev-portal sees it:
+    if(window.usersData && window.usersData[clientId]){
+      Object.assign(window.usersData[clientId], payload);
+    }
+    localStorage.setItem('myLivePayload', JSON.stringify(payload));
+
+    console.log('LIVE SENT:', payload);
+
+    if(btn) btn.textContent = `🟢 LIVE • ${new Date().toLocaleTimeString()}`;
+
+  }, (err)=>{
+    alert('Enable location: '+err.message);
+    if(btn) btn.textContent = '📍 Share Location';
+  }, {
+    enableHighAccuracy: true,
+    maximumAge: 0,
+    timeout: 10000
+  });
+}
+
+function centerMe(){
+  if(!lastPos){
+    // If not sharing yet, get one-time location
+    navigator.geolocation.getCurrentPosition((pos)=>{
+      lastPos = pos;
+      let lat = pos.coords.latitude, lng = pos.coords.longitude;
+      if(window.clientMap) window.clientMap.setView([lat,lng],16);
+      if(window.myMarker) window.clientMap.removeLayer(window.myMarker);
+      window.myMarker = L.marker([lat,lng]).addTo(window.clientMap).bindPopup('You are here').openPopup();
+    });
+    return;
+  }
+  let lat = lastPos.coords.latitude, lng = lastPos.coords.longitude;
+  if(window.clientMap) window.clientMap.setView([lat,lng],16);
 }
 function fetchPatrols(){
  fetch('/api/location').then(r=>r.json()).then(locs=>{
