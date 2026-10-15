@@ -9,11 +9,22 @@
 <div class="box" id="view-patrols" style="display:none"><input id="searchPatrol" class="search" placeholder="🔍 Search patrol..." oninput="render()"><div class="grid" id="patrols"></div><div style="margin-top:14px"><h4>🛡️ Pending Approvals</h4><div class="grid" id="pending"></div></div></div>
 <div class="box" id="view-cams" style="display:none"><div class="grid" id="camApps"></div></div>
 <div class="box" id="view-map" style="display:none"><div id="allMap" style="height:60vh;border-radius:16px;background:#101014;border:1px solid var(--line)"></div></div>
-
+<div class="box" id="view-cams" style="display:none">
+  <h4 style="margin:0 0 8px">📷 Camera Apps - Tap to Open</h4>
+  <div class="grid" style="grid-template-columns:1fr 1fr 1fr" id="camApps"></div>
+  <div style="margin-top:16px"><h4 style="margin:0 0 8px">🏠 Clients by Camera</h4><div class="grid" id="clientsByCam"></div></div>
+</div>
 <script>
 let usersData=JSON.parse(localStorage.getItem('zondi_users')||'{}');
 let locData=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
-
+const APP_LINKS={
+  'V380 Pro':{icon:'📹', pkg:'com.macrovideo.v380pro', store:'https://play.google.com/store/apps/details?id=com.macrovideo.v380pro'},
+  'Yoosee':{icon:'👁️', pkg:'com.yoosee', store:'https://play.google.com/store/apps/details?id=com.yoosee'},
+  'CareCamPro':{icon:'🛡️', pkg:'com.huiyun.care.viewerpro.googleplay', store:'https://play.google.com/store/apps/details?id=com.huiyun.care.viewerpro.googleplay'},
+  'Yi IoT':{icon:'⚪', pkg:'com.kmxc.yilink', store:'https://play.google.com/store/apps/details?id=com.kmxc.yilink'},
+  'UBox':{icon:'📦', pkg:'com.ubox', store:'https://play.google.com/store/apps/details?id=com.ubox.uboxcamera'},
+  'V380 Mini':{icon:'🔵', pkg:'com.macrovideo.v380s', store:'https://play.google.com/store/apps/details?id=com.macrovideo.v380s'}
+};
 async function loadFromServer(){
   try{
     document.getElementById('syncStatus').textContent='⏳ Syncing...';
@@ -72,8 +83,37 @@ function switchTab(t){
   document.getElementById('view-patrols').style.display=t==='patrols'?'block':'none';
   document.getElementById('view-cams').style.display=t==='cams'?'block':'none';
   document.getElementById('view-map').style.display=t==='map'?'block':'none';
+  if(t==='cams') renderCamGrid();
 }
-
+function renderCamGrid(){
+  let appsDiv=document.getElementById('camApps');
+  if(!appsDiv) return;
+  appsDiv.innerHTML='';
+  Object.keys(APP_LINKS).forEach(brand=>{
+    let info=APP_LINKS[brand];
+    let count=Object.values(usersData).filter(u=>u && u.camBrand===brand).length;
+    let d=document.createElement('div');
+    d.className='card'; d.style.textAlign='center';
+    d.innerHTML=`<div style="font-size:32px">${info.icon}</div><b>${brand}</b><small>${count} clients</small>`;
+    d.onclick=()=>openInside(brand);
+    appsDiv.appendChild(d);
+  });
+  let byCam=document.getElementById('clientsByCam');
+  if(!byCam) return;
+  byCam.innerHTML='';
+  Object.keys(usersData).forEach(k=>{
+    let u=usersData[k]; if(!u || u.role!=='client' ||!u.camBrand) return;
+    let card=document.createElement('div'); card.className='card';
+    card.innerHTML=`<div class="iconBox">${APP_LINKS[u.camBrand]?.icon||'📷'}</div><b>${u.name||k}</b><small>${u.camBrand}<br>${u.camId||''}</small><button class="btn blue small" style="width:100%;margin-top:8px" onclick="openInside('${u.camBrand}','${k}')">📱 OPEN</button>`;
+    byCam.appendChild(card);
+  });
+}
+function openInside(brand, clientKey){
+  let info=APP_LINKS[brand]; if(!info) return;
+  let pkg=info.pkg;
+  window.location.href=`intent://#Intent;package=${pkg};end`;
+  setTimeout(()=>{ window.open(info.store,'_blank'); },1200);
+}  
 function render(){
   let cSearch=(document.getElementById('searchClient').value||'').toLowerCase();
   let cDiv=document.getElementById('clients'); cDiv.innerHTML='';
