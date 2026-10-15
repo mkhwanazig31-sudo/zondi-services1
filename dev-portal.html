@@ -1,9 +1,23 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>ZONDI - Phone Dashboard</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>:root{--bg:#0A0A0B;--card:#17171D;--card2:#1F1F27;--line:#272731;--blue:#2D7FF9;--gold:#E8B62A;--green:#00E676;--red:#FF3B30;--muted:#8E8E93;--ink:#fff}*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:var(--bg);color:var(--ink);padding-bottom:90px}.top{position:sticky;top:0;z-index:5000;background:rgba(10,10,11,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px}.sCard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}.sCard b{font-size:18px;display:block}.sCard span{font-size:9px;color:var(--muted);letter-spacing:.8px}.tabs{position:sticky;top:58px;z-index:4000;background:var(--bg);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}.tab{padding:12px 6px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-weight:800;font-size:11px;text-align:center;cursor:pointer}.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}.box{padding:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;cursor:pointer}.card b{font-size:13px;display:block}.card small{color:var(--muted);font-size:11px}.iconBox{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:8px;background:var(--card2);border:1px solid var(--line)}.card.live{border-color:var(--green)}.card.sos{border-color:var(--red);background:#1A0F0F}.btn{padding:10px 12px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:12px}.gold{background:var(--gold);color:#000}.blue{background:var(--blue);color:#fff}.red{background:var(--red);color:#fff}.gray{background:var(--card2);color:#fff;border:1px solid var(--line)}.btn.small{padding:7px 10px;font-size:11px}.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:#fff;margin-bottom:10px}#fileModal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:6000;display:none;padding:10px;overflow:auto}.file{background:var(--card);border:1px solid var(--line);border-radius:20px;max-width:520px;margin:10px auto;overflow:hidden}.fileHeader{padding:14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}#fileMap{height:200px;width:100%;background:#101014}.select{width:100%;padding:11px;border-radius:10px;background:#101014;border:1px solid var(--line);color:#fff}
+<style>:root{--bg:#0A0A0B;--card:#17171D;--card2:#1F1F27;--line:#272731;--blue:#2D7FF9;--gold:#E8B62A;--green:#00E676;--red:#FF3B30;--muted:#8E8E93;--ink:#fff}*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:var(--bg);color:var(--ink);padding-bottom:90px}.top{position:sticky;top:0;z-index:5000;background:rgba(10,10,11,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px}.sCard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}.sCard b{font-size:18px;display:block}.sCard span{font-size:9px;color:var(--muted);letter-spacing:.8px}.tabs{position:sticky;top:58px;z-index:4000;background:var(--bg);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}.tab{padding:12px 6px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-weight:800;font-size:11px;text-align:center;cursor:pointer}.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}.box{padding:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;cursor:pointer}.card b{font-size:13px;display:block}.card small{color:var(--muted);font-size:11px}.iconBox{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:8px;background:var(--card2);border:1px solid var(--line)}.card.live{border-color:var(--green)}.card.sos{border-color:var(--red);background:#1A0F0F}.btn{padding:10px 12px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:12px}.gold{background:var(--gold);color:#000}.blue{background:var(--blue);color:#fff}.red{background:var(--red);color:#fff}.gray{background:var(--card2);color:#fff;border:1px solid var(--line)}.btn.small{padding:7px 10px;font-size:11px}.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:#fff;margin-bottom:10px}
 #allMap{height:60vh;border-radius:16px;background:#101014;border:1px solid var(--line);position:relative;z-index:1}
 .leaflet-top,.leaflet-bottom{z-index:400!important}
+#lockScreen{position:fixed;inset:0;z-index:9999;background:#0A0A0B;display:flex;align-items:center;justify-content:center;padding:20px}
 </style></head><body>
+
+<!-- LOCK SCREEN - PASSWORD ONLY zondi@123 -->
+<div id="lockScreen">
+  <div style="background:#17171D;border:1px solid #272731;border-radius:20px;padding:24px;width:100%;max-width:360px;text-align:center">
+    <div style="font-size:32px">🔒</div>
+    <h3 style="margin:10px 0">ZONDI DEV ACCESS</h3>
+    <p style="color:#8E8E93;font-size:12px">Enter password</p>
+    <input id="devPass" type="password" placeholder="Password" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid #272731;background:#101014;color:#fff;margin:10px 0" onkeydown="if(event.key==='Enter')unlockDev()">
+    <button onclick="unlockDev()" class="btn blue" style="width:100%;padding:12px;border-radius:12px;border:none;background:#2D7FF9;color:#fff;font-weight:800">UNLOCK</button>
+    <div id="devErr" style="color:#FF3B30;font-size:11px;margin-top:8px;display:none">Wrong password</div>
+  </div>
+</div>
+
 <div class="top"><div><div style="font-weight:900">🛰️ ZONDI DASHBOARD</div><div style="font-size:10px;color:var(--muted)" id="syncStatus">Loading from server...</div></div><button class="btn blue small" onclick="logout()">Logout</button></div>
 <div class="stats"><div class="sCard"><b id="cTotal">0</b><span>CLIENTS</span></div><div class="sCard"><b id="pTotal">0</b><span>PATROLS</span></div><div class="sCard"><b id="pPending" style="color:var(--gold)">0</b><span>PENDING</span></div><div class="sCard"><b id="liveNow" style="color:var(--green)">0</b><span>LIVE</span></div></div>
 <div class="tabs"><div class="tab active" id="tab-clients" onclick="switchTab('clients')">📁 CLIENTS</div><div class="tab" id="tab-patrols" onclick="switchTab('patrols')">🚓 PATROLS</div><div class="tab" id="tab-cams" onclick="switchTab('cams')">📷 CAMS</div><div class="tab" id="tab-map" onclick="switchTab('map')">🗺️ MAP</div></div>
@@ -22,6 +36,22 @@
   <div style="margin-top:16px"><h4 style="margin:0 0 8px">🏠 Clients by Camera</h4><div class="grid" id="clientsByCam"></div></div>
 </div>
 <script>
+// LOCK LOGIC - NO EMAIL, ONLY PASSWORD zondi@123
+(function(){
+  if(sessionStorage.getItem('zondi_dev_ok')==='yes'){
+    document.getElementById('lockScreen').style.display='none';
+  }
+})();
+function unlockDev(){
+  let p=document.getElementById('devPass').value;
+  if(p==='zondi@123'){
+    sessionStorage.setItem('zondi_dev_ok','yes');
+    document.getElementById('lockScreen').style.display='none';
+  } else {
+    document.getElementById('devErr').style.display='block';
+  }
+}
+
 let usersData=JSON.parse(localStorage.getItem('zondi_users')||'{}');
 let locData=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
 let allMap = null;
@@ -55,7 +85,6 @@ async function loadLivePatrols(){
   try{
     let r=await fetch('/api/location');
     let data=await r.json();
-    console.log('LIVE patrols:', data);
     if(data && typeof data==='object'){
       locData={};
       Object.keys(data).forEach(k=>{
@@ -67,7 +96,7 @@ async function loadLivePatrols(){
       renderMapMarkers();
       render();
     }
-  }catch(e){ console.log('no /api/location', e); }
+  }catch(e){}
 }
 async function loadFromServer(){
   try{
@@ -81,11 +110,6 @@ async function loadFromServer(){
         if(typeof item==='string') obj[item]={role:'client', status:'active', name:item};
         else obj[phone]=item;
       });
-      if(Object.keys(obj).length>0 &&!obj[Object.keys(obj)[0]].role){
-        document.getElementById('syncStatus').textContent='✅ Pending: '+data.length;
-        renderPendingArray(data);
-        return;
-      }
       usersData=obj;
     } else {
       usersData=data;
@@ -246,7 +270,11 @@ async function deletePatrol(key){
   localStorage.setItem('zondi_users', JSON.stringify(usersData));
   render(); loadFromServer(); loadPending();
 }
-function logout(){ localStorage.clear(); location.href='/login.html'; }
+function logout(){
+  sessionStorage.removeItem('zondi_dev_ok');
+  localStorage.clear();
+  location.href='/login.html';
+}
 loadFromServer(); loadPending(); loadLivePatrols();
 setInterval(()=>{ loadFromServer(); loadPending(); loadLivePatrols(); }, 5000);
 </script></body></html>
