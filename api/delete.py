@@ -1,31 +1,16 @@
 from http.server import BaseHTTPRequestHandler
-import json, os
-FILE='/tmp/zondi_users.json'
-def load():
-    if not os.path.exists(FILE): return {}
-    try:
-        with open(FILE,'r') as f: return json.load(f)
-    except: return {}
-def save(d):
-    with open(FILE,'w') as f: json.dump(d,f)
-
+import json
+from _store import get_users, set_users, get_pending, set_pending
 class handler(BaseHTTPRequestHandler):
-    def do_OPTIONS(self):
-        self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin','*')
-        self.send_header('Access-Control-Allow-Methods','POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers','Content-Type')
-        self.end_headers()
     def do_POST(self):
         self.send_response(200)
         self.send_header('Content-type','application/json')
         self.send_header('Access-Control-Allow-Origin','*')
         self.end_headers()
-        length=int(self.headers.get('content-length',0) or 0)
-        body=json.loads(self.rfile.read(length).decode() or '{}')
-        phone=body.get('phone')
-        users=load()
-        if phone in users:
-            del users[phone]
-            save(users)
+        body=json.loads(self.rfile.read(int(self.headers.get('content-length',0))).decode() or '{}')
+        phone=(body.get('phone') or '').strip().lower()
+        users=get_users(); pending=get_pending()
+        if phone in users: del users[phone]
+        if phone in pending: del pending[phone]
+        set_users(users); set_pending(pending)
         self.wfile.write(json.dumps({"ok":True}).encode())
