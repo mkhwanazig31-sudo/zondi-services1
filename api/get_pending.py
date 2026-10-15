@@ -9,6 +9,14 @@ def load():
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         users=load()
-        pending=[{"phone":k,"role":v["role"],"status":v["status"]} for k,v in users.items() if v["status"]=="pending"]
-        self.send_response(200); self.send_header('Content-type','application/json'); self.send_header('Access-Control-Allow-Origin','*'); self.end_headers()
-        self.wfile.write(json.dumps(pending).encode())
+        self.send_response(200)
+        self.send_header('Content-type','application/json')
+        self.send_header('Access-Control-Allow-Origin','*')
+        self.end_headers()
+        self.wfile.write(json.dumps(users).encode())
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin','*')
+        self.send_header('Access-Control-Allow-Methods','GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers','Content-Type')
+        self.end_headers()
