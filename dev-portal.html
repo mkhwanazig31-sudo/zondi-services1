@@ -51,6 +51,24 @@ const APP_LINKS={
   'UBox':{icon:'📦', pkg:'com.ubox', store:'https://play.google.com/store/apps/details?id=com.ubox.uboxcamera'},
   'V380 Mini':{icon:'🔵', pkg:'com.macrovideo.v380s', store:'https://play.google.com/store/apps/details?id=com.macrovideo.v380s'}
 };
+async function loadLivePatrols(){
+  try{
+    let r=await fetch('/api/location');
+    let data=await r.json();
+    console.log('LIVE patrols:', data);
+    if(data && typeof data==='object'){
+      locData={};
+      Object.keys(data).forEach(k=>{
+        let v=data[k];
+        if(v.lat && v.lng) locData[k]={lat:parseFloat(v.lat), lng:parseFloat(v.lng),...v};
+      });
+      localStorage.setItem('zondi_patrol_cache', JSON.stringify(locData));
+      document.getElementById('liveNow').textContent=Object.keys(locData).length;
+      renderMapMarkers();
+      render();
+    }
+  }catch(e){ console.log('no /api/location', e); }
+}
 async function loadFromServer(){
   try{
     document.getElementById('syncStatus').textContent='⏳ Syncing...';
@@ -229,6 +247,6 @@ async function deletePatrol(key){
   render(); loadFromServer(); loadPending();
 }
 function logout(){ localStorage.clear(); location.href='/login.html'; }
-loadFromServer(); loadPending();
-setInterval(()=>{ loadFromServer(); loadPending(); }, 10000);
+loadFromServer(); loadPending(); loadLivePatrols();
+setInterval(()=>{ loadFromServer(); loadPending(); loadLivePatrols(); }, 5000);
 </script></body></html>
