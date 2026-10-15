@@ -147,12 +147,21 @@ function initAllMap(){
   setTimeout(()=>{
     let div=document.getElementById('allMap'); if(!div) return;
     if(allMap){ allMap.invalidateSize(); renderMapMarkers(); return; }
-    allMap = L.map('allMap').setView([MY_HOUSE_LAT, MY_HOUSE_LNG], 15);
-    let sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri Satellite'}).addTo(allMap);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}').addTo(allMap);
-    let street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'});
+
+    allMap = L.map('allMap', {zoomControl:true}).setView([MY_HOUSE_LAT, MY_HOUSE_LNG], 15);
+
+    let sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri Satellite - Real Houses', maxZoom:20}).addTo(allMap);
+    let labels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}');
+    labels.addTo(allMap);
+    let street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM', maxZoom:19});
+
+    // SWITCH - keep it at bottomright so it doesn't block tabs
     let baseMaps = {"🛰️ Satellite - Real Houses": sat, "🗺️ Street Map": street};
-    L.control.layers(baseMaps, null, {position:'topright'}).addTo(allMap);
+    L.control.layers(baseMaps, null, {position:'bottomright'}).addTo(allMap);
+
+    // zoom stays topleft
+    L.control.zoom({position:'topleft'}).addTo(allMap);
+
     renderMapMarkers();
   },300);
 }
@@ -160,18 +169,25 @@ function renderMapMarkers(){
   if(!allMap) return;
   allMap.eachLayer(layer=>{ if(layer instanceof L.Marker) allMap.removeLayer(layer); });
   if(myHouseMarker){ try{allMap.removeLayer(myHouseMarker);}catch(e){} myHouseMarker=null; }
+
   if(showMyHouse){
     myHouseMarker=L.marker([MY_HOUSE_LAT, MY_HOUSE_LNG], {icon: L.divIcon({html:'🏠', className:'', iconSize:[30,30]})}).addTo(allMap).bindPopup('<b>MY HOUSE</b><br>🏠 Ga-Rankuwa Unit 20').openPopup();
   }
+
   Object.keys(usersData).forEach(k=>{
     let u=usersData[k]; if(!u || u.role!=='client') return;
     if(showLiveOnly) return;
     let lat=u.lat||u.latitude; let lng=u.lng||u.lon||u.longitude;
-    if(lat && lng){ L.marker([parseFloat(lat), parseFloat(lng)]).addTo(allMap).bindPopup(`<b>${u.name||k}</b><br>🏠 Available`); }
+    if(lat && lng){
+      let m = L.marker([parseFloat(lat), parseFloat(lng)]).addTo(allMap)
+     .bindPopup(`<b>${u.name||k}</b><br>🏠 Available<br><button onclick="allMap.setView([${lat},${lng}],18)">🔍 ZOOM HERE</button>`);
+      m.on('click', ()=>{ allMap.setView([parseFloat(lat), parseFloat(lng)], 17); });
+    }
   });
+
   Object.keys(locData).forEach(k=>{
     let p=locData[k]; if(!p ||!p.lat) return;
-    L.marker([p.lat, p.lng], {icon: L.divIcon({html:'🚓', className:'', iconSize:[20,20]})}).addTo(allMap).bindPopup(`<b>${k}</b><br>🚓 Live`);
+    L.marker([p.lat, p.lng], {icon: L.divIcon({html:'🚓', className:'', iconSize:[20,20]})}).addTo(allMap).bindPopup(`<b>${k}</b><br>🚓 Live<br><button onclick="allMap.setView([${p.lat},${p.lng}],18)">🔍 ZOOM</button>`);
   });
 }
 function render(){
