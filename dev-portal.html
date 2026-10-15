@@ -79,6 +79,31 @@ async function loadFromServer(){
     render();
   }
 }
+async function loadPending(){
+  try{
+    // try both endpoints - depends on your server
+    let res = await fetch('/api/pending').catch(()=> fetch('/api/get_pending'));
+    if(!res ||!res.ok){
+      res = await fetch('/api/get_pending');
+    }
+    let data = await res.json();
+    console.log('PENDING:', data);
+    if(Array.isArray(data) && data.length>0){
+      renderPendingArray(data);
+    } else if(typeof data === 'object' && Object.keys(data).length>0){
+      // object format pending
+      let pend=document.getElementById('pending');
+      pend.innerHTML='';
+      Object.keys(data).forEach(k=>{
+        let u=data[k];
+        let card=document.createElement('div'); card.className='card';
+        card.innerHTML=`<b>${k}</b><small>pending • ${u.role||'patrol'}</small><br><button class="btn gold small" onclick="approvePatrol('${k}')">✓ Approve</button> <button class="btn red small" onclick="deletePatrol('${k}')">Del</button>`;
+        pend.appendChild(card);
+      });
+      document.getElementById('pPending').textContent=Object.keys(data).length;
+    }
+  }catch(e){ console.log('no pending api', e); }
+}
 function renderPendingArray(arr){
   let pend=document.getElementById('pending');
   pend.innerHTML='';
@@ -221,5 +246,5 @@ async function deletePatrol(key){
 }
 function logout(){ localStorage.clear(); location.href='/login.html'; }
 loadFromServer();
-setInterval(loadFromServer, 10000);
-</script></body></html>
+loadPending();
+setInterval(()=>{ loadFromServer(); loadPending(); }, 10000);
