@@ -1,6 +1,6 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>ZONDI - Phone Dashboard</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>:root{--bg:#0A0A0B;--card:#17171D;--card2:#1F1F27;--line:#272731;--blue:#2D7FF9;--gold:#E8B62A;--green:#00E676;--red:#FF3B30;--muted:#8E8E93;--ink:#fff}*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:var(--bg);color:var(--ink);padding-bottom:90px}.top{position:sticky;top:0;z-index:1000;background:rgba(10,10,11,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px}.sCard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}.sCard b{font-size:18px;display:block}.sCard span{font-size:9px;color:var(--muted);letter-spacing:.8px}.tabs{position:sticky;top:58px;z-index:900;background:var(--bg);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}.tab{padding:12px 6px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-weight:800;font-size:11px;text-align:center;cursor:pointer}.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}.box{padding:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;cursor:pointer}.card b{font-size:13px;display:block}.card small{color:var(--muted);font-size:11px}.iconBox{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:8px;background:var(--card2);border:1px solid var(--line)}.card.live{border-color:var(--green)}.card.sos{border-color:var(--red);background:#1A0F0F}.btn{padding:10px 12px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:12px}.gold{background:var(--gold);color:#000}.blue{background:var(--blue);color:#fff}.red{background:var(--red);color:#fff}.gray{background:var(--card2);color:#fff;border:1px solid var(--line)}.btn.small{padding:7px 10px;font-size:11px}.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:#fff;margin-bottom:10px}#fileModal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:5000;display:none;padding:10px;overflow:auto}.file{background:var(--card);border:1px solid var(--line);border-radius:20px;max-width:520px;margin:10px auto;overflow:hidden}.fileHeader{padding:14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}#fileMap{height:200px;width:100%;background:#101014}.tag{font-size:10px;padding:4px 8px;border-radius:20px;border:1px solid var(--line);display:inline-block;margin-right:6px}.select{width:100%;padding:11px;border-radius:10px;background:#101014;border:1px solid var(--line);color:#fff}.camGridBtn{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center;cursor:pointer}.appIcon{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 8px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px}#appWindow{position:fixed;inset:0;background:#000;z-index:9999;display:none;flex-direction:column}#appFrame{flex:1;border:none;width:100%;background:#0A0A0B}
+<style>:root{--bg:#0A0A0B;--card:#17171D;--card2:#1F1F27;--line:#272731;--blue:#2D7FF9;--gold:#E8B62A;--green:#00E676;--red:#FF3B30;--muted:#8E8E93;--ink:#fff}*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:var(--bg);color:var(--ink);padding-bottom:90px}.top{position:sticky;top:0;z-index:1000;background:rgba(10,10,11,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px}.sCard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}.sCard b{font-size:18px;display:block}.sCard span{font-size:9px;color:var(--muted);letter-spacing:.8px}.tabs{position:sticky;top:58px;z-index:900;background:var(--bg);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}.tab{padding:12px 6px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-weight:800;font-size:11px;text-align:center;cursor:pointer}.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}.box{padding:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;cursor:pointer}.card b{font-size:13px;display:block}.card small{color:var(--muted);font-size:11px}.iconBox{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:8px;background:var(--card2);border:1px solid var(--line)}.card.live{border-color:var(--green)}.card.sos{border-color:var(--red);background:#1A0F0F}.btn{padding:10px 12px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:12px}.gold{background:var(--gold);color:#000}.blue{background:var(--blue);color:#fff}.red{background:var(--red);color:#fff}.gray{background:var(--card2);color:#fff;border:1px solid var(--line)}.btn.small{padding:7px 10px;font-size:11px}.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:#fff;margin-bottom:10px}#fileModal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:5000;display:none;padding:10px;overflow:auto}.file{background:var(--card);border:1px solid var(--line);border-radius:20px;max-width:520px;margin:10px auto;overflow:hidden}.fileHeader{padding:14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}#fileMap{height:200px;width:100%;background:#101014}.select{width:100%;padding:11px;border-radius:10px;background:#101014;border:1px solid var(--line);color:#fff}
 </style></head><body>
 <div class="top"><div><div style="font-weight:900">🛰️ ZONDI DASHBOARD</div><div style="font-size:10px;color:var(--muted)" id="syncStatus">Loading from server...</div></div><button class="btn blue small" onclick="logout()">Logout</button></div>
 <div class="stats"><div class="sCard"><b id="cTotal">0</b><span>CLIENTS</span></div><div class="sCard"><b id="pTotal">0</b><span>PATROLS</span></div><div class="sCard"><b id="pPending" style="color:var(--gold)">0</b><span>PENDING</span></div><div class="sCard"><b id="liveNow" style="color:var(--green)">0</b><span>LIVE</span></div></div>
@@ -9,44 +9,128 @@
 <div class="box" id="view-patrols" style="display:none"><input id="searchPatrol" class="search" placeholder="🔍 Search patrol..." oninput="render()"><div class="grid" id="patrols"></div><div style="margin-top:14px"><h4>🛡️ Pending Approvals</h4><div class="grid" id="pending"></div></div></div>
 <div class="box" id="view-cams" style="display:none"><div class="grid" id="camApps"></div></div>
 <div class="box" id="view-map" style="display:none"><div id="allMap" style="height:60vh;border-radius:16px;background:#101014;border:1px solid var(--line)"></div></div>
-<div id="fileModal"><div class="file"><div class="fileHeader"><div><b id="fName">File</b></div><button class="btn gray small" onclick="closeFile()">✕</button></div><div id="fileMap"></div><div style="padding:12px"><div id="fTags"></div><div id="fInfo"></div></div></div></div>
+
 <script>
 let usersData=JSON.parse(localStorage.getItem('zondi_users')||'{}');
 let locData=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
 
-// === NEW: LOAD FROM SERVER ===
 async function loadFromServer(){
   try{
     document.getElementById('syncStatus').textContent='⏳ Syncing...';
-    // Try your existing APIs
     let res = await fetch('/api/index');
-    if(!res.ok) res = await fetch('/api/get_pending');
     let data = await res.json();
-    console.log('Server data:', data);
+    console.log('SERVER /api/index:', data);
 
-    // If API returns object like {users: {...}} or direct {...}
-    if(data.users) usersData = data.users;
-    else if(data.data) usersData = data.data;
-    else if(typeof data === 'object' && Object.keys(data).length > 0) usersData = data;
+    // If server returns dict {phone: {role, status}} -> use directly
+    // If server returns array -> convert (fallback for old get_pending)
+    if(Array.isArray(data)){
+      let obj={};
+      data.forEach(item=>{
+        let phone=item.phone||item;
+        if(typeof item==='string') obj[item]={role:'client', status:'active', name:item};
+        else obj[phone]=item;
+      });
+      // If array was from get_pending, we still need full data -> try again local
+      if(Object.keys(obj).length>0 &&!obj[Object.keys(obj)[0]].role){
+        // it's just pending list, keep old usersData for clients
+        document.getElementById('syncStatus').textContent='✅ Pending: '+data.length;
+        renderPendingArray(data);
+        return;
+      }
+      usersData=obj;
+    } else {
+      usersData=data;
+    }
 
     localStorage.setItem('zondi_users', JSON.stringify(usersData));
     document.getElementById('syncStatus').textContent='✅ Synced: '+Object.keys(usersData).length+' users';
     render();
   }catch(e){
-    console.log('Server load failed, using local', e);
-    document.getElementById('syncStatus').textContent='⚠️ Offline - using phone storage';
+    console.log('Server fail', e);
+    document.getElementById('syncStatus').textContent='⚠️ Offline: '+Object.keys(usersData).length+' local';
     render();
   }
 }
 
-const APP_LINKS={'V380 Pro':{icon:'📹'},'Yoosee':{icon:'👁️'},'CareCamPro':{icon:'🛡️'}};
-function switchTab(t){document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');document.getElementById('view-clients').style.display=t==='clients'?'block':'none';document.getElementById('view-patrols').style.display=t==='patrols'?'block':'none';document.getElementById('view-cams').style.display=t==='cams'?'block':'none';document.getElementById('view-map').style.display=t==='map'?'block':'none';}
-function render(){let cSearch=(document.getElementById('searchClient').value||'').toLowerCase();let cDiv=document.getElementById('clients');cDiv.innerHTML='';let pDiv=document.getElementById('patrols');pDiv.innerHTML='';let pend=document.getElementById('pending');pend.innerHTML='';let cCount=0,pCount=0,pendCount=0;Object.keys(usersData).forEach(k=>{let u=usersData[k];if(!u) return;if(u.role==='client') cCount++;if(u.role==='patrol'&&u.status!=='pending') pCount++;if(u.status==='pending'){pendCount++;let card=document.createElement('div');card.className='card';card.innerHTML=`<b>${k}</b><small>pending</small><br><button class="btn gold small" onclick="approvePatrol('${k}')">Approve</button>`;pend.appendChild(card);}});Object.keys(usersData).forEach(k=>{let u=usersData[k];if(u.role==='client'){if(cSearch&&!k.toLowerCase().includes(cSearch)) return;let card=document.createElement('div');card.className='card';card.innerHTML=`<b>${u.name||k}</b><small>${u.client_id||''}</small>`;cDiv.appendChild(card);}if(u.role==='patrol'&&u.status!=='pending'){let card=document.createElement('div');card.className='card';card.innerHTML=`<b>${k}</b><small>${u.client_id||''}</small>`;pDiv.appendChild(card);}});document.getElementById('cTotal').textContent=cCount;document.getElementById('pTotal').textContent=pCount;document.getElementById('pPending').textContent=pendCount;document.getElementById('liveNow').textContent=Object.keys(locData).length;}
-async function approvePatrol(key){await fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})});if(usersData[key]) usersData[key].status='active';localStorage.setItem('zondi_users',JSON.stringify(usersData));render();}
-function closeFile(){document.getElementById('fileModal').style.display='none';}
-function logout(){localStorage.clear();location.href='/login.html';}
+function renderPendingArray(arr){
+  let pend=document.getElementById('pending');
+  pend.innerHTML='';
+  arr.forEach(item=>{
+    let phone=item.phone||item;
+    let card=document.createElement('div');
+    card.className='card';
+    card.innerHTML=`<b>${phone}</b><small>${item.role||'patrol'} • ${item.status||'pending'}</small><br><button class="btn gold small" onclick="approvePatrol('${phone}')">Approve</button>`;
+    pend.appendChild(card);
+  });
+  document.getElementById('pPending').textContent=arr.length;
+}
 
-// Load on start
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  document.getElementById('view-clients').style.display=t==='clients'?'block':'none';
+  document.getElementById('view-patrols').style.display=t==='patrols'?'block':'none';
+  document.getElementById('view-cams').style.display=t==='cams'?'block':'none';
+  document.getElementById('view-map').style.display=t==='map'?'block':'none';
+}
+
+function render(){
+  let cSearch=(document.getElementById('searchClient').value||'').toLowerCase();
+  let cDiv=document.getElementById('clients'); cDiv.innerHTML='';
+  let pDiv=document.getElementById('patrols'); pDiv.innerHTML='';
+  let pend=document.getElementById('pending'); pend.innerHTML='';
+  let cCount=0,pCount=0,pendCount=0;
+
+  Object.keys(usersData).forEach(k=>{
+    let u=usersData[k]; if(!u) return;
+    if(typeof u==='string') u={name:u, role:'client', status:'active'};
+    if(u.role==='client') cCount++;
+    if(u.role==='patrol' && u.status!=='pending') pCount++;
+    if(u.status==='pending'){
+      pendCount++;
+      let card=document.createElement('div'); card.className='card';
+      card.innerHTML=`<b>${k}</b><small>pending • ${u.role||''}</small><br><button class="btn gold small" onclick="approvePatrol('${k}')">✓ Approve</button> <button class="btn red small" onclick="deletePatrol('${k}')">Del</button>`;
+      pend.appendChild(card);
+    }
+  });
+
+  Object.keys(usersData).forEach(k=>{
+    let u=usersData[k]; if(!u) return;
+    if(typeof u==='string') u={name:u, role:'client', status:'active'};
+    if(u.role==='client'){
+      if(cSearch &&!k.toLowerCase().includes(cSearch) &&!(u.name||'').toLowerCase().includes(cSearch)) return;
+      let card=document.createElement('div'); card.className='card';
+      card.innerHTML=`<div class="iconBox">👤</div><b>${u.name||k}</b><small>${u.client_id||''}<br>${k}</small>`;
+      cDiv.appendChild(card);
+    }
+    if(u.role==='patrol' && u.status!=='pending'){
+      let card=document.createElement('div'); card.className='card';
+      card.innerHTML=`<div class="iconBox">🚓</div><b>${k}</b><small>${u.client_id||''}</small><br><button class="btn red small" onclick="deletePatrol('${k}')">Delete</button>`;
+      pDiv.appendChild(card);
+    }
+  });
+
+  document.getElementById('cTotal').textContent=cCount;
+  document.getElementById('pTotal').textContent=pCount;
+  document.getElementById('pPending').textContent=pendCount;
+  document.getElementById('liveNow').textContent=Object.keys(locData).length;
+}
+
+async function approvePatrol(key){
+  await fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})});
+  if(usersData[key]) usersData[key].status='active';
+  localStorage.setItem('zondi_users', JSON.stringify(usersData));
+  render(); loadFromServer();
+}
+async function deletePatrol(key){
+  if(!confirm('Delete '+key+'?')) return;
+  await fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})});
+  delete usersData[key];
+  localStorage.setItem('zondi_users', JSON.stringify(usersData));
+  render(); loadFromServer();
+}
+function logout(){ localStorage.clear(); location.href='/login.html'; }
+
 loadFromServer();
-setInterval(loadFromServer, 10000); // auto-refresh every 10s
+setInterval(loadFromServer, 10000);
 </script></body></html>
