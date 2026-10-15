@@ -7,7 +7,13 @@
 <div class="tabs"><div class="tab active" id="tab-clients" onclick="switchTab('clients')">📁 CLIENTS</div><div class="tab" id="tab-patrols" onclick="switchTab('patrols')">🚓 PATROLS</div><div class="tab" id="tab-cams" onclick="switchTab('cams')">📷 CAMS</div><div class="tab" id="tab-map" onclick="switchTab('map')">🗺️ MAP</div></div>
 <div class="box" id="view-clients"><input id="searchClient" class="search" placeholder="🔍 Search client..." oninput="render()"><div class="grid" id="clients"></div></div>
 <div class="box" id="view-patrols" style="display:none"><input id="searchPatrol" class="search" placeholder="🔍 Search patrol..." oninput="render()"><div class="grid" id="patrols"></div><div style="margin-top:14px"><h4>🛡️ Pending Approvals</h4><div class="grid" id="pending"></div></div></div>
-<div class="box" id="view-map" style="display:none"><div id="allMap" style="height:60vh;border-radius:16px;background:#101014;border:1px solid var(--line)"></div></div>
+<div class="box" id="view-map" style="display:none">
+  <div style="display:flex;gap:8px;margin-bottom:10px">
+    <button class="btn gray small" id="btnMyHouse" onclick="toggleMyHouse()" style="flex:1">🏠 MY HOUSE: OFF</button>
+    <button class="btn gray small" id="btnLive" onclick="toggleLiveOnly()" style="flex:1">🟢 LIVE ONLY: OFF</button>
+  </div>
+  <div id="allMap" style="height:60vh;border-radius:16px;background:#101014;border:1px solid var(--line)"></div>
+</div>
 <div class="box" id="view-cams" style="display:none">
   <h4 style="margin:0 0 8px">📷 Camera Apps - Tap to Open</h4>
   <div class="grid" style="grid-template-columns:1fr 1fr 1fr" id="camApps"></div>
@@ -17,6 +23,26 @@
 let usersData=JSON.parse(localStorage.getItem('zondi_users')||'{}');
 let locData=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
 let allMap = null;
+let showMyHouse=false;
+let showLiveOnly=false;
+let myHouseMarker=null;
+// SET YOUR HOUSE COORDS HERE - Emalahleni example
+const MY_HOUSE_LAT = -26.124;
+const MY_HOUSE_LNG = 29.001;
+
+function toggleMyHouse(){
+  showMyHouse=!showMyHouse;
+  document.getElementById('btnMyHouse').textContent= showMyHouse? '🏠 MY HOUSE: ON' : '🏠 MY HOUSE: OFF';
+  document.getElementById('btnMyHouse').className= showMyHouse? 'btn blue small' : 'btn gray small';
+  renderMapMarkers();
+  if(showMyHouse && allMap) allMap.setView([MY_HOUSE_LAT, MY_HOUSE_LNG], 14);
+}
+function toggleLiveOnly(){
+  showLiveOnly=!showLiveOnly;
+  document.getElementById('btnLive').textContent= showLiveOnly? '🟢 LIVE ONLY: ON' : '🟢 LIVE ONLY: OFF';
+  document.getElementById('btnLive').className= showLiveOnly? 'btn blue small' : 'btn gray small';
+  renderMapMarkers();
+}
 const APP_LINKS={
   'V380 Pro':{icon:'📹', pkg:'com.macrovideo.v380pro', store:'https://play.google.com/store/apps/details?id=com.macrovideo.v380pro'},
   'Yoosee':{icon:'👁️', pkg:'com.yoosee', store:'https://play.google.com/store/apps/details?id=com.yoosee'},
@@ -132,28 +158,28 @@ function initAllMap(){
 
 function renderMapMarkers(){
   if(!allMap) return;
-  // Clear old markers
-  allMap.eachLayer(layer=>{
-    if(layer instanceof L.Marker) allMap.removeLayer(layer);
-  });
+  allMap.eachLayer(layer=>{ if(layer instanceof L.Marker) allMap.removeLayer(layer); });
+  if(myHouseMarker){ allMap.removeLayer(myHouseMarker); myHouseMarker=null; }
 
-  // 1. Clients with location
+  if(showMyHouse){
+    myHouseMarker=L.marker([MY_HOUSE_LAT, MY_HOUSE_LNG], {icon: L.divIcon({html:'🏠', className:'', iconSize:[30,30]})})
+    .addTo(allMap).bindPopup('<b>MY HOUSE</b><br>🏠 I live here').openPopup();
+  }
+
   Object.keys(usersData).forEach(k=>{
-    let u=usersData[k]; if(!u) return;
-    let lat=u.lat||u.latitude; let lng=u.lng||u.lon||u.longitude||u.lngt;
+    let u=usersData[k]; if(!u || u.role!=='client') return;
+    if(showLiveOnly) return; // hide clients when LIVE ONLY on
+    let lat=u.lat||u.latitude; let lng=u.lng||u.lon||u.longitude;
     if(lat && lng){
-      L.marker([parseFloat(lat), parseFloat(lng)])
-       .addTo(allMap)
-       .bindPopup(`<b>${u.name||k}</b><br>${u.client_id||''}<br>👤 Client`);
+      L.marker([parseFloat(lat), parseFloat(lng)]).addTo(allMap)
+      .bindPopup(`<b>${u.name||k}</b><br>🏠 Available`);
     }
   });
 
-  // 2. Live patrols from patrol_cache
   Object.keys(locData).forEach(k=>{
     let p=locData[k]; if(!p ||!p.lat) return;
     L.marker([p.lat, p.lng], {icon: L.divIcon({html:'🚓', className:'', iconSize:[20,20]})})
-     .addTo(allMap)
-     .bindPopup(`<b>${k}</b><br>🚓 Live Patrol`);
+    .addTo(allMap).bindPopup(`<b>${k}</b><br>🚓 Live`);
   });
 }
 function render(){
