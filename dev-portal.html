@@ -1,6 +1,8 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>ZONDI - Phone Dashboard</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>:root{--bg:#0A0A0B;--card:#17171D;--card2:#1F1F27;--line:#272731;--blue:#2D7FF9;--gold:#E8B62A;--green:#00E676;--red:#FF3B30;--muted:#8E8E93;--ink:#fff}*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:var(--bg);color:var(--ink);padding-bottom:90px}.top{position:sticky;top:0;z-index:1000;background:rgba(10,10,11,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px}.sCard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}.sCard b{font-size:18px;display:block}.sCard span{font-size:9px;color:var(--muted);letter-spacing:.8px}.tabs{position:sticky;top:58px;z-index:900;background:var(--bg);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}.tab{padding:12px 6px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-weight:800;font-size:11px;text-align:center;cursor:pointer}.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}.box{padding:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;cursor:pointer}.card b{font-size:13px;display:block}.card small{color:var(--muted);font-size:11px}.iconBox{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:8px;background:var(--card2);border:1px solid var(--line)}.card.live{border-color:var(--green)}.card.sos{border-color:var(--red);background:#1A0F0F}.btn{padding:10px 12px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:12px}.gold{background:var(--gold);color:#000}.blue{background:var(--blue);color:#fff}.red{background:var(--red);color:#fff}.gray{background:var(--card2);color:#fff;border:1px solid var(--line)}.btn.small{padding:7px 10px;font-size:11px}.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:#fff;margin-bottom:10px}#fileModal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:5000;display:none;padding:10px;overflow:auto}.file{background:var(--card);border:1px solid var(--line);border-radius:20px;max-width:520px;margin:10px auto;overflow:hidden}.fileHeader{padding:14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}#fileMap{height:200px;width:100%;background:#101014}.select{width:100%;padding:11px;border-radius:10px;background:#101014;border:1px solid var(--line);color:#fff}
+<style>:root{--bg:#0A0A0B;--card:#17171D;--card2:#1F1F27;--line:#272731;--blue:#2D7FF9;--gold:#E8B62A;--green:#00E676;--red:#FF3B30;--muted:#8E8E93;--ink:#fff}*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:var(--bg);color:var(--ink);padding-bottom:90px}.top{position:sticky;top:0;z-index:4000;background:rgba(10,10,11,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px}.sCard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}.sCard b{font-size:18px;display:block}.sCard span{font-size:9px;color:var(--muted);letter-spacing:.8px}.tabs{position:sticky;top:58px;z-index:3000;background:var(--bg);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);pointer-events:auto}.tab{padding:12px 6px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-weight:800;font-size:11px;text-align:center;cursor:pointer;pointer-events:auto!important;z-index:3001!important}.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}.box{padding:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;cursor:pointer}.card b{font-size:13px;display:block}.card small{color:var(--muted);font-size:11px}.iconBox{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:8px;background:var(--card2);border:1px solid var(--line)}.card.live{border-color:var(--green)}.card.sos{border-color:var(--red);background:#1A0F0F}.btn{padding:10px 12px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:12px}.gold{background:var(--gold);color:#000}.blue{background:var(--blue);color:#fff}.red{background:var(--red);color:#fff}.gray{background:var(--card2);color:#fff;border:1px solid var(--line)}.btn.small{padding:7px 10px;font-size:11px}.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:#fff;margin-bottom:10px}#fileModal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:5000;display:none;padding:10px;overflow:auto}.file{background:var(--card);border:1px solid var(--line);border-radius:20px;max-width:520px;margin:10px auto;overflow:hidden}.fileHeader{padding:14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}#fileMap{height:200px;width:100%;background:#101014}.select{width:100%;padding:11px;border-radius:10px;background:#101014;border:1px solid var(--line);color:#fff}
+#view-map, #allMap,.leaflet-container{z-index:1!important}
+.leaflet-control,.leaflet-top,.leaflet-bottom,.leaflet-control-layers{z-index:2!important; pointer-events:auto}
 </style></head><body>
 <div class="top"><div><div style="font-weight:900">🛰️ ZONDI DASHBOARD</div><div style="font-size:10px;color:var(--muted)" id="syncStatus">Loading from server...</div></div><button class="btn blue small" onclick="logout()">Logout</button></div>
 <div class="stats"><div class="sCard"><b id="cTotal">0</b><span>CLIENTS</span></div><div class="sCard"><b id="pTotal">0</b><span>PATROLS</span></div><div class="sCard"><b id="pPending" style="color:var(--gold)">0</b><span>PENDING</span></div><div class="sCard"><b id="liveNow" style="color:var(--green)">0</b><span>LIVE</span></div></div>
@@ -28,7 +30,6 @@ let showLiveOnly=false;
 let myHouseMarker=null;
 const MY_HOUSE_LAT = -25.6135;
 const MY_HOUSE_LNG = 27.9852;
-
 function toggleMyHouse(){
   showMyHouse=!showMyHouse;
   document.getElementById('btnMyHouse').textContent= showMyHouse? '🏠 MY HOUSE: ON' : '🏠 MY HOUSE: OFF';
@@ -81,19 +82,12 @@ async function loadFromServer(){
 }
 async function loadPending(){
   try{
-    // try both endpoints - depends on your server
     let res = await fetch('/api/pending').catch(()=> fetch('/api/get_pending'));
-    if(!res ||!res.ok){
-      res = await fetch('/api/get_pending');
-    }
+    if(!res ||!res.ok){ res = await fetch('/api/get_pending'); }
     let data = await res.json();
-    console.log('PENDING:', data);
-    if(Array.isArray(data) && data.length>0){
-      renderPendingArray(data);
-    } else if(typeof data === 'object' && Object.keys(data).length>0){
-      // object format pending
-      let pend=document.getElementById('pending');
-      pend.innerHTML='';
+    if(Array.isArray(data) && data.length>0){ renderPendingArray(data); }
+    else if(typeof data === 'object' && Object.keys(data).length>0){
+      let pend=document.getElementById('pending'); pend.innerHTML='';
       Object.keys(data).forEach(k=>{
         let u=data[k];
         let card=document.createElement('div'); card.className='card';
@@ -102,15 +96,13 @@ async function loadPending(){
       });
       document.getElementById('pPending').textContent=Object.keys(data).length;
     }
-  }catch(e){ console.log('no pending api', e); }
+  }catch(e){}
 }
 function renderPendingArray(arr){
-  let pend=document.getElementById('pending');
-  pend.innerHTML='';
+  let pend=document.getElementById('pending'); pend.innerHTML='';
   arr.forEach(item=>{
     let phone=item.phone||item;
-    let card=document.createElement('div');
-    card.className='card';
+    let card=document.createElement('div'); card.className='card';
     card.innerHTML=`<b>${phone}</b><small>${item.role||'patrol'} • ${item.status||'pending'}</small><br><button class="btn gold small" onclick="approvePatrol('${phone}')">Approve</button>`;
     pend.appendChild(card);
   });
@@ -127,20 +119,17 @@ function switchTab(t){
   if(t==='map') initAllMap();
 }
 function renderCamGrid(){
-  let appsDiv=document.getElementById('camApps');
-  if(!appsDiv) return;
+  let appsDiv=document.getElementById('camApps'); if(!appsDiv) return;
   appsDiv.innerHTML='';
   Object.keys(APP_LINKS).forEach(brand=>{
     let info=APP_LINKS[brand];
     let count=Object.values(usersData).filter(u=>u && u.camBrand===brand).length;
-    let d=document.createElement('div');
-    d.className='card'; d.style.textAlign='center';
+    let d=document.createElement('div'); d.className='card'; d.style.textAlign='center';
     d.innerHTML=`<div style="font-size:32px">${info.icon}</div><b>${brand}</b><small>${count} clients</small>`;
     d.onclick=()=>openInside(brand);
     appsDiv.appendChild(d);
   });
-  let byCam=document.getElementById('clientsByCam');
-  if(!byCam) return;
+  let byCam=document.getElementById('clientsByCam'); if(!byCam) return;
   byCam.innerHTML='';
   Object.keys(usersData).forEach(k=>{
     let u=usersData[k]; if(!u || u.role!=='client' ||!u.camBrand) return;
@@ -151,18 +140,16 @@ function renderCamGrid(){
 }
 function openInside(brand, clientKey){
   let info=APP_LINKS[brand]; if(!info) return;
-  let pkg=info.pkg;
-  window.location.href=`intent://#Intent;package=${pkg};end`;
+  window.location.href=`intent://#Intent;package=${brand};end`.replace(brand, info.pkg);
   setTimeout(()=>{ window.open(info.store,'_blank'); },1200);
 }
 function initAllMap(){
   setTimeout(()=>{
-    let div=document.getElementById('allMap');
-    if(!div) return;
+    let div=document.getElementById('allMap'); if(!div) return;
     if(allMap){ allMap.invalidateSize(); renderMapMarkers(); return; }
     allMap = L.map('allMap').setView([MY_HOUSE_LAT, MY_HOUSE_LNG], 15);
     let sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri Satellite'}).addTo(allMap);
-    let labels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}').addTo(allMap);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}').addTo(allMap);
     let street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'});
     let baseMaps = {"🛰️ Satellite - Real Houses": sat, "🗺️ Street Map": street};
     L.control.layers(baseMaps, null, {position:'topright'}).addTo(allMap);
@@ -174,22 +161,17 @@ function renderMapMarkers(){
   allMap.eachLayer(layer=>{ if(layer instanceof L.Marker) allMap.removeLayer(layer); });
   if(myHouseMarker){ try{allMap.removeLayer(myHouseMarker);}catch(e){} myHouseMarker=null; }
   if(showMyHouse){
-    myHouseMarker=L.marker([MY_HOUSE_LAT, MY_HOUSE_LNG], {icon: L.divIcon({html:'🏠', className:'', iconSize:[30,30]})})
-   .addTo(allMap).bindPopup('<b>MY HOUSE</b><br>🏠 Ga-Rankuwa Unit 20').openPopup();
+    myHouseMarker=L.marker([MY_HOUSE_LAT, MY_HOUSE_LNG], {icon: L.divIcon({html:'🏠', className:'', iconSize:[30,30]})}).addTo(allMap).bindPopup('<b>MY HOUSE</b><br>🏠 Ga-Rankuwa Unit 20').openPopup();
   }
   Object.keys(usersData).forEach(k=>{
     let u=usersData[k]; if(!u || u.role!=='client') return;
     if(showLiveOnly) return;
     let lat=u.lat||u.latitude; let lng=u.lng||u.lon||u.longitude;
-    if(lat && lng){
-      L.marker([parseFloat(lat), parseFloat(lng)]).addTo(allMap)
-     .bindPopup(`<b>${u.name||k}</b><br>🏠 Available`);
-    }
+    if(lat && lng){ L.marker([parseFloat(lat), parseFloat(lng)]).addTo(allMap).bindPopup(`<b>${u.name||k}</b><br>🏠 Available`); }
   });
   Object.keys(locData).forEach(k=>{
     let p=locData[k]; if(!p ||!p.lat) return;
-    L.marker([p.lat, p.lng], {icon: L.divIcon({html:'🚓', className:'', iconSize:[20,20]})})
-   .addTo(allMap).bindPopup(`<b>${k}</b><br>🚓 Live`);
+    L.marker([p.lat, p.lng], {icon: L.divIcon({html:'🚓', className:'', iconSize:[20,20]})}).addTo(allMap).bindPopup(`<b>${k}</b><br>🚓 Live`);
   });
 }
 function render(){
@@ -235,16 +217,16 @@ async function approvePatrol(key){
   await fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})});
   if(usersData[key]) usersData[key].status='active';
   localStorage.setItem('zondi_users', JSON.stringify(usersData));
-  render(); loadFromServer();
+  render(); loadFromServer(); loadPending();
 }
 async function deletePatrol(key){
   if(!confirm('Delete '+key+'?')) return;
   await fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})});
   delete usersData[key];
   localStorage.setItem('zondi_users', JSON.stringify(usersData));
-  render(); loadFromServer();
+  render(); loadFromServer(); loadPending();
 }
 function logout(){ localStorage.clear(); location.href='/login.html'; }
-loadFromServer();
-loadPending();
+loadFromServer(); loadPending();
 setInterval(()=>{ loadFromServer(); loadPending(); }, 10000);
+</script></body></html>
