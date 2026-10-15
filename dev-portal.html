@@ -16,6 +16,7 @@
 <script>
 let usersData=JSON.parse(localStorage.getItem('zondi_users')||'{}');
 let locData=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
+let allMap = null;
 const APP_LINKS={
   'V380 Pro':{icon:'📹', pkg:'com.macrovideo.v380pro', store:'https://play.google.com/store/apps/details?id=com.macrovideo.v380pro'},
   'Yoosee':{icon:'👁️', pkg:'com.yoosee', store:'https://play.google.com/store/apps/details?id=com.yoosee'},
@@ -83,6 +84,7 @@ function switchTab(t){
   document.getElementById('view-cams').style.display=t==='cams'?'block':'none';
   document.getElementById('view-map').style.display=t==='map'?'block':'none';
   if(t==='cams') renderCamGrid();
+  if(t==='map') initAllMap();
 }
 function renderCamGrid(){
   let appsDiv=document.getElementById('camApps');
@@ -113,6 +115,47 @@ function openInside(brand, clientKey){
   window.location.href=`intent://#Intent;package=${pkg};end`;
   setTimeout(()=>{ window.open(info.store,'_blank'); },1200);
 }  
+
+function initAllMap(){
+  setTimeout(()=>{ // wait for div to show
+    let div=document.getElementById('allMap');
+    if(!div) return;
+    if(allMap){ allMap.invalidateSize(); renderMapMarkers(); return; }
+
+    allMap = L.map('allMap').setView([-26.1586, 28.9636], 11); // Emalahleni default
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      attribution:'© OpenStreetMap'
+    }).addTo(allMap);
+    renderMapMarkers();
+  },300);
+}
+
+function renderMapMarkers(){
+  if(!allMap) return;
+  // Clear old markers
+  allMap.eachLayer(layer=>{
+    if(layer instanceof L.Marker) allMap.removeLayer(layer);
+  });
+
+  // 1. Clients with location
+  Object.keys(usersData).forEach(k=>{
+    let u=usersData[k]; if(!u) return;
+    let lat=u.lat||u.latitude; let lng=u.lng||u.lon||u.longitude||u.lngt;
+    if(lat && lng){
+      L.marker([parseFloat(lat), parseFloat(lng)])
+       .addTo(allMap)
+       .bindPopup(`<b>${u.name||k}</b><br>${u.client_id||''}<br>👤 Client`);
+    }
+  });
+
+  // 2. Live patrols from patrol_cache
+  Object.keys(locData).forEach(k=>{
+    let p=locData[k]; if(!p ||!p.lat) return;
+    L.marker([p.lat, p.lng], {icon: L.divIcon({html:'🚓', className:'', iconSize:[20,20]})})
+     .addTo(allMap)
+     .bindPopup(`<b>${k}</b><br>🚓 Live Patrol`);
+  });
+}
 function render(){
   let cSearch=(document.getElementById('searchClient').value||'').toLowerCase();
   let cDiv=document.getElementById('clients'); cDiv.innerHTML='';
