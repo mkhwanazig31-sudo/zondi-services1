@@ -1,13 +1,19 @@
 from http.server import BaseHTTPRequestHandler
 import json, os
-FILE='/tmp/zondi_users.json'
-def load():
-    if not os.path.exists(FILE): return {}
+
+USERS='/tmp/zondi_users.json'
+PENDING='/tmp/zondi_pending.json'
+
+def load(f):
+    if not os.path.exists(f): return {}
     try:
-        with open(FILE,'r') as f: return json.load(f)
+        with open(f,'r') as fp: return json.load(fp)
     except: return {}
-def save(d):
-    with open(FILE,'w') as f: json.dump(d,f)
+def save(f,d):
+    try:
+        os.makedirs(os.path.dirname(f), exist_ok=True)
+        with open(f,'w') as fp: json.dump(fp,d) if False else json.dump(d,fp)
+    except: pass
 
 class handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -16,6 +22,7 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Methods','POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers','Content-Type')
         self.end_headers()
+
     def do_POST(self):
         self.send_response(200)
         self.send_header('Content-type','application/json')
@@ -24,11 +31,23 @@ class handler(BaseHTTPRequestHandler):
         length=int(self.headers.get('content-length',0) or 0)
         body=json.loads(self.rfile.read(length).decode() or '{}')
         phone=(body.get('phone') or '').strip()
-        users=load()
-        if not phone or phone not in users:
-            self.wfile.write(json.dumps({"ok":False,"error":"not found"}).encode())
+
+        users=load(USERS)
+        pending=load(PENDING)
+
+        # RULE: JUST APPROVE - check both places
+        if phone in pending:
+            users[phone] = {**pending[phone], "status":"active"}
+            del pending[phone]
+            save(PENDING, pending)
+            save(USERS, users)
+            self.wfile.write(json.dumps({"ok":True,"phone":phone,"status":"active","from":"pending"}).encode())
             return
-        # JUST APPROVE - NOTHING ELSE
-        users[phone]["status"]="active"
-        save(users)
-        self.wfile.write(json.dumps({"ok":True,"phone":phone,"status":"active"}).encode())
+
+        if phone in users:
+            users[phone]["status"]="active"
+            save(USERS, users)
+            self.wfile.write(json.dumps({"ok":True,"phone":phone,"status":"active"}).encode())
+            return
+
+        self.wfile.write(json.dumps({"ok":False,"error":"not found"}).encode())
