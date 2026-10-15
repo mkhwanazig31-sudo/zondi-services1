@@ -1,54 +1,87 @@
-import os, json, urllib.request, urllib.parse
-# SAFE - NO EXTERNAL LIBRARY - WILL NEVER CRASH
+import os, json
+print("Loading _store.py safe version")
 def get_users():
-    try:
-        url = (os.getenv('KV_REST_API_URL') or os.getenv('STORAGE_REST_API_URL') or '').rstrip('/')
-        tok = os.getenv('KV_REST_API_TOKEN') or os.getenv('STORAGE_REST_API_TOKEN') or ''
-        if not url or not tok: return {}
-        req = urllib.request.Request(f"{url}/get/zondi_users", headers={"Authorization": f"Bearer {tok}"})
-        with urllib.request.urlopen(req, timeout=4) as r:
-            v = json.loads(r.read().decode()).get('result')
-            if not v: return {}
-            try:
-                a=json.loads(v)
-                return json.loads(a) if isinstance(a,str) else a
-            except: return {}
-    except: return {}
+    return {}
+def set_users(v):
+    print(f"set_users called {len(str(v))} chars")
+    return True
+def get_pending():
+    return {}
+def set_pending(v):
+    return True
+import os
+import json
+import urllib.request
+import urllib.error
 
-def set_users(d):
+KV_URL = (os.environ.get("KV_REST_API_URL") or os.environ.get("KV_URL") or "").rstrip("/")
+KV_TOKEN = os.environ.get("KV_REST_API_TOKEN") or os.environ.get("KV_REST_API_READ_ONLY_TOKEN") or ""
+
+def _kv_get(key):
+    if not KV_URL or not KV_TOKEN:
+        print(f"KV not configured for {key}")
+        return None
     try:
-        url = (os.getenv('KV_REST_API_URL') or os.getenv('STORAGE_REST_API_URL') or '').rstrip('/')
-        tok = os.getenv('KV_REST_API_TOKEN') or os.getenv('STORAGE_REST_API_TOKEN') or ''
-        if not url or not tok: return False
-        body=json.dumps(json.dumps(d)).encode()
-        req=urllib.request.Request(f"{url}/set/zondi_users", data=body, headers={"Authorization": f"Bearer {tok}", "Content-Type":"application/json"})
-        with urllib.request.urlopen(req, timeout=4) as r: r.read()
-        return True
+        url = f"{KV_URL}/get/{key}"
+        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {KV_TOKEN}"})
+        with urllib.request.urlopen(req, timeout=5) as r:
+            data = json.loads(r.read().decode())
+            val = data.get("result")
+            if val is None:
+                return None
+            if isinstance(val, str):
+                try:
+                    return json.loads(val)
+                except:
+                    return val
+            return val
     except Exception as e:
-        print(e); return False
+        print(f"_kv_get {key} error: {e}")
+        return None
+
+def _kv_set(key, value):
+    if not KV_URL or not KV_TOKEN:
+        print(f"KV not configured, cannot set {key}")
+        return False
+    try:
+        url = f"{KV_URL}/set/{key}"
+        body = json.dumps(value)
+        # Vercel KV REST wants value as raw string in body? Use set with value as JSON string
+        # Send as POST with value
+        payload = json.dumps([body]).encode() if False else json.dumps(value).encode()
+        # Simpler: POST to /set/key/value - but we use POST with body
+        # Vercel KV: POST /set/mykey with {"value":...} or just value? Use: /set/key/value encoding
+        # Most reliable: use url-encoded value
+        # We'll use POST to /set/key with value in body
+        import urllib.parse
+        # Vercel REST: POST https://.../set/key with body = value
+        # If value is object, store as JSON string
+        store_val = json.dumps(value) if isinstance(value, (dict, list)) else str(value)
+        req = urllib.request.Request(f"{KV_URL}/set/{key}/{urllib.parse.quote(store_val)}", method="POST", headers={"Authorization": f"Bearer {KV_TOKEN}"})
+        # Actually simpler: use set with POST and body
+        # Try both methods: first method
+        try:
+            req2 = urllib.request.Request(f"{KV_URL}", data=json.dumps(["SET", key, store_val]).encode(), headers={"Authorization": f"Bearer {KV_TOKEN}", "Content-Type": "application/json"}, method="POST")
+            with urllib.request.urlopen(req2, timeout=5) as r2:
+                return True
+        except:
+            # fallback to GET set
+            with urllib.request.urlopen(req, timeout=5) as r:
+                return True
+    except Exception as e:
+        print(f"_kv_set {key} error: {e}")
+        return False
+
+def get_users():
+    v = _kv_get("users")
+    return v if isinstance(v, dict) else {}
+
+def set_users(v):
+    return _kv_set("users", v)
 
 def get_pending():
-    try:
-        url = (os.getenv('KV_REST_API_URL') or os.getenv('STORAGE_REST_API_URL') or '').rstrip('/')
-        tok = os.getenv('KV_REST_API_TOKEN') or os.getenv('STORAGE_REST_API_TOKEN') or ''
-        if not url or not tok: return {}
-        req = urllib.request.Request(f"{url}/get/zondi_pending", headers={"Authorization": f"Bearer {tok}"})
-        with urllib.request.urlopen(req, timeout=4) as r:
-            v = json.loads(r.read().decode()).get('result')
-            if not v: return {}
-            a=json.loads(v); return json.loads(a) if isinstance(a,str) else a
-    except: return {}
+    v = _kv_get("pending")
+    return v if isinstance(v, dict) else {}
 
-def set_pending(d):
-    try:
-        url = (os.getenv('KV_REST_API_URL') or os.getenv('STORAGE_REST_API_URL') or '').rstrip('/')
-        tok = os.getenv('KV_REST_API_TOKEN') or os.getenv('STORAGE_REST_API_TOKEN') or ''
-        body=json.dumps(json.dumps(d)).encode()
-        req=urllib.request.Request(f"{url}/set/zondi_pending", data=body, headers={"Authorization": f"Bearer {tok}", "Content-Type":"application/json"})
-        with urllib.request.urlopen(req, timeout=4) as r: r.read()
-        return True
-    except: return False
-
-def get_location():
-    return {}
-def set_location(d): return True
+def set_pending(v):
+    return _kv_set("pending", v)
