@@ -13,16 +13,18 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Content-type','application/json')
         self.send_header('Access-Control-Allow-Origin','*')
         self.end_headers()
-        body=json.loads(self.rfile.read(int(self.headers.get('content-length',0))).decode() or '{}')
-        phone=(body.get('phone') or '').strip().lower()
-        pending=get_pending()
-        users=get_users()
-        if phone in pending:
-            users[phone]={**pending[phone],"status":"active"}
-            del pending[phone]
-            set_users(users); set_pending(pending)
-            self.wfile.write(json.dumps({"ok":True,"from":"pending"}).encode()); return
-        if phone in users:
-            users[phone]["status"]="active"; set_users(users)
-            self.wfile.write(json.dumps({"ok":True}).encode()); return
-        self.wfile.write(json.dumps({"ok":False,"error":"not found"}).encode())
+        try:
+            b=json.loads(self.rfile.read(int(self.headers.get('content-length',0) or 0)).decode() or '{}')
+            key=(b.get('phone') or b.get('email') or '').strip().lower()
+            if not key: raise Exception("no key")
+            pending=get_pending() or {}
+            users=get_users() or {}
+            user=pending.pop(key, None) or {"phone":key,"role":"patrol","status":"active","name":key}
+            user["status"]="active"
+            users[key]=user
+            set_users(users)
+            set_pending(pending)
+            self.wfile.write(json.dumps({"ok":True}).encode())
+        except Exception as e:
+            print(e)
+            self.wfile.write(json.dumps({"ok":False,"error":str(e)}).encode())
