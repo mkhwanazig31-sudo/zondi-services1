@@ -1,4 +1,4 @@
-l{
+{
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/login", "destination": "/login.html" },
