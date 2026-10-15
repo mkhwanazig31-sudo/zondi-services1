@@ -7,7 +7,6 @@
 <div class="tabs"><div class="tab active" id="tab-clients" onclick="switchTab('clients')">📁 CLIENTS</div><div class="tab" id="tab-patrols" onclick="switchTab('patrols')">🚓 PATROLS</div><div class="tab" id="tab-cams" onclick="switchTab('cams')">📷 CAMS</div><div class="tab" id="tab-map" onclick="switchTab('map')">🗺️ MAP</div></div>
 <div class="box" id="view-clients"><input id="searchClient" class="search" placeholder="🔍 Search client..." oninput="render()"><div class="grid" id="clients"></div></div>
 <div class="box" id="view-patrols" style="display:none"><input id="searchPatrol" class="search" placeholder="🔍 Search patrol..." oninput="render()"><div class="grid" id="patrols"></div><div style="margin-top:14px"><h4>🛡️ Pending Approvals</h4><div class="grid" id="pending"></div></div></div>
-<div class="box" id="view-cams" style="display:none"><div class="grid" id="camApps"></div></div>
 <div class="box" id="view-map" style="display:none"><div id="allMap" style="height:60vh;border-radius:16px;background:#101014;border:1px solid var(--line)"></div></div>
 <div class="box" id="view-cams" style="display:none">
   <h4 style="margin:0 0 8px">📷 Camera Apps - Tap to Open</h4>
@@ -154,6 +153,7 @@ function render(){
   document.getElementById('pTotal').textContent=pCount;
   document.getElementById('pPending').textContent=pendCount;
   document.getElementById('liveNow').textContent=Object.keys(locData).length;
+    renderCamGrid();
 }
 
 async function approvePatrol(key){
