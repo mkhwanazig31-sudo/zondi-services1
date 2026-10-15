@@ -26,16 +26,15 @@ let allMap = null;
 let showMyHouse=false;
 let showLiveOnly=false;
 let myHouseMarker=null;
-// SET YOUR HOUSE COORDS HERE - Emalahleni example
-const MY_HOUSE_LAT = -26.124;
-const MY_HOUSE_LNG = 29.001;
+const MY_HOUSE_LAT = -25.6135;
+const MY_HOUSE_LNG = 27.9852;
 
 function toggleMyHouse(){
   showMyHouse=!showMyHouse;
   document.getElementById('btnMyHouse').textContent= showMyHouse? '🏠 MY HOUSE: ON' : '🏠 MY HOUSE: OFF';
   document.getElementById('btnMyHouse').className= showMyHouse? 'btn blue small' : 'btn gray small';
   renderMapMarkers();
-  if(showMyHouse && allMap) allMap.setView([MY_HOUSE_LAT, MY_HOUSE_LNG], 14);
+  if(showMyHouse && allMap) allMap.setView([MY_HOUSE_LAT, MY_HOUSE_LNG], 16);
 }
 function toggleLiveOnly(){
   showLiveOnly=!showLiveOnly;
@@ -56,10 +55,6 @@ async function loadFromServer(){
     document.getElementById('syncStatus').textContent='⏳ Syncing...';
     let res = await fetch('/api/index');
     let data = await res.json();
-    console.log('SERVER /api/index:', data);
-
-    // If server returns dict {phone: {role, status}} -> use directly
-    // If server returns array -> convert (fallback for old get_pending)
     if(Array.isArray(data)){
       let obj={};
       data.forEach(item=>{
@@ -67,9 +62,7 @@ async function loadFromServer(){
         if(typeof item==='string') obj[item]={role:'client', status:'active', name:item};
         else obj[phone]=item;
       });
-      // If array was from get_pending, we still need full data -> try again local
       if(Object.keys(obj).length>0 &&!obj[Object.keys(obj)[0]].role){
-        // it's just pending list, keep old usersData for clients
         document.getElementById('syncStatus').textContent='✅ Pending: '+data.length;
         renderPendingArray(data);
         return;
@@ -78,17 +71,14 @@ async function loadFromServer(){
     } else {
       usersData=data;
     }
-
     localStorage.setItem('zondi_users', JSON.stringify(usersData));
     document.getElementById('syncStatus').textContent='✅ Synced: '+Object.keys(usersData).length+' users';
     render();
   }catch(e){
-    console.log('Server fail', e);
     document.getElementById('syncStatus').textContent='⚠️ Offline: '+Object.keys(usersData).length+' local';
     render();
   }
 }
-
 function renderPendingArray(arr){
   let pend=document.getElementById('pending');
   pend.innerHTML='';
@@ -101,7 +91,6 @@ function renderPendingArray(arr){
   });
   document.getElementById('pPending').textContent=arr.length;
 }
-
 function switchTab(t){
   document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
   document.getElementById('tab-'+t).classList.add('active');
@@ -140,46 +129,42 @@ function openInside(brand, clientKey){
   let pkg=info.pkg;
   window.location.href=`intent://#Intent;package=${pkg};end`;
   setTimeout(()=>{ window.open(info.store,'_blank'); },1200);
-}  
-
+}
 function initAllMap(){
-  setTimeout(()=>{ // wait for div to show
+  setTimeout(()=>{
     let div=document.getElementById('allMap');
     if(!div) return;
     if(allMap){ allMap.invalidateSize(); renderMapMarkers(); return; }
-
-    allMap = L.map('allMap').setView([-26.1586, 28.9636], 11); // Emalahleni default
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-      attribution:'© OpenStreetMap'
-    }).addTo(allMap);
+    allMap = L.map('allMap').setView([MY_HOUSE_LAT, MY_HOUSE_LNG], 15);
+    let sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri Satellite'}).addTo(allMap);
+    let labels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}').addTo(allMap);
+    let street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'});
+    let baseMaps = {"🛰️ Satellite - Real Houses": sat, "🗺️ Street Map": street};
+    L.control.layers(baseMaps, null, {position:'topright'}).addTo(allMap);
     renderMapMarkers();
   },300);
 }
-
 function renderMapMarkers(){
   if(!allMap) return;
   allMap.eachLayer(layer=>{ if(layer instanceof L.Marker) allMap.removeLayer(layer); });
-  if(myHouseMarker){ allMap.removeLayer(myHouseMarker); myHouseMarker=null; }
-
+  if(myHouseMarker){ try{allMap.removeLayer(myHouseMarker);}catch(e){} myHouseMarker=null; }
   if(showMyHouse){
     myHouseMarker=L.marker([MY_HOUSE_LAT, MY_HOUSE_LNG], {icon: L.divIcon({html:'🏠', className:'', iconSize:[30,30]})})
-    .addTo(allMap).bindPopup('<b>MY HOUSE</b><br>🏠 I live here').openPopup();
+   .addTo(allMap).bindPopup('<b>MY HOUSE</b><br>🏠 Ga-Rankuwa Unit 20').openPopup();
   }
-
   Object.keys(usersData).forEach(k=>{
     let u=usersData[k]; if(!u || u.role!=='client') return;
-    if(showLiveOnly) return; // hide clients when LIVE ONLY on
+    if(showLiveOnly) return;
     let lat=u.lat||u.latitude; let lng=u.lng||u.lon||u.longitude;
     if(lat && lng){
       L.marker([parseFloat(lat), parseFloat(lng)]).addTo(allMap)
-      .bindPopup(`<b>${u.name||k}</b><br>🏠 Available`);
+     .bindPopup(`<b>${u.name||k}</b><br>🏠 Available`);
     }
   });
-
   Object.keys(locData).forEach(k=>{
     let p=locData[k]; if(!p ||!p.lat) return;
     L.marker([p.lat, p.lng], {icon: L.divIcon({html:'🚓', className:'', iconSize:[20,20]})})
-    .addTo(allMap).bindPopup(`<b>${k}</b><br>🚓 Live`);
+   .addTo(allMap).bindPopup(`<b>${k}</b><br>🚓 Live`);
   });
 }
 function render(){
@@ -188,7 +173,6 @@ function render(){
   let pDiv=document.getElementById('patrols'); pDiv.innerHTML='';
   let pend=document.getElementById('pending'); pend.innerHTML='';
   let cCount=0,pCount=0,pendCount=0;
-
   Object.keys(usersData).forEach(k=>{
     let u=usersData[k]; if(!u) return;
     if(typeof u==='string') u={name:u, role:'client', status:'active'};
@@ -201,7 +185,6 @@ function render(){
       pend.appendChild(card);
     }
   });
-
   Object.keys(usersData).forEach(k=>{
     let u=usersData[k]; if(!u) return;
     if(typeof u==='string') u={name:u, role:'client', status:'active'};
@@ -217,14 +200,12 @@ function render(){
       pDiv.appendChild(card);
     }
   });
-
   document.getElementById('cTotal').textContent=cCount;
   document.getElementById('pTotal').textContent=pCount;
   document.getElementById('pPending').textContent=pendCount;
   document.getElementById('liveNow').textContent=Object.keys(locData).length;
   renderCamGrid();
 }
-
 async function approvePatrol(key){
   await fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})});
   if(usersData[key]) usersData[key].status='active';
@@ -239,7 +220,6 @@ async function deletePatrol(key){
   render(); loadFromServer();
 }
 function logout(){ localStorage.clear(); location.href='/login.html'; }
-
 loadFromServer();
 setInterval(loadFromServer, 10000);
 </script></body></html>
