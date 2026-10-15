@@ -117,7 +117,39 @@ function upsert(e){
     if(follow) map.panTo(latlng,{animate:true});
   }
 }
-async function fetchLive(){ try{ let r=await fetch('/api/location'); let locs=await r.json(); let local=localStorage.getItem('zondi_last_loc'); if(local){ let j=JSON.parse(local); locs[j.client_id]=j; } saveCache(locs); let all=Object.keys(saved).length?saved:locs; let entries=Object.values(all).sort((a,b)=>b.ts-a.ts); let list=document.getElementById('clientList'); list.innerHTML=''; entries.forEach(e=>{ upsert(e); list.innerHTML+=`<div class="listItem" onclick="setNavigationTarget(${e.lat},${e.lng},'${e.name||e.client_id}');currentId='${e.client_id}';currentData={lat:${e.lat},lng:${e.lng}};follow=true;map.setView([${e.lat},${e.lng}],20);switchTab('map',document.getElementById('tab-map'))"><div><b>${e.sos?'🚨':'📍'} ${e.name||e.client_id}</b><br><small style="color:var(--muted)">${e.phone||''} • ±${e.accuracy||e.acc||'?'}m ${e.sos?'• SOS':''}</small></div><span class="dot ${e.sos?'red':'green'}"></span></div>`; }); }catch(e){} }
-function switchTab(n,el){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); document.getElementById('view-map').style.display=n==='map'?'block':'none'; document.getElementById('view-clients').style.display=n==='clients'?'block':'none'; document.getElementById('view-about').style.display=n==='about'?'block':'none'; if(n==='map') setTimeout(()=>map.invalidateSize(),200); }
-fetchLive(); setInterval(fetchLive,2000);
+async function fetchLive(){
+  try{
+    let r=await fetch('/api/location');
+    let locs=await r.json();
+    console.log('LIVE FROM SERVER:', locs);
+
+    // merge local last loc
+    let local=localStorage.getItem('zondi_last_loc');
+    if(local){
+      try{ let j=JSON.parse(local); if(j.client_id) locs[j.client_id]=j; }catch(e){}
+    }
+
+    saveCache(locs);
+    let all=Object.keys(locs).length? locs : saved;
+    let entries=Object.values(all).sort((a,b)=> (b.ts||0)-(a.ts||0));
+
+    let list=document.getElementById('clientList');
+    list.innerHTML='';
+
+    if(entries.length===0){
+      list.innerHTML='<div style="color:#8E8E93;font-size:12px;padding:12px">No live clients yet. Clients must open app and share location.</div>';
+      document.getElementById('activeClient').innerHTML='📡 Waiting for client location...<br><small>Server returned 0. Check /api/location</small>';
+      return;
+    }
+
+    entries.forEach(e=>{
+      if(!e.lat ||!e.lng) return;
+      upsert(e);
+      list.innerHTML+=`<div class="listItem" onclick="setNavigationTarget(${e.lat},${e.lng},'${e.name||e.client_id}');currentId='${e.client_id}';currentData={lat:${e.lat},lng:${e.lng}};follow=true;map.setView([${e.lat},${e.lng}],20);switchTab('map',document.getElementById('tab-map'))"><div><b>${e.sos?'🚨':'📍'} ${e.name||e.client_id}</b><br><small style="color:var(--muted)">${e.phone||''} • ±${e.accuracy||e.acc||'?'}m ${e.sos?'• SOS':''}</small></div><span class="dot ${e.sos?'red':'green'}"></span></div>`;
+    });
+  }catch(e){
+    console.log('fetchLive error', e);
+    document.getElementById('clientList').innerHTML='<div style="color:#FF453A">Error fetching /api/location - '+e+'</div>';
+  }
+}
 </script></body></html>
