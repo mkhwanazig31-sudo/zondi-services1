@@ -275,6 +275,26 @@ function logout(){
   localStorage.clear();
   location.href='/login.html';
 }
-loadFromServer(); loadPending(); loadLivePatrols();
-setInterval(()=>{ loadFromServer(); loadPending(); loadLivePatrols(); }, 5000);
+function startApp(){
+  loadFromServer(); loadPending(); loadLivePatrols();
+  setInterval(()=>{ loadFromServer(); loadPending(); loadLivePatrols(); }, 5000);
+}
+
+// LOCK LOGIC - NO EMAIL, ONLY PASSWORD zondi@123
+(function(){
+  if(sessionStorage.getItem('zondi_dev_ok')==='yes'){
+    document.getElementById('lockScreen').style.display='none';
+    startApp();
+  }
+})();
+function unlockDev(){
+  let p=document.getElementById('devPass').value;
+  if(p==='zondi@123'){
+    sessionStorage.setItem('zondi_dev_ok','yes');
+    document.getElementById('lockScreen').style.display='none';
+    startApp();
+  } else {
+    document.getElementById('devErr').style.display='block';
+  }
+}
 </script></body></html>
