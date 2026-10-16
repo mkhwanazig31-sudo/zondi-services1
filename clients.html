@@ -4,7 +4,7 @@
 <style>
 :root{--bg:#0B0B0F;--card:#17171D;--line:#272731;--blue:#2D7FF9;--red:#FF453A;--green:#00E676;--muted:#8E8E93}
 *{box-sizing:border-box;font-family:Inter,system-ui;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--bg);color:#fff;padding-bottom:110px;overscroll-behavior:none}
+body{margin:0;background:var(--bg);color:#fff;padding-bottom:120px;overscroll-behavior:none}
 .top{position:sticky;top:0;z-index:1000;background:rgba(11,11,15,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;margin:12px 14px;padding:14px}
 .sos-wrap{display:flex;flex-direction:column;align-items:center;padding:18px 0}
@@ -12,10 +12,12 @@ body{margin:0;background:var(--bg);color:#fff;padding-bottom:110px;overscroll-be
 .sos-btn:active{transform:scale(.95)}.sos-btn.sos-active{background:#fff;color:#FF453A;animation:pulse 0.6s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,69,58,.7)}50%{box-shadow:0 0 0 20px rgba(255,69,58,0)}}
 .btn{padding:12px 16px;border-radius:14px;border:none;font-weight:800;cursor:pointer;flex:1;text-decoration:none;text-align:center;display:block}.blue{background:var(--blue);color:#fff}.gray{background:#1F1F27;color:#fff;border:1px solid var(--line)}
-.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(23,23,29,.98);backdrop-filter:blur(20px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 6px 22px;z-index:9999}
-.tab{flex:1;text-align:center;font-size:10px;color:var(--muted);font-weight:700;cursor:pointer;padding:6px}.tab.active{color:#fff}.tab b{font-size:20px;display:block}
+/* FIX TABS CLICKABLE */
+.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(23,23,29,.98);backdrop-filter:blur(20px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 6px 22px;z-index:99999!important;pointer-events:auto!important}
+.tab{flex:1;text-align:center;font-size:10px;color:var(--muted);font-weight:700;cursor:pointer;padding:10px 6px;pointer-events:auto!important;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.tab.active{color:#fff}.tab b{font-size:20px;display:block;pointer-events:none}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}.green{background:var(--green)}
-.view{position:relative;z-index:1}
+.view{position:relative;z-index:1;min-height:60vh}
 </style>
 </head><body>
 <div class="top"><div><b>ZONDI</b> <small style="color:var(--muted)" id="userLabel">CLIENT</small></div><div style="font-size:10px;padding:6px 10px;border-radius:20px;background:#122A12;color:var(--green);border:1px solid #1F3A1F"><span class="dot green"></span> LIVE TRACKING ON</div></div>
@@ -31,16 +33,16 @@ body{margin:0;background:var(--bg);color:#fff;padding-bottom:110px;overscroll-be
 </div>
 
 <div id="view-family" class="view" style="display:none">
-  <div class="card"><b>👨‍👩‍👧 Family Circle - Garankuwa</b><br><small style="color:var(--muted)">They get your SOS on WhatsApp with Google Maps link</small>
+  <div class="card"><b>👨‍👩‍👧 Family Circle - Garankuwa</b><br><small style="color:var(--muted)">They get your SOS on WhatsApp</small>
     <div style="margin-top:12px;display:flex;gap:8px"><input id="famName" placeholder="Name e.g. Mom" style="flex:1;padding:12px;border-radius:12px;background:#0B0B0F;border:1px solid var(--line);color:#fff"><input id="famPhone" placeholder="WhatsApp 27..." style="flex:1;padding:12px;border-radius:12px;background:#0B0B0F;border:1px solid var(--line);color:#fff"></div>
     <button class="btn blue" style="width:100%;margin-top:8px" onclick="addFamily()">+ Add Family</button><div id="famList" style="margin-top:14px"></div>
   </div>
-  <div class="card" style="background:#1A0F0F;border-color:#3A1F1F"><b>🚨 Garankuwa Emergency - 1 Tap Call</b><br><small style="color:#FF9B9B">Fastest way - direct call</small>
+  <div class="card" style="background:#1A0F0F;border-color:#3A1F1F"><b>🚨 Garankuwa Emergency - 1 Tap</b>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
       <a href="tel:10111" class="btn" style="background:#FF453A;color:#fff">🚔 SAPS 10111</a>
       <a href="tel:0127974000" class="btn" style="background:#2D7FF9;color:#fff">🚔 Garankuwa SAPS</a>
-      <a href="tel:10177" class="btn gray">🚑 Ambulance 10177</a>
-      <a href="tel:112" class="btn gray">🆘 112 Cell</a>
+      <a href="tel:10177" class="btn gray">🚑 10177</a>
+      <a href="tel:112" class="btn gray">🆘 112</a>
     </div>
     <button class="btn gray" style="width:100%;margin-top:8px" onclick="shareToAllFamily(true)">📍 Send Location to ALL Family (WhatsApp)</button>
   </div>
@@ -48,13 +50,30 @@ body{margin:0;background:var(--bg);color:#fff;padding-bottom:110px;overscroll-be
 
 <div id="view-profile" class="view" style="display:none"><div class="card"><b>👤 Profile</b><div id="profileInfo" style="margin-top:10px;color:var(--muted);font-size:13px"></div><button class="btn gray" style="width:100%;margin-top:12px" onclick="localStorage.clear();location.href='/login'">Logout</button></div></div>
 
-<div class="tabs"><div class="tab active" data-tab="sos"><b>🚨</b>SOS</div><div class="tab" data-tab="family"><b>👨‍👩‍👧</b>FAMILY</div><div class="tab" data-tab="profile"><b>👤</b>PROFILE</div></div>
+<!-- FIX: onclick directly in HTML + id -->
+<div class="tabs" id="tabsBar">
+  <div class="tab active" data-tab="sos" onclick="switchTab('sos')"><b>🚨</b>SOS</div>
+  <div class="tab" data-tab="family" onclick="switchTab('family')"><b>👨‍👩‍👧</b>FAMILY</div>
+  <div class="tab" data-tab="profile" onclick="switchTab('profile')"><b>👤</b>PROFILE</div>
+</div>
 
 <script>
 let phone=localStorage.getItem('zondi_user')||'mkhwanazi1000@gmail.com'; let clientId=phone;
 document.getElementById('userLabel').innerText=phone.split('@')[0];
 document.getElementById('profileInfo').innerHTML=`Phone: ${phone}<br>ID: ${clientId}<br><small style="color:#22c55e">📍 Garankuwa • Tracked</small>`;
 let samples=[], bestAcc=Infinity, lastPos=null, myLoc=null, sos=false, btn=document.getElementById('shareBtn');
+
+// FIX TABS FUNCTION - GLOBAL!
+window.switchTab = function(t){
+  console.log('Switch to', t);
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  let activeTab = document.querySelector(`.tab[data-tab="${t}"]`);
+  if(activeTab) activeTab.classList.add('active');
+  document.getElementById('view-sos').style.display = t==='sos'?'block':'none';
+  document.getElementById('view-family').style.display = t==='family'?'block':'none';
+  document.getElementById('view-profile').style.display = t==='profile'?'block':'none';
+};
+
 navigator.geolocation.watchPosition((pos)=>{
     let acc=pos.coords.accuracy, lat=pos.coords.latitude, lng=pos.coords.longitude;
     if(acc<=50){ samples.push({lat,lng,acc}); samples.sort((a,b)=>a.acc-b.acc); samples=samples.slice(0,5); }
@@ -64,28 +83,28 @@ navigator.geolocation.watchPosition((pos)=>{
     myLoc={lat:aLat,lng:aLng,accuracy:Math.round(aAcc*10)/10,acc:Math.round(aAcc*10)/10,ts:Date.now(),time:Date.now(),phone:phone,email:phone,client_id:clientId,name:phone.split('@')[0],sos:!!sos};
     fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(myLoc)}).catch(()=>{});
     if(btn) btn.textContent=`🟢 ${aAcc.toFixed(1)}m • Best ${Math.round(bestAcc)}m`;
-    document.getElementById('accMeter').innerHTML=`📡 <b style="color:${aAcc<=3?'#22c55e':aAcc<=8?'#facc15':'#ef4444'}">${aAcc.toFixed(1)}m</b> | Best ${Math.round(bestAcc)}m<br><div style="height:6px;background:#27272a;border-radius:10px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.max(10,100-aAcc*4)}%;background:${aAcc<=3?'#22c55e':'#facc15'}"></div></div><small>${aAcc<=3?'✅ LOCKED - Garankuwa correct house':'🟡 Move outside'}</small>`;
+    document.getElementById('accMeter').innerHTML=`📡 <b style="color:${aAcc<=3?'#22c55e':aAcc<=8?'#facc15':'#ef4444'}">${aAcc.toFixed(1)}m</b> | Best ${Math.round(bestAcc)}m<br><small>${aAcc<=3?'✅ LOCKED - Garankuwa correct house':'🟡 Move outside'}</small>`;
     document.getElementById('debugLoc').innerHTML=`📍 ${aLat.toFixed(6)}, ${aLng.toFixed(6)} ±${aAcc.toFixed(1)}m`;
     findNearestPatrol(aLat,aLng);
 },{}, {enableHighAccuracy:true,maximumAge:0,timeout:30000});
+
 document.getElementById('callBtn').onclick=()=>{ window.location.href='tel:10111'; };
 document.getElementById('shareBtn').onclick=()=>{ if(myLoc){ fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(myLoc)}); alert('📍 Shared ±'+myLoc.accuracy+'m'); } };
 function getDist(lat1,lon1,lat2,lon2){ const R=6371; const dLat=(lat2-lat1)*Math.PI/180; const dLon=(lon2-lon1)*Math.PI/180; const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
 async function findNearestPatrol(myLat,myLng){ try{ let r=await fetch('/api/location'); let data=await r.json(); let all=Object.values(data).filter(p=>p.phone!==phone); if(all.length===0){ document.getElementById('nearestPatrol').innerHTML='No patrol online'; return; } let nearest=null, minD=Infinity; all.forEach(p=>{ let d=getDist(myLat,myLng,p.lat,p.lng); if(d<minD){minD=d; nearest=p;} }); if(nearest) document.getElementById('nearestPatrol').innerHTML=`✅ <b>${nearest.name||nearest.phone}</b> • ${minD.toFixed(2)} km`; }catch(e){} }
-// FAMILY
+
 let family=JSON.parse(localStorage.getItem('zondi_family')||'[]');
 function saveFamily(){ localStorage.setItem('zondi_family', JSON.stringify(family)); renderFamily(); }
-function addFamily(){ let name=document.getElementById('famName').value.trim()||'Family'; let raw=document.getElementById('famPhone').value.trim().replace(/[^0-9]/g,''); if(!raw){alert('Add phone');return;} if(raw.startsWith('0')) raw='27'+raw.slice(1); if(!raw.startsWith('27')) raw='27'+raw; family.push({name, phone:raw, id:Date.now()}); document.getElementById('famName').value=''; document.getElementById('famPhone').value=''; saveFamily(); }
-function renderFamily(){ let el=document.getElementById('famList'); if(family.length===0){el.innerHTML='<small style="color:var(--muted)">No family yet - add Mom etc</small>';return;} el.innerHTML=family.map(f=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#101014;border-radius:12px;margin-top:6px;border:1px solid var(--line)"><div><b>${f.name}</b><br><small style="color:var(--muted)">${f.phone}</small></div><div style="display:flex;gap:6px"><button onclick="shareToOne('${f.phone}')" style="padding:6px 10px;border-radius:10px;background:#25D366;color:#fff;border:none;font-weight:800">WA</button><button onclick="removeFam(${f.id})" style="padding:6px 10px;border-radius:10px;background:#1F1F27;color:#fff;border:1px solid var(--line)">X</button></div></div>`).join(''); }
-function removeFam(id){ family=family.filter(f=>f.id!==id); saveFamily(); }
-function shareToOne(p){ if(!myLoc){alert('Waiting GPS');return;} let msg=`🚨 ZONDI SOS Garankuwa from ${phone.split('@')[0]}! HELP!\n📍 https://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}\n±${myLoc.accuracy}m`; window.open(`https://wa.me/${p}?text=${encodeURIComponent(msg)}`,'_blank'); }
-function shareToAllFamily(isTest=false){ if(!myLoc){alert('Waiting GPS');return;} if(family.length===0){alert('Add family first');return;} let base=isTest?`📍 ZONDI Location Garankuwa\nhttps://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}\n±${myLoc.accuracy}m`:`🚨 ZONDI SOS Garankuwa! HELP!\n📍 https://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}\n±${myLoc.accuracy}m`; family.forEach((f,i)=>{ setTimeout(()=>{ window.open(`https://wa.me/${f.phone}?text=${encodeURIComponent(base)}`,'_blank'); }, i*900); }); }
-function switchTab(t){ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); document.querySelector(`.tab[data-tab="${t}"]`).classList.add('active'); document.getElementById('view-sos').style.display=t==='sos'?'block':'none'; document.getElementById('view-family').style.display=t==='family'?'block':'none'; document.getElementById('view-profile').style.display=t==='profile'?'block':'none'; }
-document.querySelectorAll('.tab').forEach(tab=>{ tab.addEventListener('click',()=>switchTab(tab.dataset.tab)); });
+window.addFamily = function(){ let name=document.getElementById('famName').value.trim()||'Family'; let raw=document.getElementById('famPhone').value.trim().replace(/[^0-9]/g,''); if(!raw){alert('Add phone');return;} if(raw.startsWith('0')) raw='27'+raw.slice(1); if(!raw.startsWith('27')) raw='27'+raw; family.push({name, phone:raw, id:Date.now()}); document.getElementById('famName').value=''; document.getElementById('famPhone').value=''; saveFamily(); }
+function renderFamily(){ let el=document.getElementById('famList'); if(family.length===0){el.innerHTML='<small style="color:var(--muted)">No family yet</small>';return;} el.innerHTML=family.map(f=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#101014;border-radius:12px;margin-top:6px;border:1px solid var(--line)"><div><b>${f.name}</b><br><small style="color:var(--muted)">${f.phone}</small></div><div style="display:flex;gap:6px"><button onclick="shareToOne('${f.phone}')" style="padding:6px 10px;border-radius:10px;background:#25D366;color:#fff;border:none;font-weight:800">WA</button><button onclick="removeFam(${f.id})" style="padding:6px 10px;border-radius:10px;background:#1F1F27;color:#fff;border:1px solid var(--line)">X</button></div></div>`).join(''); }
+window.removeFam = function(id){ family=family.filter(f=>f.id!==id); saveFamily(); }
+window.shareToOne = function(p){ if(!myLoc){alert('Waiting GPS');return;} let msg=`🚨 ZONDI SOS Garankuwa from ${phone.split('@')[0]}! HELP!\n📍 https://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}\n±${myLoc.accuracy}m`; window.open(`https://wa.me/${p}?text=${encodeURIComponent(msg)}`,'_blank'); }
+window.shareToAllFamily = function(isTest=false){ if(!myLoc){alert('Waiting GPS');return;} if(family.length===0){alert('Add family first');return;} let base=isTest?`📍 ZONDI Location Garankuwa\nhttps://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}`:`🚨 ZONDI SOS Garankuwa! HELP!\n📍 https://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}\n±${myLoc.accuracy}m`; family.forEach((f,i)=>{ setTimeout(()=>{ window.open(`https://wa.me/${f.phone}?text=${encodeURIComponent(base)}`,'_blank'); }, i*900); }); }
+
 let holdTimer=null, holdStart=0, sosBtn=document.getElementById('sosBtn');
-function startHold(e){ e.preventDefault(); if(myLoc && myLoc.accuracy>20){ alert(`🔴 Bad ±${myLoc.accuracy}m - Go outside Garankuwa!`); return; } holdStart=Date.now(); document.getElementById('sosStatus').innerText='Hold 2s...'; holdTimer=setInterval(()=>{ let h=(Date.now()-holdStart)/1000; if(h>=2){ clearInterval(holdTimer); triggerSOS(); } else sosBtn.innerText=Math.ceil(2-h)+'s'; },100); }
+function startHold(e){ e.preventDefault(); if(myLoc && myLoc.accuracy>20){ alert(`🔴 Bad ±${myLoc.accuracy}m - Go outside!`); return; } holdStart=Date.now(); document.getElementById('sosStatus').innerText='Hold 2s...'; holdTimer=setInterval(()=>{ let h=(Date.now()-holdStart)/1000; if(h>=2){ clearInterval(holdTimer); triggerSOS(); } else sosBtn.innerText=Math.ceil(2-h)+'s'; },100); }
 function endHold(){ clearInterval(holdTimer); if(!sos){ sosBtn.innerText='SOS'; document.getElementById('sosStatus').innerText='Ready'; } }
-async function triggerSOS(){ if(!myLoc){alert('Wait GPS');return;} if(myLoc.accuracy>15){alert(`Bad ±${myLoc.accuracy}m - need <15m`);return;} sos=true; sosBtn.classList.add('sos-active'); sosBtn.innerText='SOS!'; document.getElementById('sosStatus').innerHTML='<span style="color:#FF453A">🚨 SOS ACTIVE ±'+myLoc.accuracy+'m</span>'; let d={...myLoc, sos:true, ts:Date.now(), time:Date.now()}; await fetch('/api/sos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}); await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}); if(family.length>0) shareToAllFamily(false); alert('🚨 SOS SENT to patrol + '+family.length+' family WhatsApp!'); setTimeout(()=>{ sos=false; sosBtn.classList.remove('sos-active'); sosBtn.innerText='SOS'; document.getElementById('sosStatus').innerText='Ready'; },15000); }
+async function triggerSOS(){ if(!myLoc){alert('Wait GPS');return;} if(myLoc.accuracy>15){alert(`Bad ±${myLoc.accuracy}m - need <15m`);return;} sos=true; sosBtn.classList.add('sos-active'); sosBtn.innerText='SOS!'; document.getElementById('sosStatus').innerHTML='<span style="color:#FF453A">🚨 SOS ACTIVE ±'+myLoc.accuracy+'m</span>'; let d={...myLoc, sos:true, ts:Date.now(), time:Date.now()}; await fetch('/api/sos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}); await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}); if(family.length>0) shareToAllFamily(false); alert('🚨 SOS SENT to patrol + '+family.length+' family!'); setTimeout(()=>{ sos=false; sosBtn.classList.remove('sos-active'); sosBtn.innerText='SOS'; document.getElementById('sosStatus').innerText='Ready'; },15000); }
 sosBtn.addEventListener('touchstart',startHold,{passive:false}); sosBtn.addEventListener('touchend',endHold); sosBtn.addEventListener('mousedown',startHold); sosBtn.addEventListener('mouseup',endHold); sosBtn.addEventListener('mouseleave',endHold);
 renderFamily();
 </script>
