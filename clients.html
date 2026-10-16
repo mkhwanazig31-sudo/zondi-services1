@@ -129,13 +129,22 @@ sosBtn.addEventListener('contextmenu', e=>{ e.preventDefault(); return false; })
 function startHold(e){ e.preventDefault(); holdStart=Date.now(); document.getElementById('sosStatus').innerText='Hold 2s...'; holdTimer=setInterval(()=>{ let h=(Date.now()-holdStart)/1000; if(h>=2){ clearInterval(holdTimer); triggerSOS(); } else sosBtn.innerText=Math.ceil(2-h)+'s'; },100); }
 function endHold(){ clearInterval(holdTimer); if(!sos){ sosBtn.innerText='SOS'; document.getElementById('sosStatus').innerText='Ready - hold to activate'; } }
 async function triggerSOS(){
-  sos=true; sosBtn.classList.add('sos-active'); sosBtn.innerText='SOS!'; document.getElementById('sosStatus').innerHTML='<span style="color:#FF453A">🚨 SOS ACTIVE - All patrols alerted!</span>';
-  if(myLoc){
-    let d={...myLoc, sos:true, ts:Date.now(), time:Date.now()};
-    await fetch('/api/sos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
-    await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
-    alert('🚨 SOS SENT!');
+  if(!myLoc){
+    alert('🔴 Wait for GPS first! Go outside');
+    return;
   }
+  if(myLoc.accuracy > 15){
+    alert(`🔴 Bad accuracy ±${myLoc.accuracy}m - Go outside for accurate SOS!\nCurrent: ${myLoc.accuracy}m, need <15m`);
+    document.getElementById('accMeter').innerHTML=`<span style="color:#ef4444">⚠️ SOS blocked - accuracy ±${myLoc.accuracy}m too poor! Move outside</span>`;
+    sos=false; sosBtn.classList.remove('sos-active'); sosBtn.innerText='SOS';
+    return;
+  }
+  sos=true; sosBtn.classList.add('sos-active'); sosBtn.innerText='SOS!';
+  document.getElementById('sosStatus').innerHTML='<span style="color:#FF453A">🚨 SOS ACTIVE - ±'+myLoc.accuracy+'m</span>';
+  let d={...myLoc, sos:true, ts:Date.now(), time:Date.now()};
+  await fetch('/api/sos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  alert('🚨 SOS SENT! ±'+d.accuracy+'m - Patrol sees correct house!');
   setTimeout(()=>{ sos=false; sosBtn.classList.remove('sos-active'); sosBtn.innerText='SOS'; document.getElementById('sosStatus').innerText='Ready'; },15000);
 }
 sosBtn.addEventListener('touchstart',startHold,{passive:false});
