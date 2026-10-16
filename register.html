@@ -32,7 +32,7 @@ async function doReg(){
  localStorage.setItem('zondi_last_registered', phone);
  // ADDED: also save to KV so dev-portal can see it
  try {
-   await fetch('/api/register', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email:phone, phone:phone, role:role, name:phone})});
+   await fetch('/api/register', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email:phone, phone:phone, password:password, role:role, status:status, name:phone})});
  } catch(e) {}
  msg.style.color='green';
  if(role==='patrol'){ msg.innerText='✅ PATROL registered — Awaiting approval'; btn.innerText='Done'; btn.disabled=false; setTimeout(()=>location.href='/login',1500); }
