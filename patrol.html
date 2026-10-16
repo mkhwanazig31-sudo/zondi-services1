@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>:root{--bg:#050507;--card:#17171D;--card2:#1F1F27;--line:#272731;--blue:#2D7FF9;--gold:#E8B62A;--green:#00E676;--red:#FF453A;--muted:#8E8E93;--ink:#fff}*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:var(--bg);color:var(--ink);padding:0 0 20px;min-height:100vh;position:relative}
-body::before{content:'';position:fixed;inset:0;background:url('/logo.png') no-repeat center 40%;background-size:82% auto;opacity:.18;z-index:-2;pointer-events:none}
+body::before{content:'';position:fixed;inset:0;background:url('/logo.jpg') no-repeat center 40%;background-size:82% auto;opacity:.18;z-index:-2;pointer-events:none}
 body::after{content:'';position:fixed;inset:0;background:radial-gradient(70% 50% at 50% 35%,rgba(0,0,0,.15) 0%,rgba(5,5,7,.92) 75%);z-index:-1;pointer-events:none}
 .top{position:sticky;top:0;z-index:1000;background:rgba(11,11,15,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
 .logo{width:38px;height:38px;border-radius:10px;object-fit:cover;background:#000;border:1px solid var(--line)}
@@ -30,9 +30,9 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(70% 50%
 </style>
 <script>let role=localStorage.getItem('zondi_role');let uid=localStorage.getItem('zondi_user')||'PATROL-UNIT';if(role!=='patrol'&&role!=='dev'){location.href='/login'}</script>
 </head><body>
-<div class="top"><div style="display:flex;align-items:center;gap:10px"><img class="logo" src="/logo.png" onerror="this.src='https://via.placeholder.com/38'"><div><div style="font-weight:900;font-size:13px">ZONDI PATROL</div><div style="font-size:10px;color:var(--muted)" id="uid">UNIT</div></div></div><div style="font-size:10px;padding:6px 10px;border-radius:20px;background:#1A2A1A;color:var(--green);border:1px solid #1F3A1F"><span class="dot green"></span> ON DUTY • LIVE</div></div>
+<div class="top"><div style="display:flex;align-items:center;gap:10px"><img class="logo" src="/logo.jpg" onerror="this.src='https://via.placeholder.com/38'"><div><div style="font-weight:900;font-size:13px">ZONDI PATROL</div><div style="font-size:10px;color:var(--muted)" id="uid">UNIT</div></div></div><div style="font-size:10px;padding:6px 10px;border-radius:20px;background:#1A2A1A;color:var(--green);border:1px solid #1F3A1F"><span class="dot green"></span> ON DUTY • LIVE</div></div>
 
-<div id="view-launcher"><div style="text-align:center;padding:18px 0 6px"><img src="/logo.png" style="width:88px;height:88px;border-radius:20px;border:1px solid #2A2A35;box-shadow:0 12px 36px rgba(0,0,0,.7)" onerror="this.style.display='none'"><div style="margin-top:10px;font-weight:900;letter-spacing:1px;font-size:13px;color:#E8B62A">ZONDI PATROL SERVICE</div><small style="color:#8E8E93;font-size:10px">PROTECT • TRACE • RECOVER • BARRIER</small></div>
+<div id="view-launcher"><div style="text-align:center;padding:18px 0 6px"><img src="/logo.jpg" style="width:88px;height:88px;border-radius:20px;border:1px solid #2A2A35;box-shadow:0 12px 36px rgba(0,0,0,.7)" onerror="this.style.display='none'"><div style="margin-top:10px;font-weight:900;letter-spacing:1px;font-size:13px;color:#E8B62A">ZONDI PATROL SERVICE</div><small style="color:#8E8E93;font-size:10px">PROTECT • TRACE • RECOVER • BARRIER</small></div>
 <div class="launcher">
 <div class="app" onclick="openApp('map')"><div class="app-icon map">🗺️</div><b>Map</b></div>
 <div class="app" onclick="openApp('radio')"><div class="app-icon radio">📻</div><b>Radio</b></div>
@@ -72,7 +72,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(70% 50%
 </div></div>
 
 <div id="view-clients" style="display:none"><button class="backBtn" onclick="openApp('launcher')">← Home</button><div class="card"><b>📍 Live Clients</b><small style="color:var(--muted);display:block;margin-top:4px">🔵 Client • 🔴 SOS • Tap to navigate</small><div id="clientList" style="margin-top:12px"></div><div id="sosList" style="margin-top:12px"></div></div></div>
-<div id="view-about" style="display:none"><button class="backBtn" onclick="openApp('launcher')">← Home</button><div class="card" style="padding:0;overflow:hidden"><img src="/about.png" style="width:100%;display:block"><div style="padding:14px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><img src="/logo.png" class="logo"><b>ZONDI PATROL SERVICE</b></div><p style="color:var(--muted);font-size:12px;line-height:1.6">VIGILANT. DISCIPLINED. DEDICATED.<br>PROTECT • TRACE • RECOVER + BARRIER<br><br>📞 071 536 3253 • 074 774 3521</p></div></div></div>
+<div id="view-about" style="display:none"><button class="backBtn" onclick="openApp('launcher')">← Home</button><div class="card" style="padding:0;overflow:hidden"><img src="/about.jpg" style="width:100%;display:block"><div style="padding:14px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><img src="/logo.jpg" class="logo"><b>ZONDI PATROL SERVICE</b></div><p style="color:var(--muted);font-size:12px;line-height:1.6">VIGILANT. DISCIPLINED. DEDICATED.<br>PROTECT • TRACE • RECOVER + BARRIER<br><br>📞 071 536 3253 • 074 774 3521</p></div></div></div>
 
 <script>
 document.getElementById('uid').innerText=uid;
