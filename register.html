@@ -15,7 +15,7 @@ function normalizeKey(v){
   if(v.includes('@')) return v.toLowerCase();
   return v.replace(/\s+/g,'');
 }
-function doReg(){
+async function doReg(){
  let btn=document.getElementById('btn'); btn.innerText='Creating...'; btn.disabled=true;
  let rawPhone=document.getElementById('phone').value;
  let phone=normalizeKey(rawPhone);
@@ -29,8 +29,11 @@ function doReg(){
  let status = role==='patrol'? 'pending' : 'approved';
  users[phone]={password,role,status,client_id:'ZONDI-'+phone.slice(-4).toUpperCase(),name:phone,phone:phone,created:Date.now()};
  localStorage.setItem('zondi_users', JSON.stringify(users));
- // also set current so login remembers
  localStorage.setItem('zondi_last_registered', phone);
+ // ADDED: also save to KV so dev-portal can see it
+ try {
+   await fetch('/api/register', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email:phone, phone:phone, role:role, name:phone})});
+ } catch(e) {}
  msg.style.color='green';
  if(role==='patrol'){ msg.innerText='✅ PATROL registered — Awaiting approval'; btn.innerText='Done'; btn.disabled=false; setTimeout(()=>location.href='/login',1500); }
  else { msg.innerText='✅ Client registered — Redirecting'; setTimeout(()=>location.href='/login',800); }
