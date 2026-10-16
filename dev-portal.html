@@ -5,8 +5,6 @@
 .leaflet-top,.leaflet-bottom{z-index:400!important}
 #lockScreen{position:fixed;inset:0;z-index:9999;background:#0A0A0B;display:flex;align-items:center;justify-content:center;padding:20px}
 </style></head><body>
-
-<!-- LOCK SCREEN - PASSWORD ONLY zondi@123 -->
 <div id="lockScreen">
   <div style="background:#17171D;border:1px solid #272731;border-radius:20px;padding:24px;width:100%;max-width:360px;text-align:center">
     <div style="font-size:32px">🔒</div>
@@ -17,7 +15,6 @@
     <div id="devErr" style="color:#FF3B30;font-size:11px;margin-top:8px;display:none">Wrong password</div>
   </div>
 </div>
-
 <div class="top"><div><div style="font-weight:900">🛰️ ZONDI DASHBOARD</div><div style="font-size:10px;color:var(--muted)" id="syncStatus">Loading from server...</div></div><button class="btn blue small" onclick="logout()">Logout</button></div>
 <div class="stats"><div class="sCard"><b id="cTotal">0</b><span>CLIENTS</span></div><div class="sCard"><b id="pTotal">0</b><span>PATROLS</span></div><div class="sCard"><b id="pPending" style="color:var(--gold)">0</b><span>PENDING</span></div><div class="sCard"><b id="liveNow" style="color:var(--green)">0</b><span>LIVE</span></div></div>
 <div class="tabs"><div class="tab active" id="tab-clients" onclick="switchTab('clients')">📁 CLIENTS</div><div class="tab" id="tab-patrols" onclick="switchTab('patrols')">🚓 PATROLS</div><div class="tab" id="tab-cams" onclick="switchTab('cams')">📷 CAMS</div><div class="tab" id="tab-map" onclick="switchTab('map')">🗺️ MAP</div></div>
@@ -36,7 +33,6 @@
   <div style="margin-top:16px"><h4 style="margin:0 0 8px">🏠 Clients by Camera</h4><div class="grid" id="clientsByCam"></div></div>
 </div>
 <script>
-// LOCK LOGIC - NO EMAIL, ONLY PASSWORD zondi@123
 (function(){
   if(sessionStorage.getItem('zondi_dev_ok')==='yes'){
     document.getElementById('lockScreen').style.display='none';
@@ -51,8 +47,8 @@ function unlockDev(){
     document.getElementById('devErr').style.display='block';
   }
 }
-
 let usersData=JSON.parse(localStorage.getItem('zondi_users')||'{}');
+let pendingData=JSON.parse(localStorage.getItem('zondi_pending_cache')||'{}');
 let locData=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
 let allMap = null;
 let showMyHouse=false;
@@ -103,7 +99,16 @@ async function loadFromServer(){
     document.getElementById('syncStatus').textContent='⏳ Syncing...';
     let res = await fetch('/api/index');
     let data = await res.json();
-    if(Array.isArray(data)){
+    console.log('INDEX RAW:', data);
+    // FIXED: Handle new format {users:{}, pending:{}}
+    if(data && data.users){
+      usersData = data.users;
+      // Merge pending into cache but don't overwrite render yet
+      if(data.pending && Object.keys(data.pending).length>0){
+        pendingData = data.pending;
+        localStorage.setItem('zondi_pending_cache', JSON.stringify(pendingData));
+      }
+    } else if(Array.isArray(data)){
       let obj={};
       data.forEach(item=>{
         let phone=item.phone||item;
@@ -111,44 +116,62 @@ async function loadFromServer(){
         else obj[phone]=item;
       });
       usersData=obj;
-    } else {
+    } else if(data &&!data.users){
+      // Old format direct users object
       usersData=data;
     }
-    localStorage.setItem('zondi_users', JSON.stringify(usersData));
-    document.getElementById('syncStatus').textContent='✅ Synced: '+Object.keys(usersData).length+' users';
+    // Only save if we got real users, don't save empty over cache
+    if(Object.keys(usersData).length>0){
+      localStorage.setItem('zondi_users', JSON.stringify(usersData));
+      document.getElementById('syncStatus').textContent='✅ Synced: '+Object.keys(usersData).length+' users | '+Object.keys(pendingData).length+' pending';
+    } else {
+      document.getElementById('syncStatus').textContent='⚠️ Server empty, using cache: '+Object.keys(usersData).length+' local';
+    }
     render();
   }catch(e){
+    console.log('index fail', e);
     document.getElementById('syncStatus').textContent='⚠️ Offline: '+Object.keys(usersData).length+' local';
     render();
   }
 }
 async function loadPending(){
   try{
-    let res = await fetch('/api/pending').catch(()=> fetch('/api/get_pending'));
+    let res = await fetch('/api/pending').catch(()=> fetch('/api/get_pending')).catch(()=> fetch('/api/index'));
     if(!res ||!res.ok){ res = await fetch('/api/get_pending'); }
     let data = await res.json();
-    if(Array.isArray(data) && data.length>0){ renderPendingArray(data); }
-    else if(typeof data === 'object' && Object.keys(data).length>0){
-      let pend=document.getElementById('pending'); pend.innerHTML='';
-      Object.keys(data).forEach(k=>{
-        let u=data[k];
-        let card=document.createElement('div'); card.className='card';
-        card.innerHTML=`<b>${k}</b><small>pending • ${u.role||'patrol'}</small><br><button class="btn gold small" onclick="approvePatrol('${k}')">✓ Approve</button> <button class="btn red small" onclick="deletePatrol('${k}')">Del</button>`;
-        pend.appendChild(card);
-      });
-      document.getElementById('pPending').textContent=Object.keys(data).length;
+    console.log('PENDING RAW:', data);
+    let pendingObj = null;
+    if(Array.isArray(data)){
+      pendingObj={}; data.forEach(item=>{ pendingObj[item.phone||item]=item; });
+    } else if(data.pending){
+      pendingObj=data.pending;
+    } else if(data.users){
+      // from /api/index
+      pendingObj=data.pending||{};
+    } else {
+      pendingObj=data;
     }
-  }catch(e){}
+    // FIXED: Don't clear if empty! Keep cache to stop blinking
+    if(pendingObj && Object.keys(pendingObj).length>0){
+      pendingData = pendingObj;
+      localStorage.setItem('zondi_pending_cache', JSON.stringify(pendingData));
+    }
+    // Always render from pendingData (cached)
+    renderPending();
+  }catch(e){ console.log('pending fail', e); renderPending(); }
 }
-function renderPendingArray(arr){
-  let pend=document.getElementById('pending'); pend.innerHTML='';
-  arr.forEach(item=>{
-    let phone=item.phone||item;
+function renderPending(){
+  let pendDiv=document.getElementById('pending');
+  pendDiv.innerHTML='';
+  let keys=Object.keys(pendingData);
+  keys.forEach(k=>{
+    let u=pendingData[k];
+    if(!u) u={role:'patrol', status:'pending'};
     let card=document.createElement('div'); card.className='card';
-    card.innerHTML=`<b>${phone}</b><small>${item.role||'patrol'} • ${item.status||'pending'}</small><br><button class="btn gold small" onclick="approvePatrol('${phone}')">Approve</button>`;
-    pend.appendChild(card);
+    card.innerHTML=`<b>${k}</b><small>pending • ${u.role||'patrol'}</small><br><button class="btn gold small" onclick="approvePatrol('${k}')">✓ Approve</button> <button class="btn red small" onclick="deletePatrol('${k}')">Del</button>`;
+    pendDiv.appendChild(card);
   });
-  document.getElementById('pPending').textContent=arr.length;
+  document.getElementById('pPending').textContent=keys.length;
 }
 function switchTab(t){
   document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
@@ -222,19 +245,12 @@ function render(){
   let cSearch=(document.getElementById('searchClient').value||'').toLowerCase();
   let cDiv=document.getElementById('clients'); cDiv.innerHTML='';
   let pDiv=document.getElementById('patrols'); pDiv.innerHTML='';
-  let pend=document.getElementById('pending'); pend.innerHTML='';
-  let cCount=0,pCount=0,pendCount=0;
+  let cCount=0,pCount=0;
   Object.keys(usersData).forEach(k=>{
     let u=usersData[k]; if(!u) return;
     if(typeof u==='string') u={name:u, role:'client', status:'active'};
     if(u.role==='client') cCount++;
     if(u.role==='patrol' && u.status!=='pending') pCount++;
-    if(u.status==='pending'){
-      pendCount++;
-      let card=document.createElement('div'); card.className='card';
-      card.innerHTML=`<b>${k}</b><small>pending • ${u.role||''}</small><br><button class="btn gold small" onclick="approvePatrol('${k}')">✓ Approve</button> <button class="btn red small" onclick="deletePatrol('${k}')">Del</button>`;
-      pend.appendChild(card);
-    }
   });
   Object.keys(usersData).forEach(k=>{
     let u=usersData[k]; if(!u) return;
@@ -253,34 +269,39 @@ function render(){
   });
   document.getElementById('cTotal').textContent=cCount;
   document.getElementById('pTotal').textContent=pCount;
-  document.getElementById('pPending').textContent=pendCount;
+  // pPending handled in renderPending()
   document.getElementById('liveNow').textContent=Object.keys(locData).length;
   renderCamGrid();
 }
 async function approvePatrol(key){
   await fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})});
-  if(usersData[key]) usersData[key].status='active';
-  localStorage.setItem('zondi_users', JSON.stringify(usersData));
-  render(); loadFromServer(); loadPending();
+  if(pendingData[key]){
+    usersData[key]=pendingData[key];
+    usersData[key].status='active';
+    usersData[key].role='patrol';
+    delete pendingData[key];
+    localStorage.setItem('zondi_users', JSON.stringify(usersData));
+    localStorage.setItem('zondi_pending_cache', JSON.stringify(pendingData));
+  }
+  render(); renderPending(); loadFromServer();
 }
 async function deletePatrol(key){
   if(!confirm('Delete '+key+'?')) return;
   await fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})});
   delete usersData[key];
+  delete pendingData[key];
   localStorage.setItem('zondi_users', JSON.stringify(usersData));
-  render(); loadFromServer(); loadPending();
+  localStorage.setItem('zondi_pending_cache', JSON.stringify(pendingData));
+  render(); renderPending(); loadFromServer();
 }
 function logout(){
   sessionStorage.removeItem('zondi_dev_ok');
-  localStorage.clear();
-  location.href='/login.html';
+  location.href='/login';
 }
 function startApp(){
   loadFromServer(); loadPending(); loadLivePatrols();
-  setInterval(()=>{ loadFromServer(); loadPending(); loadLivePatrols(); }, 5000);
+  setInterval(()=>{ loadFromServer(); loadPending(); loadLivePatrols(); }, 8000);
 }
-
-// LOCK LOGIC - NO EMAIL, ONLY PASSWORD zondi@123
 (function(){
   if(sessionStorage.getItem('zondi_dev_ok')==='yes'){
     document.getElementById('lockScreen').style.display='none';
