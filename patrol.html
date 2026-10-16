@@ -101,34 +101,38 @@ function navInApp(){
   map.fitBounds(routingLine.getBounds(),{padding:[60,60]});
 }
 function upsert(e){
-  let latlng=[e.lat,e.lng]; let isSOS=!!e.sos; let color=isSOS?'#FF453A':'#2D7FF9'; let label=(e.name||e.client_id||'C').slice(0,12); let acc=e.accuracy||e.acc||'?';
-  let html=`<div class="pin ${isSOS?'sos-bounce':''}"><div class="pin-head" style="background:${color}"><span>${isSOS?'!':label.charAt(0).toUpperCase()}</span></div><div class="pin-label" style="background:${isSOS?'#FF453A':'#0B0B0F'}">${label} • ±${acc}m</div></div>`;
-  let icon=L.divIcon({html:html,className:'',iconSize:[40,56],iconAnchor:[20,48]});
-  if(!markers[e.client_id]){ markers[e.client_id]=L.marker(latlng,{icon:icon}).addTo(map).on('click',()=>{ setNavigationTarget(e.lat,e.lng,e.name||e.client_id); currentId=e.client_id; currentData=e; }); }
-  else{ markers[e.client_id].setLatLng(latlng); markers[e.client_id].setIcon(icon); }
-  markers[e.client_id].bindPopup(`<div style="font-family:Inter"><b>${isSOS?'🚨 SOS — ':''}${e.name||e.client_id}</b><br>📞 ${e.phone||''}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${acc}m<br><button onclick="setNavigationTarget(${e.lat},${e.lng},'${e.client_id}')" style="margin-top:6px;padding:6px 10px;border-radius:8px;background:#2D7FF9;color:#fff;border:none">Navigate</button></div>`);
+  if(!e ||!e.lat ||!e.lng) return;
+  // FIX undefined
+  e.client_id = e.client_id || e.phone || e.email || 'Unknown';
+  e.name = e.name || e.client_id.split('@')[0] || e.phone || 'Client';
+  e.phone = e.phone || e.email || e.client_id;
+  e.accuracy = e.accuracy || e.acc || '?';
+  // FIX Invalid Date - handle seconds and ms
+  let ts = e.ts || e.time || Date.now();
+  if(ts < 1e12) ts = ts * 1000; // seconds to ms
+  e.ts = ts;
 
-  // FIXED: Don't auto-jump! Only auto-set if NO current target, or if new SOS is newer and different
-  let isNewer = (e.ts||0) > lastSOSTime;
-  if(!currentId){
+  let latlng=[parseFloat(e.lat),parseFloat(e.lng)];
+  let isSOS=!!e.sos;
+  let color=isSOS?'#FF453A':'#2D7FF9';
+  let label=(e.name||'C').slice(0,12);
+  let html=`<div class="pin ${isSOS?'sos-bounce':''}"><div class="pin-head" style="background:${color}"><span>${isSOS?'!':label.charAt(0).toUpperCase()}</span></div><div class="pin-label" style="background:${isSOS?'#FF453A':'#0B0B0F'}">${label} • ±${e.accuracy}m</div></div>`;
+  let icon=L.divIcon({html:html,className:'',iconSize:[40,56],iconAnchor:[20,48]});
+  if(!markers[e.client_id]){
+    markers[e.client_id]=L.marker(latlng,{icon:icon}).addTo(map).on('click',()=>{
+      setNavigationTarget(e.lat,e.lng,e.name); currentId=e.client_id; currentData=e;
+    });
+  } else {
+    markers[e.client_id].setLatLng(latlng); markers[e.client_id].setIcon(icon);
+  }
+  markers[e.client_id].bindPopup(`<div style="font-family:Inter"><b>${isSOS?'🚨 SOS — ':''}${e.name}</b><br>📞 ${e.phone}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${e.accuracy}m<br><button onclick="setNavigationTarget(${e.lat},${e.lng},'${e.name}')" style="margin-top:6px;padding:6px 10px;border-radius:8px;background:#2D7FF9;color:#fff;border:none">Navigate</button></div>`);
+
+  if(!currentId || e.client_id===currentId){
+    document.getElementById('activeTitle').innerHTML=isSOS?`🚨 SOS — ${e.name}`:`📍 LIVE — ${e.name}`;
+    document.getElementById('activeClient').innerHTML=`<span class="dot ${isSOS?'red':'green'}"></span> <b>${e.phone}</b> • ${e.client_id}<br>👤 ${e.name}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${e.accuracy}m<br>🕒 ${new Date(e.ts).toLocaleTimeString()}`;
+    document.getElementById('lastUpdate').innerText=new Date(e.ts).toLocaleTimeString();
     currentId=e.client_id; currentData=e;
-    document.getElementById('activeTitle').innerHTML=e.sos?`🚨 SOS — ${e.name||e.client_id}`:`📍 LIVE — ${e.name||e.client_id}`;
-    document.getElementById('activeClient').innerHTML=`<span class="dot ${e.sos?'red':'green'}"></span> <b>${e.phone||''}</b> • ${e.client_id}<br>👤 ${e.name||''}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${acc}m<br>🕒 ${new Date(e.ts).toLocaleTimeString()}`;
-    document.getElementById('lastUpdate').innerText=new Date(e.ts).toLocaleTimeString();
-    if(e.sos){ document.getElementById('sosActions').style.display='block'; lastSOSId=e.client_id; lastSOSTime=e.ts||Date.now(); }
-  } else if(e.client_id===currentId){
-    document.getElementById('activeTitle').innerHTML=e.sos?`🚨 SOS — ${e.name||e.client_id}`:`📍 LIVE — ${e.name||e.client_id}`;
-    document.getElementById('activeClient').innerHTML=`<span class="dot ${e.sos?'red':'green'}"></span> <b>${e.phone||''}</b> • ${e.client_id}<br>👤 ${e.name||''}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${acc}m<br>🕒 ${new Date(e.ts).toLocaleTimeString()}`;
-    document.getElementById('lastUpdate').innerText=new Date(e.ts).toLocaleTimeString();
     if(follow) map.panTo(latlng,{animate:true});
-  } else if(isSOS && isNewer && e.client_id!==lastSOSId){
-    // New SOS from different client and newer than last - switch once, then stop jumping
-    currentId=e.client_id; currentData=e; lastSOSId=e.client_id; lastSOSTime=e.ts||Date.now();
-    setNavigationTarget(e.lat,e.lng,e.name||e.client_id);
-    document.getElementById('activeTitle').innerHTML=`🚨 SOS — ${e.name||e.client_id}`;
-    document.getElementById('activeClient').innerHTML=`<span class="dot red"></span> <b>${e.phone||''}</b> • ${e.client_id}<br>👤 ${e.name||''}<br>📍 SOS at ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${acc}m<br>🕒 ${new Date(e.ts).toLocaleTimeString()}`;
-    document.getElementById('sosActions').style.display='block';
-    document.getElementById('lastUpdate').innerText=new Date(e.ts).toLocaleTimeString();
   }
 }
 async function fetchLive(){
