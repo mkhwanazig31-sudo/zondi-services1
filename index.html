@@ -1,3 +1,47 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZONDI</title>
-<style>body{margin:0;background:#F9F7F2;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:Inter}.box{background:#fff;border:1px solid #EDE8E0;border-radius:24px;padding:28px;width:90%;max-width:360px;text-align:center}.btn{width:100%;padding:13px;border-radius:12px;border:none;font-weight:700;margin:8px 0;cursor:pointer}.blue{background:#2D7FF9;color:#fff}.light{background:#fff;border:1px solid #EDE8E0}</style>
-</head><body><div class="box"><h2>ZONDI</h2><p style="color:#8A857E;font-size:13px">Protection Services</p><button class="btn blue" onclick="location.href='/login'">Login</button><button class="btn light" onclick="location.href='/register'">Create Account</button></div></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ZONDI Protection Services</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F9F7F2;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:Inter,sans-serif;color:#2D2A26}
+.box{background:#fff;border:1px solid #EDE8E0;border-radius:24px;padding:28px;width:92%;max-width:380px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.04)}
+.logo{width:88px;height:88px;border-radius:20px;object-fit:cover;border:1px solid #EDE8E0;margin:0 auto 14px auto;display:block;background:#F9F7F2}
+h2{margin:0;font-size:22px;font-weight:700;letter-spacing:-0.3px}
+.sub{color:#8A857E;font-size:13px;margin:6px 0 18px 0}
+.btn{width:100%;padding:13px;border-radius:12px;border:none;font-weight:700;margin:8px 0;cursor:pointer;font-size:14px;transition:0.15s}
+.btn:active{transform:scale(0.98)}
+.blue{background:#2D7FF9;color:#fff}
+.blue:hover{background:#1E6DE8}
+.light{background:#fff;border:1px solid #EDE8E0;color:#2D2A26}
+.light:hover{background:#F9F7F2}
+.about{margin-top:22px;text-align:left;background:#F9F7F2;border-radius:16px;padding:14px;border:1px solid #EDE8E0}
+.about img{width:100%;height:148px;object-fit:cover;border-radius:12px;margin-bottom:10px;border:1px solid #EDE8E0;display:block;background:#fff}
+.about h4{margin:0 0 6px 0;font-size:14px;font-weight:700}
+.about p{margin:0;color:#8A857E;font-size:12.5px;line-height:1.5}
+.badge{display:inline-block;background:#F9F7F2;border:1px solid #EDE8E0;border-radius:20px;padding:4px 10px;font-size:11px;color:#8A857E;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="box">
+<img src="/logo.jpg" class="logo" alt="ZONDI Logo" onerror="this.src='https://via.placeholder.com/88?text=Z';">
+
+<h2>ZONDI</h2>
+<p class="sub">Protection Services • Ga-Rankuwa</p>
+
+<button class="btn blue" onclick="location.href='/login'">Login</button>
+<button class="btn light" onclick="location.href='/register'">Create Account</button>
+
+<div class="about">
+<img src="/about.jpg" alt="About ZONDI" onerror="this.style.display='none'">
+<h4>About ZONDI</h4>
+<p>ZONDI is a community patrol & SOS system for Ga-Rankuwa. One tap shares your live location with family & patrol team. Fast response, safety for all. Built for the community.</p>
+</div>
+
+<span class="badge">Secure • Local • Fast Response</span>
+</div>
+</body>
+</html>
