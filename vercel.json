@@ -3,6 +3,9 @@
     { "source": "/register", "destination": "/register.html" },
     { "source": "/login", "destination": "/login.html" },
     { "source": "/dev-portal", "destination": "/dev-portal.html" },
+    { "source": "/patrol", "destination": "/patrol.html" },
+    { "source": "/clients", "destination": "/clients.html" },
+    { "source": "/forgot-password", "destination": "/forgot-password.html" },
     { "source": "/app", "destination": "/index.html" },
     { "source": "/api/:path*", "destination": "/api/:path*" }
   ],
