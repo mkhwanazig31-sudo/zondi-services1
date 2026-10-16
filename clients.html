@@ -58,14 +58,12 @@ input{padding:12px;border-radius:12px;background:#0B0B0F;border:1px solid var(--
 </div>
 
 <script>
-// --- NO CRASH GUARANTEED ---
 let phone = localStorage.getItem('zondi_user')||'mkhwanazi1000@gmail.com';
 try{document.getElementById('userLabel').innerText=phone.split('@')[0]}catch(e){}
 try{document.getElementById('profileInfo').innerHTML='Phone: '+phone+'<br>Garankuwa • Tracked'}catch(e){}
 
 let myLoc=null, samples=[], bestAcc=Infinity;
 
-// TABS - GLOBAL
 window.switchTab=function(t){
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   document.querySelector(`.tab[data-tab="${t}"]`).classList.add('active');
@@ -74,7 +72,6 @@ window.switchTab=function(t){
   document.getElementById('view-profile').style.display=t==='profile'?'block':'none';
 };
 
-// FAMILY - WORKS WITHOUT GPS!
 let family=[];
 try{ family=JSON.parse(localStorage.getItem('zondi_family')||'[]'); }catch(e){ family=[]; }
 
@@ -107,25 +104,46 @@ window.addFamily=function(){
 };
 
 window.removeFam=function(id){ family=family.filter(f=>f.id!==id); saveFamily(); };
-window.shareToOne=function(p){
-  if(!myLoc){ alert('⚠️ Waiting GPS - go outside! But opening WhatsApp anyway');
-    window.open(`https://wa.me/${p}?text=${encodeURIComponent('🚨 ZONDI SOS Garankuwa! Help! - '+phone)}`,'_blank'); return; }
+
+window.shareToOne=async function(p){
+  if(!myLoc){ alert('⚠️ Waiting GPS - go outside!'); return; }
+  try{
+    let r=await fetch('/api/notify-family',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({family:[{phone:p}], lat:myLoc.lat, lng:myLoc.lng, accuracy:myLoc.accuracy, phone:phone, test:true})});
+    let j=await r.json();
+    if(j.ok){ alert('✅ Auto-sent to '+p); return; }
+  }catch(e){}
   let msg=`🚨 ZONDI SOS Garankuwa from ${phone.split('@')[0]}! HELP!\n📍 https://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}\n±${myLoc.accuracy}m`;
   window.open(`https://wa.me/${p}?text=${encodeURIComponent(msg)}`,'_blank');
 };
-window.shareToAllFamily=function(){
+
+// --- NEW AUTO-SEND - NO CHOOSING! ---
+window.shareToAllFamily=async function(isTest=false){
   if(family.length===0){ alert('Add family first!'); return; }
-  if(!myLoc){ alert('GPS not ready - go outside!'); }
-  let base=myLoc?`🚨 ZONDI SOS Garankuwa!\n📍 https://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}\n±${myLoc.accuracy}m`:`🚨 ZONDI SOS Garankuwa! HELP! ${phone}`;
-  family.forEach((f,i)=>{ setTimeout(()=>{ window.open(`https://wa.me/${f.phone}?text=${encodeURIComponent(base)}`,'_blank'); }, i*800); });
+  if(!myLoc){ alert('GPS not ready - go outside!'); return; }
+  document.getElementById('sendAllBtn').innerText='⏳ Auto-sending...';
+  try{
+    let payload={ family:family, lat:myLoc.lat, lng:myLoc.lng, accuracy:myLoc.accuracy, phone:phone, test:isTest };
+    let r=await fetch('/api/notify-family',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    let j=await r.json();
+    if(j.ok){
+      alert('✅ AUTO-SENT to '+family.length+' family! No choosing needed!\n'+j.message);
+      document.getElementById('sendAllBtn').innerText='📍 Send Location to ALL Family (WhatsApp)';
+      return;
+    } else { throw new Error(j.error); }
+  }catch(e){
+    console.log('Fallback wa.me', e);
+    document.getElementById('sendAllBtn').innerText='📍 Send Location to ALL Family (WhatsApp)';
+    // Fallback if UltraMsg not set yet
+    let base=isTest?`📍 ZONDI Location\nhttps://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}`:`🚨 ZONDI SOS Garankuwa! HELP!\n📍 https://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}\n±${myLoc.accuracy}m`;
+    family.forEach((f,i)=>{ setTimeout(()=>{ window.open(`https://wa.me/${f.phone}?text=${encodeURIComponent(base)}`,'_blank'); }, i*800); });
+  }
 };
 
-// BUTTONS - ATTACH AFTER LOAD
 setTimeout(()=>{
   let addBtn=document.getElementById('addFamBtn');
   if(addBtn) addBtn.addEventListener('click', window.addFamily);
   let sendAll=document.getElementById('sendAllBtn');
-  if(sendAll) sendAll.addEventListener('click', window.shareToAllFamily);
+  if(sendAll) sendAll.addEventListener('click', ()=>window.shareToAllFamily(true));
   let callBtn=document.getElementById('callBtn');
   if(callBtn) callBtn.addEventListener('click', ()=>{ window.location.href='tel:10111'; });
   let shareBtn=document.getElementById('shareBtn');
@@ -136,7 +154,6 @@ setTimeout(()=>{
   renderFamily();
 }, 200);
 
-// GPS - TRY BUT DON'T CRASH
 if(navigator.geolocation){
   navigator.geolocation.watchPosition((pos)=>{
     try{
@@ -153,14 +170,13 @@ if(navigator.geolocation){
       let dbg=document.getElementById('debugLoc');
       if(dbg) dbg.innerHTML=`📍 ${aLat.toFixed(6)}, ${aLng.toFixed(6)} ±${aAcc.toFixed(1)}m`;
       fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...myLoc, email:phone, client_id:phone, name:phone.split('@')[0]})}).catch(()=>{});
-    }catch(e){ console.log(e); }
+    }catch(e){}
   }, (e)=>{
     let meter=document.getElementById('accMeter');
     if(meter) meter.innerHTML=`🔴 GPS Error: ${e.message}<br>Allow location permission!`;
   }, {enableHighAccuracy:true, maximumAge:0, timeout:30000});
 }
 
-// SOS
 let holdTimer=null, sosBtn=document.getElementById('sosBtn');
 if(sosBtn){
   function startHold(e){
@@ -175,7 +191,7 @@ if(sosBtn){
     document.getElementById('sosStatus').innerHTML='🚨 SOS ACTIVE!';
     let d={...myLoc, sos:true, ts:Date.now(), time:Date.now(), phone:phone, email:phone};
     try{ await fetch('/api/sos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}); }catch(e){}
-    shareToAllFamily();
+    await window.shareToAllFamily(false);
     alert('🚨 SOS SENT!');
   }
   sosBtn.addEventListener('touchstart', startHold, {passive:false});
