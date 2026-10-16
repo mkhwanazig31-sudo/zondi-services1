@@ -28,14 +28,12 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Methods','POST, OPTIONS, GET')
         self.send_header('Access-Control-Allow-Headers','Content-Type')
         self.end_headers()
-
     def do_GET(self):
         self.send_response(200)
         self.send_header('Content-type','application/json')
         self.send_header('Access-Control-Allow-Origin','*')
         self.end_headers()
         self.wfile.write(b'{"ok":true,"msg":"use POST"}')
-
     def do_POST(self):
         self.send_response(200)
         self.send_header('Content-type','application/json')
@@ -51,7 +49,6 @@ class handler(BaseHTTPRequestHandler):
             if not key:
                 self.wfile.write(b'{"ok":false,"error":"no email/phone"}')
                 return
-
             if 'patrol' in role or 'guard' in role:
                 pending = _get("pending")
                 pending[key] = {"phone":key,"email":key,"role":"patrol","status":"pending","name":name}
@@ -60,7 +57,6 @@ class handler(BaseHTTPRequestHandler):
                 users = _get("users")
                 users[key] = {"phone":key,"email":key,"role":"client","status":"active","name":name}
                 _set("users", users)
-
             self.wfile.write(b'{"ok":true}')
         except Exception as e:
             print(e)
