@@ -14,10 +14,9 @@
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}.green{background:var(--green);box-shadow:0 0 10px var(--green)}.red{background:var(--red);box-shadow:0 0 10px var(--red)}
 .pin{width:36px;height:48px;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 6px 12px rgba(0,0,0,.8))}
 .pin-head{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2px solid #fff;color:#fff;font-weight:900;font-size:13px}
-.pin-head span{transform:rotate(45deg)} .pin-label{background:#0B0B0F;color:#fff;padding:4px 8px;border-radius:10px;font-size:9px;font-weight:800;border:1px solid #2A2A2A;white-space:nowrap;margin-top:4px}
+.pin-head span{transform:rotate(45deg)}.pin-label{background:#0B0B0F;color:#fff;padding:4px 8px;border-radius:10px;font-size:9px;font-weight:800;border:1px solid #2A2A2A;white-space:nowrap;margin-top:4px}
 .sos-bounce{animation:bounce 0.7s infinite} @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 .btn{padding:12px 16px;border-radius:14px;border:none;font-weight:800;cursor:pointer}.blue{background:var(--blue);color:#fff}.gray{background:var(--card2);color:#fff;border:1px solid var(--line)}
-/* ZONDI APP GRID - TECNO STYLE */
 .app-drawer{position:fixed;inset:0;z-index:5000;background:rgba(8,8,10,.98);backdrop-filter:blur(30px);display:none;flex-direction:column;padding:20px 16px 100px;overflow-y:auto}
 .app-drawer.open{display:flex}
 .drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
@@ -43,12 +42,12 @@
 <button class="fab" id="locateBtn" style="top:12px;right:12px;background:#17171D;color:#fff;border:1px solid #333" onclick="locateMe()">🎯 Me</button>
 <button class="fab" id="zoomInBtn" style="top:120px;right:12px;bottom:auto">➕</button>
 <button class="fab" id="zoomOutBtn" style="top:160px;right:12px;bottom:auto">➖</button>
-<div id="targetInfo" style="position:absolute;top:12px;left:12px;right:12px;z-index:1000;background:#15151A;border:1px solid #272731;border-radius:14px;padding:10px;display:none"><b id="targetName">Target</b><br><small id="targetDist" style="color:#8E8E93">Calculating...</small></div>
+<div id="targetInfo" style="position:absolute;top:50px;left:12px;right:12px;z-index:1000;background:#15151A;border:1px solid #272731;border-radius:14px;padding:10px;display:none"><b id="targetName">Target</b><br><small id="targetDist" style="color:#8E8E93">Calculating...</small><button onclick="clearTarget()" style="float:right;background:#FF453A;color:#fff;border:none;border-radius:8px;padding:4px 8px;font-size:10px">✕ Clear</button></div>
 <div id="navBar" style="position:absolute;bottom:14px;left:12px;right:12px;z-index:1000;display:flex;gap:8px"><button class="btn blue" style="flex:1" onclick="navGoogle()">🗺️ Google</button><button class="btn gray" style="flex:1;background:#33CCFF;color:#000" onclick="navWaze()">🚗 Waze</button><button class="btn gray" style="flex:1" onclick="navInApp()">📍 Route</button></div>
 </div>
-<div class="card"><div style="display:flex;justify-content:space-between"><b id="activeTitle">Active Tracking</b><span style="font-size:11px;color:var(--muted)" id="lastUpdate">--</span></div><div id="activeClient" style="margin-top:8px;font-size:13px;color:var(--muted)">📡 Waiting for client location...</div></div></div>
+<div class="card"><div style="display:flex;justify-content:space-between"><b id="activeTitle">Active Tracking</b><span style="font-size:11px;color:var(--muted)" id="lastUpdate">--</span></div><div id="activeClient" style="margin-top:8px;font-size:13px;color:var(--muted)">📡 Waiting for client location...</div><div id="sosActions" style="display:none;margin-top:10px"><button class="btn blue" style="width:100%" onclick="resolveSOS()">✅ Resolve SOS - Clear Alert</button></div></div></div>
 
-<div id="view-clients" style="display:none"><div class="card"><b>📍 Live Clients</b><small style="color:var(--muted);display:block;margin-top:4px">🔵 Client • 🔴 SOS • Tap to navigate</small><div id="clientList" style="margin-top:12px"></div></div></div>
+<div id="view-clients" style="display:none"><div class="card"><b>📍 Live Clients</b><small style="color:var(--muted);display:block;margin-top:4px">🔵 Client • 🔴 SOS • Tap to navigate</small><div id="clientList" style="margin-top:12px"></div><div id="sosList" style="margin-top:12px"></div></div></div>
 <div id="view-about" style="display:none"><div class="card" style="padding:0;overflow:hidden"><img src="/about.png" style="width:100%;display:block"><div style="padding:14px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><img src="/logo.png" class="logo"><b>ZONDI PATROL SERVICE</b></div><p style="color:var(--muted);font-size:12px;line-height:1.6">VIGILANT. DISCIPLINED. DEDICATED.<br>YOUR SAFETY IS OUR MISSION<br><br>📞 071 536 3253 • 074 774 3521</p></div></div></div>
 <div class="tabs"><div class="tab active" id="tab-map" onclick="switchTab('map',this)"><b>🗺️</b>MAP</div><div class="tab" onclick="switchTab('clients',this)"><b>📍</b>CLIENTS</div><div class="tab" onclick="switchTab('about',this)"><b>🦁</b>ABOUT</div></div>
 
@@ -58,16 +57,12 @@ let map=L.map('map',{zoomControl:false}).setView([-25.7479,28.2293],18);
 L.control.zoom({position:'bottomright'}).addTo(map);
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:22,opacity:.85}).addTo(map);
-let markers={}, currentId=null, currentData=null, follow=true, myLoc=null;
+let markers={}, currentId=null, currentData=null, follow=true, myLoc=null, lastSOSId=null, lastSOSTime=0;
 let saved=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
 function saveCache(l){Object.assign(saved,l);localStorage.setItem('zondi_patrol_cache',JSON.stringify(saved));}
 map.on('dragstart',()=>{follow=false;document.getElementById('followBtn').innerText='📍 Follow: OFF';});
 document.getElementById('followBtn').onclick=()=>{follow=true;document.getElementById('followBtn').innerText='📍 Follow: ON'; if(currentData) map.setView([currentData.lat,currentData.lng],20);};
-
-// PATROL GPS FOR NAVIGATION
 navigator.geolocation.watchPosition(p=>{myLoc={lat:p.coords.latitude,lng:p.coords.longitude};},null,{enableHighAccuracy:true});
-
-// --- NAVIGATION SYSTEM ---
 let activeTarget=null, routingLine=null;
 function getDistance(lat1,lon1,lat2,lon2){const R=6371;const dLat=(lat2-lat1)*Math.PI/180;const dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
 function setNavigationTarget(lat,lng,name='Client'){
@@ -78,30 +73,33 @@ function setNavigationTarget(lat,lng,name='Client'){
   else document.getElementById('targetDist').innerText=`📍 ${lat.toFixed(6)}, ${lng.toFixed(6)} • Tap Google/Waze to navigate`;
   navInApp();
 }
-  function locateMe(){
+function clearTarget(){
+  activeTarget=null;
+  document.getElementById('targetInfo').style.display='none';
+  if(routingLine){ map.removeLayer(routingLine); routingLine=null; }
+  currentId=null; currentData=null;
+  document.getElementById('activeTitle').innerText='Active Tracking';
+  document.getElementById('activeClient').innerHTML='📡 No target - tap a client';
+  document.getElementById('sosActions').style.display='none';
+}
+function locateMe(){
   if(!myLoc) return alert('Waiting for your GPS...');
   follow=true;
   document.getElementById('followBtn').innerText='📍 Follow: ON';
   map.setView([myLoc.lat,myLoc.lng],19,{animate:true});
 }
-
-// Zoom buttons
 document.getElementById('zoomInBtn').onclick = ()=> map.zoomIn();
 document.getElementById('zoomOutBtn').onclick = ()=> map.zoomOut();
-
-// Also fix locateMe on load
 setTimeout(locateMe, 2000);
-  
 function navGoogle(){ if(!activeTarget) return alert('Tap a client first'); window.open(`https://www.google.com/maps/dir/?api=1&destination=${activeTarget.lat},${activeTarget.lng}&travelmode=driving`,'_blank'); }
 function navWaze(){ if(!activeTarget) return alert('Tap a client first'); window.open(`https://waze.com/ul?ll=${activeTarget.lat},${activeTarget.lng}&navigate=yes`,'_blank'); }
 function navInApp(){
   if(!activeTarget) return;
   if(routingLine) map.removeLayer(routingLine);
-  let start = myLoc ? [myLoc.lat,myLoc.lng] : [activeTarget.lat, activeTarget.lng];
+  let start = myLoc? [myLoc.lat,myLoc.lng] : [activeTarget.lat, activeTarget.lng];
   routingLine = L.polyline([start,[activeTarget.lat,activeTarget.lng]],{color:'#2D7FF9',weight:5,dashArray:'10,10'}).addTo(map);
   map.fitBounds(routingLine.getBounds(),{padding:[60,60]});
 }
-
 function upsert(e){
   let latlng=[e.lat,e.lng]; let isSOS=!!e.sos; let color=isSOS?'#FF453A':'#2D7FF9'; let label=(e.name||e.client_id||'C').slice(0,12); let acc=e.accuracy||e.acc||'?';
   let html=`<div class="pin ${isSOS?'sos-bounce':''}"><div class="pin-head" style="background:${color}"><span>${isSOS?'!':label.charAt(0).toUpperCase()}</span></div><div class="pin-label" style="background:${isSOS?'#FF453A':'#0B0B0F'}">${label} • ±${acc}m</div></div>`;
@@ -109,47 +107,125 @@ function upsert(e){
   if(!markers[e.client_id]){ markers[e.client_id]=L.marker(latlng,{icon:icon}).addTo(map).on('click',()=>{ setNavigationTarget(e.lat,e.lng,e.name||e.client_id); currentId=e.client_id; currentData=e; }); }
   else{ markers[e.client_id].setLatLng(latlng); markers[e.client_id].setIcon(icon); }
   markers[e.client_id].bindPopup(`<div style="font-family:Inter"><b>${isSOS?'🚨 SOS — ':''}${e.name||e.client_id}</b><br>📞 ${e.phone||''}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${acc}m<br><button onclick="setNavigationTarget(${e.lat},${e.lng},'${e.client_id}')" style="margin-top:6px;padding:6px 10px;border-radius:8px;background:#2D7FF9;color:#fff;border:none">Navigate</button></div>`);
-  if(!currentId || (isSOS && e.client_id!==currentId)){ currentId=e.client_id; currentData=e; setNavigationTarget(e.lat,e.lng,e.name||e.client_id); }
-  if(e.client_id===currentId){
+
+  // FIXED: Don't auto-jump! Only auto-set if NO current target, or if new SOS is newer and different
+  let isNewer = (e.ts||0) > lastSOSTime;
+  if(!currentId){
+    currentId=e.client_id; currentData=e;
+    document.getElementById('activeTitle').innerHTML=e.sos?`🚨 SOS — ${e.name||e.client_id}`:`📍 LIVE — ${e.name||e.client_id}`;
+    document.getElementById('activeClient').innerHTML=`<span class="dot ${e.sos?'red':'green'}"></span> <b>${e.phone||''}</b> • ${e.client_id}<br>👤 ${e.name||''}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${acc}m<br>🕒 ${new Date(e.ts).toLocaleTimeString()}`;
+    document.getElementById('lastUpdate').innerText=new Date(e.ts).toLocaleTimeString();
+    if(e.sos){ document.getElementById('sosActions').style.display='block'; lastSOSId=e.client_id; lastSOSTime=e.ts||Date.now(); }
+  } else if(e.client_id===currentId){
     document.getElementById('activeTitle').innerHTML=e.sos?`🚨 SOS — ${e.name||e.client_id}`:`📍 LIVE — ${e.name||e.client_id}`;
     document.getElementById('activeClient').innerHTML=`<span class="dot ${e.sos?'red':'green'}"></span> <b>${e.phone||''}</b> • ${e.client_id}<br>👤 ${e.name||''}<br>📍 ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${acc}m<br>🕒 ${new Date(e.ts).toLocaleTimeString()}`;
     document.getElementById('lastUpdate').innerText=new Date(e.ts).toLocaleTimeString();
     if(follow) map.panTo(latlng,{animate:true});
+  } else if(isSOS && isNewer && e.client_id!==lastSOSId){
+    // New SOS from different client and newer than last - switch once, then stop jumping
+    currentId=e.client_id; currentData=e; lastSOSId=e.client_id; lastSOSTime=e.ts||Date.now();
+    setNavigationTarget(e.lat,e.lng,e.name||e.client_id);
+    document.getElementById('activeTitle').innerHTML=`🚨 SOS — ${e.name||e.client_id}`;
+    document.getElementById('activeClient').innerHTML=`<span class="dot red"></span> <b>${e.phone||''}</b> • ${e.client_id}<br>👤 ${e.name||''}<br>📍 SOS at ${e.lat.toFixed(7)}, ${e.lng.toFixed(7)}<br>🎯 ±${acc}m<br>🕒 ${new Date(e.ts).toLocaleTimeString()}`;
+    document.getElementById('sosActions').style.display='block';
+    document.getElementById('lastUpdate').innerText=new Date(e.ts).toLocaleTimeString();
   }
 }
 async function fetchLive(){
   try{
     let r=await fetch('/api/location');
     let locs=await r.json();
-    console.log('LIVE FROM SERVER:', locs);
-
-    // merge local last loc
     let local=localStorage.getItem('zondi_last_loc');
     if(local){
       try{ let j=JSON.parse(local); if(j.client_id) locs[j.client_id]=j; }catch(e){}
     }
-
     saveCache(locs);
     let all=Object.keys(locs).length? locs : saved;
     let entries=Object.values(all).sort((a,b)=> (b.ts||0)-(a.ts||0));
-
     let list=document.getElementById('clientList');
     list.innerHTML='';
-
     if(entries.length===0){
       list.innerHTML='<div style="color:#8E8E93;font-size:12px;padding:12px">No live clients yet. Clients must open app and share location.</div>';
-      document.getElementById('activeClient').innerHTML='📡 Waiting for client location...<br><small>Server returned 0. Check /api/location</small>';
+      if(!currentId) document.getElementById('activeClient').innerHTML='📡 Waiting for client location...';
       return;
     }
-
     entries.forEach(e=>{
       if(!e.lat ||!e.lng) return;
+      if(e.sos) return; // SOS handled separately
       upsert(e);
-      list.innerHTML+=`<div class="listItem" onclick="setNavigationTarget(${e.lat},${e.lng},'${e.name||e.client_id}');currentId='${e.client_id}';currentData={lat:${e.lat},lng:${e.lng}};follow=true;map.setView([${e.lat},${e.lng}],20);switchTab('map',document.getElementById('tab-map'))"><div><b>${e.sos?'🚨':'📍'} ${e.name||e.client_id}</b><br><small style="color:var(--muted)">${e.phone||''} • ±${e.accuracy||e.acc||'?'}m ${e.sos?'• SOS':''}</small></div><span class="dot ${e.sos?'red':'green'}"></span></div>`;
+      list.innerHTML+=`<div class="listItem" onclick="setNavigationTarget(${e.lat},${e.lng},'${e.name||e.client_id}');currentId='${e.client_id}';currentData={lat:${e.lat},lng:${e.lng}};follow=true;map.setView([${e.lat},${e.lng}],20);switchTab('map',document.getElementById('tab-map'))"><div><b>📍 ${e.name||e.client_id}</b><br><small style="color:var(--muted)">${e.phone||''} • ±${e.accuracy||e.acc||'?'}m</small></div><span class="dot green"></span></div>`;
     });
   }catch(e){
     console.log('fetchLive error', e);
-    document.getElementById('clientList').innerHTML='<div style="color:#FF453A">Error fetching /api/location - '+e+'</div>';
   }
 }
-</script></body></html>
+async function fetchSOS(){
+  try{
+    let r=await fetch('/api/sos');
+    let alerts=await r.json();
+    if(!Array.isArray(alerts)) alerts = alerts? Object.values(alerts) : [];
+    // FIXED: Filter old SOS >15 min, and only show newest per client to stop jumping
+    let now = Date.now()/1000;
+    alerts = alerts.filter(a=>{
+      let ts = a.ts || a.time || 0;
+      if(typeof ts === 'string') ts = parseFloat(ts) || 0;
+      // Keep if within 15 min (900 sec) or if no ts (show for 5 min)
+      return (now - ts) < 900 || ts===0;
+    });
+    // Deduplicate - keep newest per phone
+    let byPhone={};
+    alerts.forEach(a=>{
+      let phone = (a.phone||a.email||'').toLowerCase();
+      if(!byPhone[phone] || (a.ts||0) > (byPhone[phone].ts||0)){
+        byPhone[phone]=a;
+      }
+    });
+    let unique = Object.values(byPhone).sort((a,b)=>(b.ts||0)-(a.ts||0));
+    // Only show max 1 SOS at a time to prevent jumping
+    let sosDiv=document.getElementById('sosList');
+    sosDiv.innerHTML='';
+    if(unique.length===0){
+      if(document.getElementById('activeTitle').innerText.includes('SOS')){
+        // If SOS expired, clear active
+        if((now - lastSOSTime) > 900){
+          clearTarget();
+          document.getElementById('activeClient').innerHTML='✅ All clear - No active SOS';
+        }
+      }
+      return;
+    }
+    let latest = unique[0];
+    latest.sos=true;
+    // Show banner for latest SOS only
+    sosDiv.innerHTML=`<div style="background:#FF453A;color:#fff;border-radius:14px;padding:12px;margin:8px 0"><b>🚨 SOS ACTIVE - ${latest.name||latest.phone||latest.client_id}</b><br><small>${latest.phone||''} • ${new Date((latest.ts||0)*1000).toLocaleTimeString()}</small><br><button class="btn blue" style="margin-top:8px;width:100%" onclick="setNavigationTarget(${latest.lat},${latest.lng},'${latest.name||latest.client_id}');currentId='${latest.phone||latest.client_id}';follow=true;map.setView([${latest.lat},${latest.lng}],19)">🎯 Navigate to SOS</button></div>`;
+
+    // Auto-set navigation to latest SOS only if no current target or newer than last
+    if(!currentId || (latest.ts||0) > lastSOSTime){
+      upsert({...latest, client_id: latest.phone||latest.client_id||latest.email, lat: parseFloat(latest.lat), lng: parseFloat(latest.lng), ts: (latest.ts||0)*1000 });
+    }
+  }catch(e){ console.log('fetchSOS error', e); }
+}
+async function resolveSOS(){
+  if(!currentId &&!lastSOSId) return;
+  let phone = currentId || lastSOSId;
+  try{
+    await fetch('/api/sos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'clear', phone: phone})});
+    clearTarget();
+    document.getElementById('activeClient').innerHTML='✅ SOS Resolved - Alert cleared';
+    lastSOSId=null; lastSOSTime=0;
+    fetchSOS();
+  }catch(e){ alert('Failed to clear: '+e); }
+}
+function switchTab(t,el){
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
+  if(el) el.classList.add('active');
+  else document.getElementById('tab-'+t).classList.add('active');
+  document.getElementById('view-map').style.display=t==='map'?'block':'none';
+  document.getElementById('view-clients').style.display=t==='clients'?'block':'none';
+  document.getElementById('view-about').style.display=t==='about'?'block':'none';
+  if(t==='map') setTimeout(()=>map.invalidateSize(),300);
+}
+setInterval(()=>{ fetchLive(); fetchSOS(); }, 4000);
+fetchLive(); fetchSOS();
+</script>
+</body></html>
