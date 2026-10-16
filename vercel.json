@@ -1,7 +1,10 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/register", "destination": "/register.html" },
     { "source": "/login", "destination": "/login.html" },
-    { "source": "/dev-portal", "destination": "/dev-portal.html" }
-  ]
+    { "source": "/dev-portal", "destination": "/dev-portal.html" },
+    { "source": "/app", "destination": "/index.html" },
+    { "source": "/api/:path*", "destination": "/api/:path*" }
+  ],
+  "cleanUrls": true
 }
