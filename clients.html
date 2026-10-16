@@ -73,29 +73,101 @@ function shareLocation(){
   let btn=document.getElementById('shareBtn');
   if(btn) btn.textContent='🛰️ Hunting 1-2m...';
 
-  liveWatchId = navigator.geolocation.watchPosition((pos)=>{
+ let samples=[], bestAcc=Infinity, myMarker=null, myLoc=null;
+let liveWatchId = navigator.geolocation.watchPosition((pos)=>{
     let acc=pos.coords.accuracy, lat=pos.coords.latitude, lng=pos.coords.longitude;
-    if(acc<20){ samples.push({lat,lng,acc}); if(samples.length>10) samples.shift(); }
-    if(acc<bestAcc) bestAcc=acc;
-    let avgLat=samples.reduce((s,p)=>s+p.lat,0)/samples.length||lat;
-    let avgLng=samples.reduce((s,p)=>s+p.lng,0)/samples.length||lng;
-    let avgAcc=samples.reduce((s,p)=>s+p.acc,0)/samples.length||acc;
+
+    // FIX 1: Only keep GOOD samples <10m, not <20m! Fixes wrong location
+    if(acc <= 10){
+      samples.push({lat,lng,acc, t: Date.now()});
+      // Keep only last 5 best samples, sorted by accuracy
+      samples.sort((a,b)=>a.acc - b.acc);
+      samples = samples.slice(0,5);
+    }
+    if(acc < bestAcc) bestAcc = acc;
+
+    // FIX 2: Weighted average - best accuracy counts more, not simple average!
+    if(samples.length === 0){
+      // No good sample yet, use current if <15m only
+      if(acc > 15) return; // Skip bad readings - stops wrong house
+      samples = [{lat,lng,acc}];
+    }
+
+    // Weighted by 1/acc - more accurate = more weight
+    let totalWeight=0, avgLat=0, avgLng=0, avgAcc=0;
+    samples.forEach(p=>{
+      let w = 1 / (p.acc || 1);
+      totalWeight += w;
+      avgLat += p.lat * w;
+      avgLng += p.lng * w;
+      avgAcc += p.acc * w;
+    });
+    avgLat /= totalWeight;
+    avgLng /= totalWeight;
+    avgAcc /= totalWeight;
+
+    // FIX 3: Don't move map every time! Only first time or Follow ON
+    if(typeof follow === 'undefined' || follow){
+      map.setView([avgLat,avgLng], 19, {animate: true});
+    }
+
     lastPos={coords:{latitude:avgLat,longitude:avgLng,accuracy:avgAcc}};
-    myLoc={lat:avgLat,lng:avgLng,accuracy:Math.round(avgAcc),ts:Date.now(),phone:phone,client_id:clientId,sos:sos};
+    myLoc={
+      lat: avgLat,
+      lng: avgLng,
+      accuracy: Math.round(avgAcc*10)/10,
+      acc: Math.round(avgAcc*10)/10,
+      ts: Date.now(), // ms, not seconds! Fixes Invalid Date
+      time: Date.now(),
+      phone: phone || localStorage.getItem('zondi_user'),
+      email: phone || localStorage.getItem('zondi_user'),
+      client_id: clientId || phone || localStorage.getItem('zondi_user'),
+      name: (phone || localStorage.getItem('zondi_user') || 'Client').split('@')[0], // Fixes undefined!
+      sos:!!sos
+    };
 
-    map.setView([avgLat,avgLng],19);
     if(myMarker) map.removeLayer(myMarker);
-    myMarker=L.circleMarker([avgLat,avgLng],{radius:acc<=3?5:10,color:acc<=3?'#00E676':'#FFD60A',fillColor:acc<=3?'#00E676':'#FFD60A',fillOpacity:0.9}).addTo(map);
+    myMarker=L.circleMarker([avgLat,avgLng],{
+      radius: avgAcc<=3?6: avgAcc<=6?8:10,
+      color: avgAcc<=3?'#00E676': avgAcc<=6?'#FFD60A':'#FF453A',
+      fillColor: avgAcc<=3?'#00E676': avgAcc<=6?'#FFD60A':'#FF453A',
+      fillOpacity:0.9,
+      weight:2
+    }).addTo(map).bindPopup(`You • ±${avgAcc.toFixed(1)}m`);
 
-    fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(myLoc)}).catch(()=>{});
-    localStorage.setItem('myLivePayload',JSON.stringify(myLoc));
-    if(btn) btn.textContent=`🟢 ${avgAcc.toFixed(1)}m • Best ${Math.round(bestAcc)}m`;
+    // FIX 4: Only send to server if accuracy <15m - prevents wrong location on patrol!
+    if(avgAcc <= 15){
+      fetch('/api/location',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(myLoc)
+      }).catch(()=>{});
+      localStorage.setItem('myLivePayload',JSON.stringify(myLoc));
+      localStorage.setItem('zondi_last_loc', JSON.stringify(myLoc));
+    }
+
+    if(btn) btn.textContent=`${avgAcc<=3?'🟢': avgAcc<=6?'🟡':'🔴'} ${avgAcc.toFixed(1)}m • Best ${Math.round(bestAcc)}m`;
 
     let el=document.getElementById('accMeter');
-    if(el){ el.innerHTML=`📡 Accuracy: <b style="color:${avgAcc<=3?'#22c55e':avgAcc<=6?'#facc15':'#ef4444'}">${avgAcc.toFixed(1)}m</b><br><small>Best: ${Math.round(bestAcc)}m | Samples: ${samples.length}/10</small><br><div style="height:6px;background:#27272a;border-radius:10px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.max(10,100-avgAcc*5)}%;background:${avgAcc<=3?'#22c55e':'#facc15'}"></div></div><small>${avgAcc<=2.5?'✅ 1-2m LOCKED - correct house':avgAcc<=5?'🟡 Almost there - stay outside':'🔴 Move outside for better signal'}</small>`; }
+    if(el){
+      el.innerHTML=`📡 Accuracy: <b style="color:${avgAcc<=3?'#22c55e':avgAcc<=6?'#facc15':'#ef4444'}">${avgAcc.toFixed(1)}m</b><br>
+      <small>Best: ${Math.round(bestAcc)}m | Samples: ${samples.length}/5 (good <10m only)</small><br>
+      <div style="height:6px;background:#27272a;border-radius:10px;margin-top:6px;overflow:hidden">
+        <div style="height:100%;width:${Math.max(10,100-avgAcc*8)}%;background:${avgAcc<=3?'#22c55e': avgAcc<=6?'#facc15':'#ef4444'}"></div>
+      </div>
+      <small>${avgAcc<=2.5?'✅ 1-2m LOCKED - correct house!':avgAcc<=5?'🟡 Good - stay still 10sec':'🔴 Move outside, hold phone high'}</small>`;
+    }
 
-  },e=>alert(e.message),{enableHighAccuracy:true,maximumAge:0,timeout:30000});
-}
+  }, e=>{
+    console.log('GPS error', e);
+    // Don't alert every time - just log
+    let el=document.getElementById('accMeter');
+    if(el) el.innerHTML=`🔴 GPS Error: ${e.message}<br><small>Enable location + go outside</small>`;
+  },{
+    enableHighAccuracy:true,
+    maximumAge:0,
+    timeout:30000
+  });
 
 function centerMe(){ if(myLoc) map.setView([myLoc.lat,myLoc.lng],19); else if(lastPos) map.setView([lastPos.coords.latitude,lastPos.coords.longitude],19); }
 
