@@ -1,36 +1,18 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>ZONDI - Client</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root{--bg:#0B0B0F;--card:#17171D;--line:#272731;--blue:#2D7FF9;--red:#FF453A;--green:#00E676;--muted:#8E8E93}
 *{box-sizing:border-box;font-family:Inter,system-ui;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:#fff;padding-bottom:110px;overscroll-behavior:none}
 .top{position:sticky;top:0;z-index:1000;background:rgba(11,11,15,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;margin:12px 14px;padding:14px}
-#map{height:42vh;width:100%;background:#101014}
 .sos-wrap{display:flex;flex-direction:column;align-items:center;padding:18px 0}
-/* FIX COPY MENU */
-.sos-btn{
-  width:140px;height:140px;border-radius:50%;
-  background:radial-gradient(circle at 30% 30%,#FF6B60,#FF453A);
-  border:4px solid #fff;box-shadow:0 0 40px rgba(255,69,58,.6);
-  color:#fff;font-weight:900;font-size:28px;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;user-select:none;-webkit-user-select:none;-moz-user-select:none;
-  -webkit-touch-callout:none;touch-action:none;
-}
-.sos-btn:active{transform:scale(.95)}
-.sos-btn.sos-active{background:#fff;color:#FF453A;animation:pulse 0.6s infinite}
+.sos-btn{width:140px;height:140px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#FF6B60,#FF453A);border:4px solid #fff;box-shadow:0 0 40px rgba(255,69,58,.6);color:#fff;font-weight:900;font-size:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-user-select:none;-moz-user-select:none;-webkit-touch-callout:none;touch-action:none}
+.sos-btn:active{transform:scale(.95)}.sos-btn.sos-active{background:#fff;color:#FF453A;animation:pulse 0.6s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,69,58,.7)}50%{box-shadow:0 0 0 20px rgba(255,69,58,0)}}
 .btn{padding:12px 16px;border-radius:14px;border:none;font-weight:800;cursor:pointer;flex:1}.blue{background:var(--blue);color:#fff}.gray{background:#1F1F27;color:#fff;border:1px solid var(--line)}
-/* FIX TABS NOT CLICKABLE */
-.tabs{
-  position:fixed;bottom:0;left:0;right:0;
-  background:rgba(23,23,29,.98);backdrop-filter:blur(20px);
-  border-top:1px solid var(--line);display:flex;justify-content:space-around;
-  padding:10px 6px 22px;z-index:9999; /* Was 2000, map was over it! */
-  pointer-events:auto;
-}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(23,23,29,.98);backdrop-filter:blur(20px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 6px 22px;z-index:9999;pointer-events:auto}
 .tab{flex:1;text-align:center;font-size:10px;color:var(--muted);font-weight:700;cursor:pointer;padding:6px;pointer-events:auto;user-select:none}
 .tab.active{color:#fff}.tab b{font-size:20px;display:block;pointer-events:none}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}.green{background:var(--green)}.red{background:var(--red)}
@@ -47,19 +29,17 @@ body{margin:0;background:var(--bg);color:#fff;padding-bottom:110px;overscroll-be
       <div id="sosStatus" style="margin-top:12px;font-size:12px;color:var(--muted)">Ready - hold to activate</div>
     </div>
     <div id="accMeter" class="card" style="margin:8px 0;background:#101014;font-size:12px;text-align:left">📡 Accuracy: waiting for GPS... Go outside<br><small>Best: --</small></div>
-    <div style="display:flex;gap:8px;margin-top:10px"><button class="btn blue" id="shareBtn">📍 Share Location</button><button class="btn gray" id="centerBtn">🎯 Center Me</button></div>
+    <div style="display:flex;gap:8px;margin-top:10px"><button class="btn blue" id="shareBtn">📍 Share Location</button><button class="btn gray" id="callBtn">📞 Call Patrol</button></div>
   </div>
-  <div class="card"><b>🛡️ Nearest Patrol</b><div id="nearestPatrol" style="margin-top:8px;font-size:13px;color:var(--muted)">Scanning... Go outside for GPS</div></div>
-  <div id="mapWrap" style="margin:12px 14px;border-radius:20px;overflow:hidden;border:1px solid var(--line)"><div id="map"></div></div>
+  <div class="card"><b>🛡️ Nearest Patrol</b><div id="nearestPatrol" style="margin-top:8px;font-size:13px;color:var(--muted)">Scanning... Go outside for GPS</div>
+  <div style="margin-top:12px;padding:10px;background:#101014;border-radius:12px;border:1px solid var(--line)"><small style="color:var(--muted)">🔒 You are being tracked. Patrol can see your location on their map. Map hidden for privacy.</small><div id="debugLoc" style="margin-top:6px;font-size:10px;color:#666"></div></div></div>
 </div>
 
-<div id="view-map" class="view" style="display:none"><div id="map2" style="height:78vh"></div></div>
 <div id="view-family" class="view" style="display:none"><div class="card"><b>👨‍👩‍👧 Family</b><br><small style="color:var(--muted)">Add family to share SOS</small><div style="margin-top:12px"><input id="famInput" placeholder="Family phone/email" style="width:100%;padding:12px;border-radius:12px;background:#0B0B0F;border:1px solid var(--line);color:#fff"><button class="btn blue" style="width:100%;margin-top:8px" onclick="alert('Family invite sent!')">Add Family</button></div></div></div>
 <div id="view-profile" class="view" style="display:none"><div class="card"><b>👤 Profile</b><div id="profileInfo" style="margin-top:10px;color:var(--muted);font-size:13px"></div><button class="btn gray" style="width:100%;margin-top:12px" onclick="localStorage.clear();location.href='/login'">Logout</button></div></div>
 
 <div class="tabs" id="tabsBar">
   <div class="tab active" data-tab="sos"><b>🚨</b>SOS</div>
-  <div class="tab" data-tab="map"><b>🗺️</b>MAP</div>
   <div class="tab" data-tab="family"><b>👨‍👩‍👧</b>FAMILY</div>
   <div class="tab" data-tab="profile"><b>👤</b>PROFILE</div>
 </div>
@@ -68,19 +48,12 @@ body{margin:0;background:var(--bg);color:#fff;padding-bottom:110px;overscroll-be
 let phone=localStorage.getItem('zondi_user')||'mkhwanazi1000@gmail.com';
 let clientId=phone;
 document.getElementById('userLabel').innerText=phone.split('@')[0];
-document.getElementById('profileInfo').innerHTML=`Phone: ${phone}<br>ID: ${clientId}<br><small style="color:#22c55e">GPS: Active</small>`;
+document.getElementById('profileInfo').innerHTML=`Phone: ${phone}<br>ID: ${clientId}<br><small style="color:#22c55e">GPS: Active - Tracked</small>`;
 
-let map=L.map('map',{zoomControl:false}).setView([-25.7479,28.2293],18);
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(map);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:22,opacity:.85}).addTo(map);
-let map2=L.map('map2',{zoomControl:false}).setView([-25.7479,28.2293],18);
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(map2);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:22,opacity:.85}).addTo(map2);
-
-let myMarker=null, patrolMarkers={}, samples=[], bestAcc=Infinity, lastPos=null, myLoc=null, sos=false, follow=true;
+let samples=[], bestAcc=Infinity, lastPos=null, myLoc=null, sos=false;
 let btn=document.getElementById('shareBtn');
 
-// --- GPS - WORKS EVEN WITH BAD SIGNAL FOR DEMO ---
+// --- GPS TRACKING WITHOUT MAP ---
 navigator.geolocation.watchPosition((pos)=>{
     let acc=pos.coords.accuracy, lat=pos.coords.latitude, lng=pos.coords.longitude;
     if(acc<=50){ samples.push({lat,lng,acc}); samples.sort((a,b)=>a.acc-b.acc); samples=samples.slice(0,5); }
@@ -89,80 +62,56 @@ navigator.geolocation.watchPosition((pos)=>{
     let tw=0, aLat=0, aLng=0, aAcc=0;
     samples.forEach(p=>{ let w=1/(p.acc||1); tw+=w; aLat+=p.lat*w; aLng+=p.lng*w; aAcc+=p.acc*w; });
     aLat/=tw; aLng/=tw; aAcc/=tw;
-    if(follow){ map.setView([aLat,aLng],19); }
     lastPos={coords:{latitude:aLat,longitude:aLng,accuracy:aAcc}};
     myLoc={lat:aLat,lng:aLng,accuracy:Math.round(aAcc*10)/10,acc:Math.round(aAcc*10)/10,ts:Date.now(),time:Date.now(),phone:phone,email:phone,client_id:clientId,name:phone.split('@')[0],sos:!!sos};
-    if(myMarker) map.removeLayer(myMarker);
-    myMarker=L.circleMarker([aLat,aLng],{radius:8,color:'#00E676',fillColor:'#00E676',fillOpacity:0.9}).addTo(map);
+    // Still tracked for patrol even without map!
     fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(myLoc)}).catch(()=>{});
     localStorage.setItem('zondi_last_loc',JSON.stringify(myLoc));
     if(btn) btn.textContent=`🟢 ${aAcc.toFixed(1)}m • Best ${Math.round(bestAcc)}m`;
     let el=document.getElementById('accMeter');
-    if(el) el.innerHTML=`📡 Accuracy: <b style="color:${aAcc<=3?'#22c55e':aAcc<=8?'#facc15':'#ef4444'}">${aAcc.toFixed(1)}m</b> | Best ${Math.round(bestAcc)}m<br><div style="height:6px;background:#27272a;border-radius:10px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.max(10,100-aAcc*4)}%;background:${aAcc<=3?'#22c55e':'#facc15'}"></div></div><small>${aAcc<=3?'✅ LOCKED - correct house':'🟡 Move outside, hold phone still'}</small>`;
+    if(el) el.innerHTML=`📡 Accuracy: <b style="color:${aAcc<=3?'#22c55e':aAcc<=8?'#facc15':'#ef4444'}">${aAcc.toFixed(1)}m</b> | Best ${Math.round(bestAcc)}m<br><div style="height:6px;background:#27272a;border-radius:10px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.max(10,100-aAcc*4)}%;background:${aAcc<=3?'#22c55e':'#facc15'}"></div></div><small>${aAcc<=3?'✅ LOCKED - patrol sees correct house':'🟡 Move outside, hold phone still'}</small>`;
+    document.getElementById('debugLoc').innerHTML=`📍 ${aLat.toFixed(6)}, ${aLng.toFixed(6)} ±${aAcc.toFixed(1)}m (tracked)`;
     findNearestPatrol(aLat,aLng);
 }, e=>{
   document.getElementById('accMeter').innerHTML=`🔴 GPS Error: ${e.message}<br><small>Allow location permission</small>`;
-  document.getElementById('nearestPatrol').innerHTML=`🔴 No GPS - ${e.message}`;
 },{enableHighAccuracy:true,maximumAge:0,timeout:30000});
 
-document.getElementById('centerBtn').onclick=()=>{ follow=true; if(lastPos) map.setView([lastPos.coords.latitude,lastPos.coords.longitude],19); };
-document.getElementById('shareBtn').onclick=()=>{ if(myLoc) alert('📍 Shared: '+myLoc.lat.toFixed(6)+', '+myLoc.lng.toFixed(6)); else alert('Waiting GPS'); };
+document.getElementById('callBtn').onclick=()=>{ alert('📞 Calling patrol...'); };
+document.getElementById('shareBtn').onclick=()=>{ if(myLoc) { fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(myLoc)}); alert('📍 Shared: '+myLoc.lat.toFixed(6)+', '+myLoc.lng.toFixed(6)+' ±'+myLoc.accuracy+'m'); } else alert('Waiting GPS'); };
 
 function getDist(lat1,lon1,lat2,lon2){ const R=6371; const dLat=(lat2-lat1)*Math.PI/180; const dLon=(lon2-lon1)*Math.PI/180; const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
 async function findNearestPatrol(myLat,myLng){
   try{
     let r=await fetch('/api/location'); let data=await r.json();
     let all=Object.values(data);
-    if(all.length===0){ document.getElementById('nearestPatrol').innerHTML='Scanning... No patrol online<br><small>Login as mkhwanazi32@gmail.com on patrol side</small>'; return; }
-    let patrols=all.filter(p=> (p.phone||'').toLowerCase().includes('32') || (p.client_id||'').toLowerCase().includes('patrol') );
-    if(patrols.length===0) patrols=all.filter(p=>p.phone!==phone);
+    let patrols=all.filter(p=>p.phone!==phone);
+    if(patrols.length===0){ document.getElementById('nearestPatrol').innerHTML='Scanning... No patrol online'; return; }
     let nearest=null, minD=Infinity;
     patrols.forEach(p=>{ let d=getDist(myLat,myLng,p.lat,p.lng); if(d<minD){minD=d; nearest=p;} });
-    if(nearest){ document.getElementById('nearestPatrol').innerHTML=`✅ <b>${nearest.name||nearest.phone}</b> • ${minD.toFixed(2)} km • ${Math.max(1,Math.round(minD*2.5))} min<br><small>📞 ${nearest.phone} • ±${nearest.accuracy||'?'}m</small>`; }
+    if(nearest){ document.getElementById('nearestPatrol').innerHTML=`✅ <b>${nearest.name||nearest.phone}</b> • ${minD.toFixed(2)} km<br><small>📞 ${nearest.phone} • ±${nearest.accuracy||'?'}m - Patrol sees you</small>`; }
   }catch(e){ document.getElementById('nearestPatrol').innerHTML='Scanning...'; }
 }
 
-// SOS - FIX COPY MENU
-let holdTimer=null, holdStart=0;
-let sosBtn=document.getElementById('sosBtn');
+let holdTimer=null, holdStart=0, sosBtn=document.getElementById('sosBtn');
 sosBtn.addEventListener('contextmenu', e=>{ e.preventDefault(); return false; });
-function startHold(e){ e.preventDefault(); holdStart=Date.now(); document.getElementById('sosStatus').innerText='Hold 2s...'; holdTimer=setInterval(()=>{ let h=(Date.now()-holdStart)/1000; if(h>=2){ clearInterval(holdTimer); triggerSOS(); } else sosBtn.innerText=Math.ceil(2-h)+'s'; },100); }
+function startHold(e){ e.preventDefault(); if(myLoc && myLoc.accuracy>20){ alert(`🔴 Bad accuracy ±${myLoc.accuracy}m - Go outside for accurate SOS!`); return; } holdStart=Date.now(); document.getElementById('sosStatus').innerText='Hold 2s...'; holdTimer=setInterval(()=>{ let h=(Date.now()-holdStart)/1000; if(h>=2){ clearInterval(holdTimer); triggerSOS(); } else sosBtn.innerText=Math.ceil(2-h)+'s'; },100); }
 function endHold(){ clearInterval(holdTimer); if(!sos){ sosBtn.innerText='SOS'; document.getElementById('sosStatus').innerText='Ready - hold to activate'; } }
 async function triggerSOS(){
-  if(!myLoc){
-    alert('🔴 Wait for GPS first! Go outside');
-    return;
-  }
-  if(myLoc.accuracy > 15){
-    alert(`🔴 Bad accuracy ±${myLoc.accuracy}m - Go outside for accurate SOS!\nCurrent: ${myLoc.accuracy}m, need <15m`);
-    document.getElementById('accMeter').innerHTML=`<span style="color:#ef4444">⚠️ SOS blocked - accuracy ±${myLoc.accuracy}m too poor! Move outside</span>`;
-    sos=false; sosBtn.classList.remove('sos-active'); sosBtn.innerText='SOS';
-    return;
-  }
-  sos=true; sosBtn.classList.add('sos-active'); sosBtn.innerText='SOS!';
-  document.getElementById('sosStatus').innerHTML='<span style="color:#FF453A">🚨 SOS ACTIVE - ±'+myLoc.accuracy+'m</span>';
+  sos=true; sosBtn.classList.add('sos-active'); sosBtn.innerText='SOS!'; document.getElementById('sosStatus').innerHTML='<span style="color:#FF453A">🚨 SOS ACTIVE - ±'+(myLoc?.accuracy||'?')+'m - Patrol alerted!</span>';
   let d={...myLoc, sos:true, ts:Date.now(), time:Date.now()};
   await fetch('/api/sos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
   await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
-  alert('🚨 SOS SENT! ±'+d.accuracy+'m - Patrol sees correct house!');
+  alert('🚨 SOS SENT! Patrol sees you!');
   setTimeout(()=>{ sos=false; sosBtn.classList.remove('sos-active'); sosBtn.innerText='SOS'; document.getElementById('sosStatus').innerText='Ready'; },15000);
 }
-sosBtn.addEventListener('touchstart',startHold,{passive:false});
-sosBtn.addEventListener('touchend',endHold);
-sosBtn.addEventListener('mousedown',startHold);
-sosBtn.addEventListener('mouseup',endHold);
-sosBtn.addEventListener('mouseleave',endHold);
+sosBtn.addEventListener('touchstart',startHold,{passive:false}); sosBtn.addEventListener('touchend',endHold); sosBtn.addEventListener('mousedown',startHold); sosBtn.addEventListener('mouseup',endHold); sosBtn.addEventListener('mouseleave',endHold);
 
-// FIX TABS - CLICKABLE
 function switchTab(t){
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   document.querySelector(`.tab[data-tab="${t}"]`).classList.add('active');
   document.getElementById('view-sos').style.display=t==='sos'?'block':'none';
-  document.getElementById('view-map').style.display=t==='map'?'block':'none';
   document.getElementById('view-family').style.display=t==='family'?'block':'none';
   document.getElementById('view-profile').style.display=t==='profile'?'block':'none';
-  if(t==='map') setTimeout(()=>map2.invalidateSize(),200);
-  if(t==='sos') setTimeout(()=>map.invalidateSize(),200);
 }
 document.querySelectorAll('.tab').forEach(tab=>{
   tab.addEventListener('click',()=>{ switchTab(tab.dataset.tab); });
