@@ -1,37 +1,37 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>ZONDI - Client</title>
 <style>
-:root{--bg:#0B0B0F;--card:#17171D;--line:#272731;--blue:#2D7FF9;--red:#FF453A;--green:#00E676;--muted:#8E8E93}
+:root{--bg:#0B0B0F;--card:#17171D;--line:#272731;--blue:#2D7FF9;--red:#FF453A;--green:#00E676;--muted:#8E8E93;--gold:#E8B62A}
 *{box-sizing:border-box;font-family:Inter,sans-serif}
 body{margin:0;background:var(--bg);color:#fff;padding-bottom:120px}
 .top{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
 .logo{width:36px;height:36px;border-radius:10px;object-fit:cover;border:1px solid var(--line);background:#000}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;margin:12px 14px;padding:14px}
-.sos-btn{width:140px;height:140px;border-radius:50%;background:#FF453A;border:4px solid #fff;color:#fff;font-weight:900;font-size:28px;display:flex;align-items:center;justify-content:center;margin:10px auto;cursor:pointer}
+.sos-btn{width:150px;height:150px;border-radius:50%;background:radial-gradient(#FF6A5A,#CC1F0F);border:4px solid #fff;color:#fff;font-weight:900;font-size:32px;display:flex;align-items:center;justify-content:center;margin:12px auto;cursor:pointer;box-shadow:0 0 30px rgba(255,69,58,.5)}
 .btn{padding:12px 16px;border-radius:14px;border:none;font-weight:800;cursor:pointer;width:100%;margin-top:8px;display:block;text-align:center;text-decoration:none}
 .blue{background:var(--blue);color:#fff}.gray{background:#1F1F27;color:#fff;border:1px solid var(--line)}
 .tabs{position:fixed;bottom:0;left:0;right:0;background:#17171D;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 6px 22px;z-index:99999}
 .tab{flex:1;text-align:center;font-size:10px;color:var(--muted);font-weight:700;cursor:pointer;padding:10px}.tab.active{color:#fff}.tab b{font-size:20px;display:block}
 input{padding:12px;border-radius:12px;background:#0B0B0F;border:1px solid var(--line);color:#fff;width:100%}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}.green{background:var(--green);box-shadow:0 0 8px var(--green)}.red{background:var(--red)}.gold{background:var(--gold)}
 </style>
 </head><body>
-<div class="top"><div style="display:flex;align-items:center;gap:10px"><img src="/logo.jpg" class="logo" alt="ZONDI" onerror="this.style.display='none'"><div><b>ZONDI</b> <small id="userLabel">CLIENT</small></div></div><div style="font-size:10px;padding:6px 10px;border-radius:20px;background:#122A12;color:var(--green)">LIVE TRACKING ON</div></div>
+<div class="top"><div style="display:flex;align-items:center;gap:10px"><img src="/logo.jpg" class="logo" alt="ZONDI" onerror="this.style.display='none'"><div><b>ZONDI</b> <small id="userLabel">CLIENT</small></div></div><div style="font-size:10px;padding:6px 10px;border-radius:20px;background:#122A12;color:var(--green)"><span class="dot green"></span> <span id="liveLabel">LIVE TRACKING ON</span></div></div>
 
 <div id="view-sos">
   <div class="card" style="text-align:center">
-    <b>Emergency?</b><br><small style="color:var(--muted)">Hold SOS 2s</small>
+    <b>Emergency?</b><br><small style="color:var(--muted)">Hold SOS 2s - patrol + family gets you</small>
     <div class="sos-btn" id="sosBtn">SOS</div>
-    <div id="sosStatus" style="font-size:12px;color:var(--muted)">Ready</div>
-    <div id="accMeter" style="margin:8px 0;background:#101014;padding:10px;border-radius:12px;font-size:12px;text-align:left">📡 Waiting GPS... Go outside Garankuwa</div>
+    <div id="sosStatus" style="font-size:12px;color:var(--muted)">Ready • Hold 2 sec</div>
+    <div id="accMeter" style="margin:10px 0;background:#101014;border:1px solid var(--line);padding:12px;border-radius:12px;font-size:12px;text-align:left">📡 Waiting GPS... Go near window</div>
     <div style="display:flex;gap:8px"><button class="btn blue" id="shareBtn">📍 Share Location</button><button class="btn gray" id="callBtn">📞 Call Patrol</button></div>
   </div>
-  <div class="card"><b>🛡️ Nearest Patrol</b><div id="nearestPatrol" style="margin-top:8px;font-size:13px;color:var(--muted)">Scanning...</div><div id="debugLoc" style="font-size:10px;color:#666;margin-top:6px"></div></div>
-  <div class="card" style="padding:0;overflow:hidden"><img src="/about.jpg" style="width:100%;height:140px;object-fit:cover;display:block" onerror="this.style.display='none'"><div style="padding:12px"><b>About ZONDI</b><br><small style="color:var(--muted)">Community patrol & SOS for Ga-Rankuwa. One tap shares live location.</small></div></div>
+  <div class="card"><b>🛡️ Nearest Patrol</b><div id="nearestPatrol" style="margin-top:8px;font-size:13px;color:var(--muted)">Scanning patrol locations...</div><div id="debugLoc" style="font-size:10px;color:#666;margin-top:6px"></div><div id="queueInfo" style="font-size:9px;color:var(--gold);margin-top:4px"></div></div>
 </div>
 
 <div id="view-family" style="display:none">
   <div class="card">
-    <b>👨‍👩‍👧 Family Circle - Garankuwa</b><br><small style="color:var(--muted)">They get your SOS on WhatsApp</small>
+    <b>👨‍👩‍👧 Family Circle - Garankuwa</b><br><small style="color:var(--muted)">They get your SOS on WhatsApp auto</small>
     <div style="display:flex;gap:8px;margin-top:12px">
       <input id="famName" placeholder="Name e.g. Mom">
       <input id="famPhone" placeholder="067..." inputmode="numeric">
@@ -51,7 +51,7 @@ input{padding:12px;border-radius:12px;background:#0B0B0F;border:1px solid var(--
   </div>
 </div>
 
-<div id="view-profile" style="display:none"><div class="card"><b>👤 Profile</b><div id="profileInfo" style="margin-top:10px"></div><button class="btn gray" onclick="localStorage.clear();location.reload()">Logout</button></div></div>
+<div id="view-profile" style="display:none"><div class="card"><b>👤 Profile</b><div id="profileInfo" style="margin-top:10px"></div><button class="btn gray" onclick="localStorage.clear();location.href='/login'">Logout</button></div></div>
 
 <div class="tabs">
   <div class="tab active" data-tab="sos" onclick="switchTab('sos')"><b>🚨</b>SOS</div>
@@ -61,10 +61,8 @@ input{padding:12px;border-radius:12px;background:#0B0B0F;border:1px solid var(--
 
 <script>
 let phone = localStorage.getItem('zondi_user')||'mkhwanazi1000@gmail.com';
-try{document.getElementById('userLabel').innerText=phone.split('@')[0]}catch(e){}
-try{document.getElementById('profileInfo').innerHTML='Phone: '+phone+'<br>Garankuwa • Tracked'}catch(e){}
-
-let myLoc=null, samples=[], bestAcc=Infinity;
+document.getElementById('userLabel').innerText=phone.split('@')[0];
+document.getElementById('profileInfo').innerHTML='Phone: '+phone+'<br>Garankuwa • Tracked • v2 improved';
 
 window.switchTab=function(t){
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
@@ -74,130 +72,126 @@ window.switchTab=function(t){
   document.getElementById('view-profile').style.display=t==='profile'?'block':'none';
 };
 
-let family=[];
-try{ family=JSON.parse(localStorage.getItem('zondi_family')||'[]'); }catch(e){ family=[]; }
-
-function saveFamily(){
-  try{
-    localStorage.setItem('zondi_family', JSON.stringify(family));
-    renderFamily();
-    alert('✅ Family saved! '+family.length+' total');
-  }catch(e){ alert('Save error: '+e.message); }
-}
-
+let family=JSON.parse(localStorage.getItem('zondi_family')||'[]');
+function saveFamily(){ localStorage.setItem('zondi_family', JSON.stringify(family)); renderFamily(); }
 function renderFamily(){
   let el=document.getElementById('famList');
   if(!el) return;
-  if(family.length===0){ el.innerHTML='<small style="color:var(--muted)">No family yet</small>'; return; }
+  if(family.length===0){ el.innerHTML='<small style="color:var(--muted)">No family yet - add 2</small>'; return; }
   el.innerHTML=family.map(f=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#101014;border-radius:12px;margin-top:6px;border:1px solid #272731"><div><b>${f.name}</b><br><small style="color:#8E8E93">${f.phone}</small></div><div style="display:flex;gap:6px"><button class="btn blue" style="width:auto;padding:6px 10px" onclick="shareToOne('${f.phone}')">WA</button><button class="btn gray" style="width:auto;padding:6px 10px" onclick="removeFam(${f.id})">X</button></div></div>`).join('');
 }
-
 window.addFamily=function(){
-  let nameEl=document.getElementById('famName');
-  let phoneEl=document.getElementById('famPhone');
-  let name=(nameEl.value||'Family').trim();
-  let raw=(phoneEl.value||'').replace(/[^0-9]/g,'');
-  if(!raw){ alert('⚠️ Enter phone number!'); return; }
+  let name=(document.getElementById('famName').value||'Family').trim();
+  let raw=(document.getElementById('famPhone').value||'').replace(/[^0-9]/g,'');
+  if(!raw){ alert('Enter phone'); return; }
   if(raw.startsWith('0')) raw='27'+raw.slice(1);
   if(!raw.startsWith('27')) raw='27'+raw;
-  family.push({name:name, phone:raw, id:Date.now()});
-  nameEl.value=''; phoneEl.value='';
-  saveFamily();
+  family.push({name, phone:raw, id:Date.now()}); document.getElementById('famName').value=''; document.getElementById('famPhone').value=''; saveFamily();
 };
-
 window.removeFam=function(id){ family=family.filter(f=>f.id!==id); saveFamily(); };
-
 window.shareToOne=async function(p){
-  if(!myLoc){ alert('⚠️ Waiting GPS - go outside!'); return; }
+  if(!myLoc){ alert('Waiting GPS'); return; }
+  let msg=`🚨 ZONDI SOS Garankuwa from ${phone.split('@')[0]}! HELP!\n📍 https://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}\n±${myLoc.accuracy}m`; window.open(`https://wa.me/${p}?text=${encodeURIComponent(msg)}`,'_blank');
+};
+window.shareToAllFamily=async function(isTest=false){
+  if(family.length===0){ alert('Add family first'); return; }
+  if(!myLoc){ alert('GPS not ready'); return; }
   try{
-    let r=await fetch('/api/notify-family',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({family:[{phone:p}], lat:myLoc.lat, lng:myLoc.lng, accuracy:myLoc.accuracy, phone:phone, test:true})});
-    let j=await r.json();
-    if(j.ok){ alert('✅ Auto-sent to '+p); return; }
+    let r=await fetch('/api/notify-family',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({family, lat:myLoc.lat, lng:myLoc.lng, accuracy:myLoc.accuracy, phone, test:isTest})});
+    let j=await r.json(); if(j.ok){ alert('✅ Auto-sent to '+family.length); return; }
   }catch(e){}
-  let msg=`🚨 ZONDI SOS Garankuwa from ${phone.split('@')[0]}! HELP!\n📍 https://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}\n±${myLoc.accuracy}m`;
-  window.open(`https://wa.me/${p}?text=${encodeURIComponent(msg)}`,'_blank');
+  let base=isTest?`📍 ZONDI Location https://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}`:`🚨 ZONDI SOS! https://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}`;
+  family.forEach((f,i)=>{ setTimeout(()=>{ window.open(`https://wa.me/${f.phone}?text=${encodeURIComponent(base)}`,'_blank'); }, i*800); });
 };
 
-window.shareToAllFamily=async function(isTest=false){
-  if(family.length===0){ alert('Add family first!'); return; }
-  if(!myLoc){ alert('GPS not ready - go outside!'); return; }
-  document.getElementById('sendAllBtn').innerText='⏳ Auto-sending...';
+// ===== IMPROVED TRACKER CORE =====
+let myLoc=null, samples=[], bestAcc=Infinity, lastSentLoc=null, lastSendTime=0, queue=[];
+function getDistance(lat1,lon1,lat2,lon2){const R=6371;const dLat=(lat2-lat1)*Math.PI/180;const dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*1000;}
+function shouldSend(newLoc){
+  if(!lastSentLoc) return true;
+  let dist=getDistance(lastSentLoc.lat,lastSentLoc.lng,newLoc.lat,newLoc.lng);
+  let timeDiff=Date.now()-lastSendTime;
+  // Send if moved >8m OR 30 sec passed AND moved >2m
+  if(dist>8) return true;
+  if(timeDiff>30000 && dist>2) return true;
+  if(timeDiff>120000) return true; // heartbeat every 2 min
+  return false;
+}
+async function postLocation(loc, force=false){
+  if(!force && !shouldSend(loc)) return;
+  lastSentLoc={...loc}; lastSendTime=Date.now();
   try{
-    let payload={ family:family, lat:myLoc.lat, lng:myLoc.lng, accuracy:myLoc.accuracy, phone:phone, test:isTest };
-    let r=await fetch('/api/notify-family',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    let j=await r.json();
-    if(j.ok){
-      alert('✅ AUTO-SENT to '+family.length+' family! No choosing needed!\n'+j.message);
-      document.getElementById('sendAllBtn').innerText='📍 Send Location to ALL Family (WhatsApp)';
-      return;
-    } else { throw new Error(j.error); }
+    let payload={...loc, email:phone, client_id:phone, name:phone.split('@')[0]};
+    let r=await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    let j=await r.json(); if(j.ok) document.getElementById('liveLabel').innerText=`LIVE • ${j.total_clients||'?'} clients`;
+    // flush queue
+    if(queue.length>0){
+      for(let q of queue){ await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(q)}); }
+      queue=[]; localStorage.removeItem('zondi_q'); document.getElementById('queueInfo').innerText='';
+    }
   }catch(e){
-    console.log('Fallback wa.me', e);
-    document.getElementById('sendAllBtn').innerText='📍 Send Location to ALL Family (WhatsApp)';
-    let base=isTest?`📍 ZONDI Location\nhttps://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}`:`🚨 ZONDI SOS Garankuwa! HELP!\n📍 https://www.google.com/maps?q=${myLoc.lat},${myLoc.lng}\n±${myLoc.accuracy}m`;
-    family.forEach((f,i)=>{ setTimeout(()=>{ window.open(`https://wa.me/${f.phone}?text=${encodeURIComponent(base)}`,'_blank'); }, i*800); });
+    // offline -> queue
+    queue.push({...loc, email:phone, client_id:phone, time:Date.now()}); localStorage.setItem('zondi_q', JSON.stringify(queue));
+    document.getElementById('queueInfo').innerText=`📦 Offline queued: ${queue.length}`;
   }
-};
+}
 
 setTimeout(()=>{
-  let addBtn=document.getElementById('addFamBtn');
-  if(addBtn) addBtn.addEventListener('click', window.addFamily);
-  let sendAll=document.getElementById('sendAllBtn');
-  if(sendAll) sendAll.addEventListener('click', ()=>window.shareToAllFamily(true));
-  let callBtn=document.getElementById('callBtn');
-  if(callBtn) callBtn.addEventListener('click', ()=>{ window.location.href='tel:10111'; });
-  let shareBtn=document.getElementById('shareBtn');
-  if(shareBtn) shareBtn.addEventListener('click', ()=>{
-    if(!myLoc){ alert('📡 No GPS yet - go outside Garankuwa!'); return; }
-    alert('📍 Location ±'+myLoc.accuracy+'m shared!');
+  document.getElementById('addFamBtn').addEventListener('click', window.addFamily);
+  document.getElementById('sendAllBtn').addEventListener('click', ()=>window.shareToAllFamily(true));
+  document.getElementById('callBtn').addEventListener('click', ()=>{ window.location.href='tel:10111'; });
+  document.getElementById('shareBtn').addEventListener('click', ()=>{
+    if(!myLoc){ alert('No GPS yet'); return; }
+    postLocation(myLoc, true); alert('📍 Location ±'+myLoc.accuracy+'m shared to patrol! Batched queue cleared.');
   });
-  renderFamily();
+  renderFamily(); queue=JSON.parse(localStorage.getItem('zondi_q')||'[]');
 }, 200);
 
 if(navigator.geolocation){
   navigator.geolocation.watchPosition((pos)=>{
     try{
       let acc=pos.coords.accuracy, lat=pos.coords.latitude, lng=pos.coords.longitude;
-      if(acc<=50){ samples.push({lat,lng,acc}); samples.sort((a,b)=>a.acc-b.acc); samples=samples.slice(0,5); }
+      // Keep best 5 samples for smoothing
+      if(acc<=80){ samples.push({lat,lng,acc}); samples.sort((a,b)=>a.acc-b.acc); samples=samples.slice(0,5); }
       if(acc<bestAcc) bestAcc=acc;
       if(samples.length===0) samples=[{lat,lng,acc}];
       let tw=0, aLat=0, aLng=0, aAcc=0;
       samples.forEach(p=>{ let w=1/(p.acc||1); tw+=w; aLat+=p.lat*w; aLng+=p.lng*w; aAcc+=p.acc*w; });
       aLat/=tw; aLng/=tw; aAcc/=tw;
       myLoc={lat:aLat,lng:aLng,accuracy:Math.round(aAcc*10)/10, time:Date.now(), phone:phone};
+      
+      // NEW: Patrol grade LOCKED logic
       let meter=document.getElementById('accMeter');
-      if(meter) meter.innerHTML=`📡 <b>${aAcc.toFixed(1)}m</b> | Best ${Math.round(bestAcc)}m - ${aAcc<=3?'✅ LOCKED':'🟡 Move outside'}`;
-      let dbg=document.getElementById('debugLoc');
-      if(dbg) dbg.innerHTML=`📍 ${aLat.toFixed(6)}, ${aLng.toFixed(6)} ±${aAcc.toFixed(1)}m`;
-      fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...myLoc, email:phone, client_id:phone, name:phone.split('@')[0]})}).catch(()=>{});
-    }catch(e){}
+      let statusText='';
+      if(aAcc<=15) statusText=`<span class="dot green"></span> <b style="color:var(--green)">✅ LOCKED ${aAcc.toFixed(1)}m</b> • Best ${Math.round(bestAcc)}m • Ready`;
+      else if(aAcc<=30) statusText=`<span class="dot gold"></span> <b style="color:var(--gold)">🟡 FAIR ${aAcc.toFixed(1)}m</b> • Best ${Math.round(bestAcc)}m • Near window`;
+      else statusText=`<span class="dot red"></span> <b style="color:var(--red)">🔴 POOR ${aAcc.toFixed(1)}m</b> • Best ${Math.round(bestAcc)}m • Move outside`;
+      
+      if(meter) meter.innerHTML=statusText;
+      document.getElementById('debugLoc').innerHTML=`📍 ${aLat.toFixed(6)}, ${aLng.toFixed(6)} ±${aAcc.toFixed(1)}m | Sent: ${lastSentLoc?Math.round(getDistance(lastSentLoc.lat,lastSentLoc.lng,aLat,aLng))+'m ago': 'now'}`;
+      
+      // Smart send
+      postLocation(myLoc);
+    }catch(e){ console.log(e); }
   }, (e)=>{
-    let meter=document.getElementById('accMeter');
-    if(meter) meter.innerHTML=`🔴 GPS Error: ${e.message}<br>Allow location permission!`;
+    document.getElementById('accMeter').innerHTML=`🔴 GPS Error: ${e.message}<br>Allow location!`;
   }, {enableHighAccuracy:true, maximumAge:0, timeout:30000});
 }
 
 let holdTimer=null, sosBtn=document.getElementById('sosBtn');
 if(sosBtn){
-  function startHold(e){
-    if(e) e.preventDefault();
-    if(!myLoc){ alert('Go outside for GPS first!'); return; }
-    document.getElementById('sosStatus').innerText='Hold 2s...';
-    let s=2; holdTimer=setInterval(()=>{ s--; sosBtn.innerText=s+'s'; if(s<=0){ clearInterval(holdTimer); triggerSOS(); } }, 500);
-  }
-  function endHold(){ clearInterval(holdTimer); sosBtn.innerText='SOS'; }
+  function startHold(e){ if(e) e.preventDefault(); if(!myLoc){ alert('Wait GPS lock first - need ✅ LOCKED'); return; } document.getElementById('sosStatus').innerText='Hold 2s... Keep holding'; let s=2; holdTimer=setInterval(()=>{ s--; sosBtn.innerText=s+'s'; if(s<=0){ clearInterval(holdTimer); triggerSOS(); } }, 500); }
+  function endHold(){ clearInterval(holdTimer); sosBtn.innerText='SOS'; document.getElementById('sosStatus').innerText='Ready • Hold 2 sec'; }
   async function triggerSOS(){
-    sosBtn.innerText='SOS!';
-    document.getElementById('sosStatus').innerHTML='🚨 SOS ACTIVE!';
-    let d={...myLoc, sos:true, ts:Date.now(), time:Date.now(), phone:phone, email:phone};
+    sosBtn.innerText='SENT!'; document.getElementById('sosStatus').innerHTML='🚨 SOS ACTIVE! Patrol + family alerted!';
+    let d={...myLoc, sos:true, ts:Date.now(), time:Date.now(), phone, email:phone};
     try{ await fetch('/api/sos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}); }catch(e){}
+    await postLocation({...myLoc, sos:true}, true);
     await window.shareToAllFamily(false);
-    alert('🚨 SOS SENT!');
+    if(navigator.vibrate) navigator.vibrate([200,100,200]); alert('🚨 SOS SENT! ±'+myLoc.accuracy+'m');
   }
-  sosBtn.addEventListener('touchstart', startHold, {passive:false});
-  sosBtn.addEventListener('touchend', endHold);
-  sosBtn.addEventListener('mousedown', startHold);
-  sosBtn.addEventListener('mouseup', endHold);
+  sosBtn.addEventListener('touchstart', startHold, {passive:false}); sosBtn.addEventListener('touchend', endHold);
+  sosBtn.addEventListener('mousedown', startHold); sosBtn.addEventListener('mouseup', endHold);
 }
 </script>
 </body></html>
