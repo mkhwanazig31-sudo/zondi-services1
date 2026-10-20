@@ -1,4 +1,5 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>ZONDI - Phone Dashboard</title>
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>ZONDI - Phone Dashboard</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>:root{--bg:#0A0A0B;--card:#17171D;--card2:#1F1F27;--line:#272731;--blue:#2D7FF9;--gold:#E8B62A;--green:#00E676;--red:#FF3B30;--muted:#8E8E93;--ink:#fff}*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:var(--bg);color:var(--ink);padding-bottom:90px}.top{position:sticky;top:0;z-index:5000;background:rgba(10,10,11,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px}.sCard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}.sCard b{font-size:18px;display:block}.sCard span{font-size:9px;color:var(--muted);letter-spacing:.8px}.tabs{position:sticky;top:58px;z-index:4000;background:var(--bg);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}.tab{padding:12px 6px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-weight:800;font-size:11px;text-align:center;cursor:pointer}.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}.box{padding:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;cursor:pointer}.card b{font-size:13px;display:block}.card small{color:var(--muted);font-size:11px}.iconBox{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:8px;background:var(--card2);border:1px solid var(--line)}.card.live{border-color:var(--green)}.card.sos{border-color:var(--red);background:#1A0F0F}.btn{padding:10px 12px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:12px}.gold{background:var(--gold);color:#000}.blue{background:var(--blue);color:#fff}.red{background:var(--red);color:#fff}.gray{background:var(--card2);color:#fff;border:1px solid var(--line)}.btn.small{padding:7px 10px;font-size:11px}.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:#fff;margin-bottom:10px}
 #allMap{height:60vh;border-radius:16px;background:#101014;border:1px solid var(--line);position:relative;z-index:1}
@@ -18,8 +19,8 @@
 <div class="top"><div><div style="font-weight:900">🛰️ ZONDI DASHBOARD</div><div style="font-size:10px;color:var(--muted)" id="syncStatus">Loading from server...</div></div><button class="btn blue small" onclick="logout()">Logout</button></div>
 <div class="stats"><div class="sCard"><b id="cTotal">0</b><span>CLIENTS</span></div><div class="sCard"><b id="pTotal">0</b><span>PATROLS</span></div><div class="sCard"><b id="pPending" style="color:var(--gold)">0</b><span>PENDING</span></div><div class="sCard"><b id="liveNow" style="color:var(--green)">0</b><span>LIVE</span></div></div>
 <div class="tabs"><div class="tab active" id="tab-clients" onclick="switchTab('clients')">📁 CLIENTS</div><div class="tab" id="tab-patrols" onclick="switchTab('patrols')">🚓 PATROLS</div><div class="tab" id="tab-cams" onclick="switchTab('cams')">📷 CAMS</div><div class="tab" id="tab-map" onclick="switchTab('map')">🗺️ MAP</div></div>
-<div class="box" id="view-clients"><input id="searchClient" class="search" placeholder="🔍 Search client..." oninput="render()"><div class="grid" id="clients"></div></div>
-<div class="box" id="view-patrols" style="display:none"><input id="searchPatrol" class="search" placeholder="🔍 Search patrol..." oninput="render()"><div class="grid" id="patrols"></div><div style="margin-top:14px"><h4>🛡️ Pending Approvals</h4><div class="grid" id="pending"></div></div></div>
+<div class="box" id="view-clients"><input id="searchClient" class="search" placeholder="🔍 Search client..." oninput="renderClientsPatrols()"><div class="grid" id="clients"></div></div>
+<div class="box" id="view-patrols" style="display:none"><input id="searchPatrol" class="search" placeholder="🔍 Search patrol..." oninput="renderClientsPatrols()"><div class="grid" id="patrols"></div><div style="margin-top:14px"><h4>🛡️ Pending Approvals</h4><div class="grid" id="pending"></div></div></div>
 <div class="box" id="view-map" style="display:none">
   <div style="display:flex;gap:8px;margin-bottom:10px">
     <button class="btn gray small" id="btnMyHouse" onclick="toggleMyHouse()" style="flex:1">🏠 MY HOUSE: OFF</button>
@@ -33,20 +34,6 @@
   <div style="margin-top:16px"><h4 style="margin:0 0 8px">🏠 Clients by Camera</h4><div class="grid" id="clientsByCam"></div></div>
 </div>
 <script>
-(function(){
-  if(sessionStorage.getItem('zondi_dev_ok')==='yes'){
-    document.getElementById('lockScreen').style.display='none';
-  }
-})();
-function unlockDev(){
-  let p=document.getElementById('devPass').value;
-  if(p==='zondi@123'){
-    sessionStorage.setItem('zondi_dev_ok','yes');
-    document.getElementById('lockScreen').style.display='none';
-  } else {
-    document.getElementById('devErr').style.display='block';
-  }
-}
 let usersData=JSON.parse(localStorage.getItem('zondi_users')||'{}');
 let pendingData=JSON.parse(localStorage.getItem('zondi_pending_cache')||'{}');
 let locData=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
@@ -54,8 +41,13 @@ let allMap = null;
 let showMyHouse=false;
 let showLiveOnly=false;
 let myHouseMarker=null;
+let lastUsersHash = JSON.stringify(usersData).length+'-'+Object.keys(usersData).length;
+let lastPendingHash = JSON.stringify(pendingData).length+'-'+Object.keys(pendingData).length;
 const MY_HOUSE_LAT = -25.6135;
 const MY_HOUSE_LNG = 27.9852;
+
+function hashObj(o){ try{ return JSON.stringify(o).length+'-'+Object.keys(o).length; }catch(e){ return '0-0'; } }
+
 function toggleMyHouse(){
   showMyHouse=!showMyHouse;
   document.getElementById('btnMyHouse').textContent= showMyHouse? '🏠 MY HOUSE: ON' : '🏠 MY HOUSE: OFF';
@@ -77,91 +69,85 @@ const APP_LINKS={
   'UBox':{icon:'📦', pkg:'com.ubox', store:'https://play.google.com/store/apps/details?id=com.ubox.uboxcamera'},
   'V380 Mini':{icon:'🔵', pkg:'com.macrovideo.v380s', store:'https://play.google.com/store/apps/details?id=com.macrovideo.v380s'}
 };
+
 async function loadLivePatrols(){
   try{
     let r=await fetch('/api/location');
     let data=await r.json();
     if(data && typeof data==='object'){
-      locData={};
+      let newLoc={};
       Object.keys(data).forEach(k=>{
         let v=data[k];
-        if(v.lat && v.lng) locData[k]={lat:parseFloat(v.lat), lng:parseFloat(v.lng),...v};
+        if(v.lat && v.lng) newLoc[k]={lat:parseFloat(v.lat), lng:parseFloat(v.lng),...v};
       });
+      locData=newLoc;
       localStorage.setItem('zondi_patrol_cache', JSON.stringify(locData));
       document.getElementById('liveNow').textContent=Object.keys(locData).length;
       renderMapMarkers();
-      render();
     }
   }catch(e){}
 }
+
 async function loadFromServer(){
   try{
-    document.getElementById('syncStatus').textContent='⏳ Syncing...';
     let res = await fetch('/api/index');
     let data = await res.json();
-    console.log('INDEX RAW:', data);
-    // FIXED: Handle new format {users:{}, pending:{}}
-    if(data && data.users){
-      usersData = data.users;
-      // Merge pending into cache but don't overwrite render yet
-      if(data.pending && Object.keys(data.pending).length>0){
-        pendingData = data.pending;
-        localStorage.setItem('zondi_pending_cache', JSON.stringify(pendingData));
-      }
-    } else if(Array.isArray(data)){
-      let obj={};
-      data.forEach(item=>{
+    let newUsers = null;
+    if(data && data.users) newUsers = data.users;
+    else if(Array.isArray(data)){
+      let obj={}; data.forEach(item=>{
         let phone=item.phone||item;
         if(typeof item==='string') obj[item]={role:'client', status:'active', name:item};
         else obj[phone]=item;
       });
-      usersData=obj;
-    } else if(data &&!data.users){
-      // Old format direct users object
-      usersData=data;
+      newUsers=obj;
+    } else if(data && Object.keys(data).length>0 && !data.users && !data.pending){
+      newUsers=data;
     }
-    // Only save if we got real users, don't save empty over cache
-    if(Object.keys(usersData).length>0){
-      localStorage.setItem('zondi_users', JSON.stringify(usersData));
-      document.getElementById('syncStatus').textContent='✅ Synced: '+Object.keys(usersData).length+' users | '+Object.keys(pendingData).length+' pending';
-    } else {
-      document.getElementById('syncStatus').textContent='⚠️ Server empty, using cache: '+Object.keys(usersData).length+' local';
+    if(newUsers && Object.keys(newUsers).length>0){
+      let h=hashObj(newUsers);
+      if(h!==lastUsersHash){
+        usersData=newUsers;
+        localStorage.setItem('zondi_users', JSON.stringify(usersData));
+        lastUsersHash=h;
+        renderClientsPatrols();
+        renderCamGrid();
+        document.getElementById('syncStatus').textContent='✅ Synced: '+Object.keys(usersData).length+' users | '+Object.keys(pendingData).length+' pending';
+      }
     }
-    render();
+    updateCounters();
   }catch(e){
-    console.log('index fail', e);
     document.getElementById('syncStatus').textContent='⚠️ Offline: '+Object.keys(usersData).length+' local';
-    render();
   }
 }
+
 async function loadPending(){
   try{
-    let res = await fetch('/api/pending').catch(()=> fetch('/api/get_pending')).catch(()=> fetch('/api/index'));
-    if(!res ||!res.ok){ res = await fetch('/api/get_pending'); }
+    let res = await fetch('/api/pending');
+    if(!res || !res.ok) res = await fetch('/api/get_pending');
     let data = await res.json();
-    console.log('PENDING RAW:', data);
     let pendingObj = null;
-    if(Array.isArray(data)){
-      pendingObj={}; data.forEach(item=>{ pendingObj[item.phone||item]=item; });
-    } else if(data.pending){
-      pendingObj=data.pending;
-    } else if(data.users){
-      // from /api/index
-      pendingObj=data.pending||{};
-    } else {
-      pendingObj=data;
-    }
-    // FIXED: Don't clear if empty! Keep cache to stop blinking
+    if(Array.isArray(data)){ pendingObj={}; data.forEach(item=>{ pendingObj[item.phone||item]=item; }); }
+    else if(data.pending) pendingObj=data.pending;
+    else pendingObj=data;
+    
     if(pendingObj && Object.keys(pendingObj).length>0){
-      pendingData = pendingObj;
-      localStorage.setItem('zondi_pending_cache', JSON.stringify(pendingData));
+      let h=hashObj(pendingObj);
+      if(h!==lastPendingHash){
+        pendingData=pendingObj;
+        localStorage.setItem('zondi_pending_cache', JSON.stringify(pendingData));
+        lastPendingHash=h;
+        renderPending();
+      }
+    } else {
+      renderPending();
     }
-    // Always render from pendingData (cached)
-    renderPending();
-  }catch(e){ console.log('pending fail', e); renderPending(); }
+  }catch(e){ renderPending(); }
 }
+
 function renderPending(){
   let pendDiv=document.getElementById('pending');
+  if(!pendDiv) return;
   pendDiv.innerHTML='';
   let keys=Object.keys(pendingData);
   keys.forEach(k=>{
@@ -173,6 +159,7 @@ function renderPending(){
   });
   document.getElementById('pPending').textContent=keys.length;
 }
+
 function switchTab(t){
   document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
   document.getElementById('tab-'+t).classList.add('active');
@@ -183,6 +170,7 @@ function switchTab(t){
   if(t==='cams') renderCamGrid();
   if(t==='map') initAllMap();
 }
+
 function renderCamGrid(){
   let appsDiv=document.getElementById('camApps'); if(!appsDiv) return;
   appsDiv.innerHTML='';
@@ -232,8 +220,7 @@ function renderMapMarkers(){
     if(showLiveOnly) return;
     let lat=u.lat||u.latitude; let lng=u.lng||u.lon||u.longitude;
     if(lat && lng){
-      let m = L.marker([parseFloat(lat), parseFloat(lng)]).addTo(allMap).bindPopup(`<b>${u.name||k}</b><br><button onclick="allMap.setView([${lat},${lng}],18)">🔍 ZOOM TO CLIENT</button>`);
-      m.on('click', ()=>{ allMap.setView([parseFloat(lat), parseFloat(lng)], 17); });
+      L.marker([parseFloat(lat), parseFloat(lng)]).addTo(allMap).bindPopup(`<b>${u.name||k}</b><br>${k}`);
     }
   });
   Object.keys(locData).forEach(k=>{
@@ -241,38 +228,48 @@ function renderMapMarkers(){
     L.marker([p.lat, p.lng], {icon: L.divIcon({html:'🚓', className:'', iconSize:[20,20]})}).addTo(allMap).bindPopup(`<b>${k}</b><br>🚓 Live`);
   });
 }
-function render(){
-  let cSearch=(document.getElementById('searchClient').value||'').toLowerCase();
-  let cDiv=document.getElementById('clients'); cDiv.innerHTML='';
-  let pDiv=document.getElementById('patrols'); pDiv.innerHTML='';
+
+function updateCounters(){
   let cCount=0,pCount=0;
   Object.keys(usersData).forEach(k=>{
     let u=usersData[k]; if(!u) return;
-    if(typeof u==='string') u={name:u, role:'client', status:'active'};
     if(u.role==='client') cCount++;
     if(u.role==='patrol' && u.status!=='pending') pCount++;
   });
+  document.getElementById('cTotal').textContent=cCount;
+  document.getElementById('pTotal').textContent=pCount;
+  document.getElementById('pPending').textContent=Object.keys(pendingData).length;
+  document.getElementById('liveNow').textContent=Object.keys(locData).length;
+}
+
+function renderClientsPatrols(){
+  let cSearch=(document.getElementById('searchClient')?.value||'').toLowerCase();
+  let pSearch=(document.getElementById('searchPatrol')?.value||'').toLowerCase();
+  let cDiv=document.getElementById('clients'); 
+  let pDiv=document.getElementById('patrols');
+  if(!cDiv || !pDiv) return;
+  cDiv.innerHTML=''; pDiv.innerHTML='';
   Object.keys(usersData).forEach(k=>{
     let u=usersData[k]; if(!u) return;
     if(typeof u==='string') u={name:u, role:'client', status:'active'};
     if(u.role==='client'){
-      if(cSearch &&!k.toLowerCase().includes(cSearch) &&!(u.name||'').toLowerCase().includes(cSearch)) return;
+      if(cSearch && !k.toLowerCase().includes(cSearch) && !(u.name||'').toLowerCase().includes(cSearch)) return;
       let card=document.createElement('div'); card.className='card';
       card.innerHTML=`<div class="iconBox">👤</div><b>${u.name||k}</b><small>${u.client_id||''}<br>${k}</small>`;
       cDiv.appendChild(card);
     }
     if(u.role==='patrol' && u.status!=='pending'){
+      if(pSearch && !k.toLowerCase().includes(pSearch)) return;
       let card=document.createElement('div'); card.className='card';
       card.innerHTML=`<div class="iconBox">🚓</div><b>${k}</b><small>${u.client_id||''}</small><br><button class="btn red small" onclick="deletePatrol('${k}')">Delete</button>`;
       pDiv.appendChild(card);
     }
   });
-  document.getElementById('cTotal').textContent=cCount;
-  document.getElementById('pTotal').textContent=pCount;
-  // pPending handled in renderPending()
-  document.getElementById('liveNow').textContent=Object.keys(locData).length;
-  renderCamGrid();
+  updateCounters();
 }
+
+function render(){ renderClientsPatrols(); renderCamGrid(); } // legacy support
+
 async function approvePatrol(key){
   await fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})});
   if(pendingData[key]){
@@ -282,8 +279,10 @@ async function approvePatrol(key){
     delete pendingData[key];
     localStorage.setItem('zondi_users', JSON.stringify(usersData));
     localStorage.setItem('zondi_pending_cache', JSON.stringify(pendingData));
+    lastUsersHash=hashObj(usersData);
+    lastPendingHash=hashObj(pendingData);
   }
-  render(); renderPending(); loadFromServer();
+  renderClientsPatrols(); renderPending(); loadFromServer();
 }
 async function deletePatrol(key){
   if(!confirm('Delete '+key+'?')) return;
@@ -292,16 +291,22 @@ async function deletePatrol(key){
   delete pendingData[key];
   localStorage.setItem('zondi_users', JSON.stringify(usersData));
   localStorage.setItem('zondi_pending_cache', JSON.stringify(pendingData));
-  render(); renderPending(); loadFromServer();
+  lastUsersHash=hashObj(usersData);
+  lastPendingHash=hashObj(pendingData);
+  renderClientsPatrols(); renderPending(); loadFromServer();
 }
 function logout(){
   sessionStorage.removeItem('zondi_dev_ok');
   location.href='/login';
 }
 function startApp(){
+  renderClientsPatrols(); renderPending(); renderCamGrid(); updateCounters();
   loadFromServer(); loadPending(); loadLivePatrols();
-  setInterval(()=>{ loadFromServer(); loadPending(); loadLivePatrols(); }, 8000);
+  setInterval(loadFromServer, 15000);
+  setInterval(loadPending, 15000);
+  setInterval(loadLivePatrols, 5000);
 }
+// INIT
 (function(){
   if(sessionStorage.getItem('zondi_dev_ok')==='yes'){
     document.getElementById('lockScreen').style.display='none';
