@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>ZONDI - DEV 99.9% FIXED</title>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>ZONDI - DEV 99.9% FIXED EDIT DELETE</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>:root{--bg:#0A0A0B;--card:#17171D;--card2:#1F1F27;--line:#272731;--blue:#2D7FF9;--gold:#E8B62A;--green:#00E676;--red:#FF3B30;--muted:#8E8E93;--ink:#fff}*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:var(--bg);color:var(--ink);padding-bottom:90px}.top{position:sticky;top:0;z-index:5000;background:rgba(10,10,11,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px}.sCard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}.sCard b{font-size:18px;display:block}.sCard span{font-size:9px;color:var(--muted);letter-spacing:.8px}.tabs{position:sticky;top:58px;z-index:4000;background:var(--bg);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}.tab{padding:12px 6px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-weight:800;font-size:11px;text-align:center;cursor:pointer}.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}.box{padding:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;cursor:pointer}.card b{font-size:13px;display:block}.card small{color:var(--muted);font-size:11px}.iconBox{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:8px;background:var(--card2);border:1px solid var(--line)}.btn{padding:10px 12px;border-radius:10px;border:none;font-weight:800;cursor:pointer;font-size:12px}.gold{background:var(--gold);color:#000}.blue{background:var(--blue);color:#fff}.red{background:var(--red);color:#fff}.gray{background:var(--card2);color:#fff;border:1px solid var(--line)}.btn.small{padding:7px 10px;font-size:11px}.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:#fff;margin-bottom:10px}
 #allMap{height:72vh;border-radius:16px;background:#0A0A0B;border:1px solid var(--line);position:relative;z-index:1}
 #lockScreen{position:fixed;inset:0;z-index:9999;background:#0A0A0B;display:flex;align-items:center;justify-content:center;padding:20px}
+#editModal{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;padding:20px}
 .pin-green{width:28px;height:28px;background:#00E676;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px #00E676}
 .pin-red{width:34px;height:34px;background:#FF3B30;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px #FF3B30;animation:jump 0.5s infinite alternate}
 .pin-red.stopped{animation:none !important}
@@ -23,11 +24,25 @@
     <div id="devErr" style="color:#FF3B30;font-size:11px;margin-top:8px;display:none">Wrong password</div>
   </div>
 </div>
-<div class="top"><div><div style="font-weight:900">🛰️ ZONDI DASHBOARD 99.9% FIXED</div><div style="font-size:10px;color:var(--muted)" id="syncStatus">Loading...</div></div><button class="btn blue small" onclick="logout()">Logout</button></div>
+<div id="editModal">
+  <div style="background:#17171D;border:1px solid #272731;border-radius:20px;padding:20px;width:100%;max-width:380px">
+    <b id="editTitle">✏️ Edit Client</b>
+    <input id="editName" class="search" style="margin-top:10px" placeholder="Name">
+    <input id="editPhone" class="search" placeholder="Phone (key)" disabled style="opacity:.5">
+    <select id="editCamBrand" class="search"><option value="">No Camera</option><option>V380 Pro</option><option>Yoosee</option><option>CareCamPro</option><option>Yi IoT</option><option>UBox</option><option>V380 Mini</option></select>
+    <input id="editCamId" class="search" placeholder="Camera ID">
+    <input id="editCamUrl" class="search" placeholder="Camera URL (RTSP/HLS/HTTP for IN ZONDI view)">
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn gray" style="flex:1" onclick="closeEdit()">Cancel</button>
+      <button class="btn blue" style="flex:1" onclick="saveEdit()">💾 Save</button>
+    </div>
+  </div>
+</div>
+<div class="top"><div><div style="font-weight:900">🛰️ ZONDI DASHBOARD 99.9% EDIT DELETE</div><div style="font-size:10px;color:var(--muted)" id="syncStatus">Loading...</div></div><button class="btn blue small" onclick="logout()">Logout</button></div>
 <div class="stats"><div class="sCard"><b id="cTotal">0</b><span>CLIENTS</span></div><div class="sCard"><b id="pTotal">0</b><span>PATROLS</span></div><div class="sCard"><b id="pPending" style="color:var(--gold)">0</b><span>PENDING</span></div><div class="sCard"><b id="liveNow" style="color:var(--green)">0</b><span>LIVE</span></div></div>
 <div class="tabs"><div class="tab active" id="tab-clients" onclick="switchTab('clients')">📁 CLIENTS</div><div class="tab" id="tab-patrols" onclick="switchTab('patrols')">🚓 PATROLS</div><div class="tab" id="tab-cams" onclick="switchTab('cams')">📷 CAMS</div><div class="tab" id="tab-map" onclick="switchTab('map')">🗺️ MAP</div></div>
 <div class="box" id="view-clients"><input id="searchClient" class="search" placeholder="🔍 Search client..." oninput="renderClientsPatrols()"><div class="grid" id="clients"></div></div>
-<div class="box" id="view-patrols" style="display:none"><input id="searchPatrol" class="search" placeholder="🔍 Search patrol..." oninput="renderClientsPatrols()"><div class="grid" id="patrols"></div><div style="margin-top:14px"><h4>🛡️ Pending Approvals - FIXED NO CRASH</h4><div class="grid" id="pending"></div></div></div>
+<div class="box" id="view-patrols" style="display:none"><input id="searchPatrol" class="search" placeholder="🔍 Search patrol..." oninput="renderClientsPatrols()"><div class="grid" id="patrols"></div><div style="margin-top:14px"><h4>🛡️ Pending Approvals</h4><div class="grid" id="pending"></div></div></div>
 <div class="box" id="view-map" style="display:none">
   <div id="emergencyBanner" class="emergencyBanner"><div style="font-weight:900;color:var(--red);font-size:13px">🔴 LIVE EMERGENCIES <span id="emergencyCount">0</span></div><div id="emergencyList" style="margin-top:8px;display:grid;gap:6px"></div><button class="btn red small" style="width:100%;margin-top:8px" onclick="stopAllEmergencies()">🛑 STOP ALL</button></div>
   <div style="display:flex;gap:8px;margin-bottom:10px">
@@ -59,7 +74,7 @@
   <input id="searchMap" class="search" style="margin-top:10px" placeholder="🔍 Search pin..." oninput="searchPinOnMap()">
 </div>
 <div class="box" id="view-cams" style="display:none">
-  <h4 style="margin:0 0 8px">📷 Camera Apps - NEW VIEW IN ZONDI</h4><div class="grid" style="grid-template-columns:1fr 1fr 1fr" id="camApps"></div>
+  <h4 style="margin:0 0 8px">📷 Camera Apps - VIEW IN ZONDI</h4><div class="grid" style="grid-template-columns:1fr 1fr 1fr" id="camApps"></div>
   <div style="margin-top:16px"><div class="grid" id="clientsByCam"></div></div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -99,7 +114,7 @@ function renderCamGrid(){
       }catch(e){}
     });
     let byCam=document.getElementById('clientsByCam'); if(!byCam) return; byCam.innerHTML='';
-    byCam.innerHTML=`<div class="card" style="grid-column:1/-1;background:#101014;border:1px solid #272731"><b>🎥 ZONDI IN-APP CAM VIEWER - NEW</b><small style="display:block;margin-top:6px">View cameras INSIDE Zondi, not in other apps!<br>V380/Yoosee RTSP → need go2rtc proxy to HLS</small><div style="display:flex;gap:6px;margin-top:10px"><input id="camUrlInput" class="search" placeholder="https://.../live.m3u8 or http://ip/video or rtsp:// (needs proxy)" style="margin:0;flex:1"><button class="btn blue small" onclick="playCamInApp()">▶️ PLAY IN ZONDI</button></div><video id="zondiVideo" controls autoplay muted playsinline style="width:100%;margin-top:10px;border-radius:12px;background:#000;display:none;max-height:40vh"></video><iframe id="zondiIframe" style="width:100%;height:300px;border:none;border-radius:12px;margin-top:10px;display:none;background:#000"></iframe><div style="font-size:10px;color:#8E8E93;margin-top:6px">HTTP/HLS plays directly. RTSP needs <a href="https://github.com/AlexxIT/go2rtc" target="_blank" style="color:#2D7FF9">go2rtc</a> proxy.</div></div>`;
+    byCam.innerHTML=`<div class="card" style="grid-column:1/-1;background:#101014;border:1px solid #272731"><b>🎥 ZONDI IN-APP CAM VIEWER - NEW</b><small style="display:block;margin-top:6px">View cameras INSIDE Zondi!<br>RTSP needs go2rtc proxy</small><div style="display:flex;gap:6px;margin-top:10px"><input id="camUrlInput" class="search" placeholder="https://.../live.m3u8 or http://ip/video" style="margin:0;flex:1"><button class="btn blue small" onclick="playCamInApp()">▶️ PLAY IN ZONDI</button></div><video id="zondiVideo" controls autoplay muted playsinline style="width:100%;margin-top:10px;border-radius:12px;background:#000;display:none;max-height:40vh"></video><iframe id="zondiIframe" style="width:100%;height:300px;border:none;border-radius:12px;margin-top:10px;display:none;background:#000"></iframe></div>`;
     Object.keys(usersData||{}).forEach(k=>{
       try{
         let u=usersData[k]; if(!u||typeof u==='string') return; if(u.role!=='client'||!u.camBrand) return;
@@ -112,11 +127,76 @@ function renderCamGrid(){
 }
 function openInside(brand){try{let info=APP_LINKS[brand]; if(!info) return; window.location.href=`intent://#Intent;package=${info.pkg};end`; setTimeout(()=>{window.open(info.store,'_blank');},1200);}catch(e){}}
 function openCamInApp(brand, clientKey){try{let u=clientKey?usersData[clientKey]:null; let url=u? (u.camUrl||u.rtsp||u.hls||'') : ''; if(url){let inp=document.getElementById('camUrlInput'); if(inp){inp.value=url; playCamInApp();}} else {switchTab('cams'); let inp=document.getElementById('camUrlInput'); if(inp){inp.placeholder='Enter URL for '+brand; inp.focus();}}}catch(e){}}
-function playCamInApp(){try{let url=(document.getElementById('camUrlInput')?.value||'').trim(); if(!url){alert('Enter URL'); return;} let video=document.getElementById('zondiVideo'); let iframe=document.getElementById('zondiIframe'); if(!video||!iframe) return; video.style.display='none'; iframe.style.display='none'; if(url.startsWith('rtsp://')){alert('RTSP needs go2rtc proxy. Convert to HLS first. See link below.'); iframe.style.display='block'; iframe.src='https://github.com/AlexxIT/go2rtc'; return;} if(url.includes('.m3u8')){if(Hls.isSupported()){let hls=new Hls(); hls.loadSource(url); hls.attachMedia(video); video.style.display='block'; video.play().catch(()=>{});} else {video.style.display='block'; video.src=url; video.play().catch(()=>{});}} else {video.style.display='block'; try{video.src=url; video.play().catch(()=>{video.style.display='none'; iframe.style.display='block'; iframe.src=url;});}catch(e){iframe.style.display='block'; iframe.src=url;}}}catch(e){alert('Error: '+e.message);}}
-function initAllMap(){try{setTimeout(()=>{let div=document.getElementById('allMap'); if(!div) return; if(allMap){try{allMap.invalidateSize(); renderMapMarkers();}catch(e){} return;} allMap=L.map('allMap',{zoomControl:false,maxZoom:19,minZoom:5}).setView([-25.6135,27.9852],15); let sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:19,attribution:'© Esri',errorTileUrl:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='}).addTo(allMap); let labels=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:19}).addTo(allMap); let street=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,maxNativeZoom:19}); let terrain=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,maxNativeZoom:17}); mapLayers={sat,street,terrain,labels}; L.control.scale({position:'bottomleft'}).addTo(allMap); if(navigator.geolocation){try{navigator.geolocation.watchPosition(p=>{myLoc={lat:p.coords.latitude,lng:p.coords.longitude};}, null, {enableHighAccuracy:true});}catch(e){}} renderMapMarkers();},300);}catch(e){}}
+function playCamInApp(){try{let url=(document.getElementById('camUrlInput')?.value||'').trim(); if(!url){alert('Enter URL'); return;} let video=document.getElementById('zondiVideo'); let iframe=document.getElementById('zondiIframe'); if(!video||!iframe) return; video.style.display='none'; iframe.style.display='none'; if(url.startsWith('rtsp://')){alert('RTSP needs go2rtc proxy. Convert to HLS first.'); iframe.style.display='block'; iframe.src='https://github.com/AlexxIT/go2rtc'; return;} if(url.includes('.m3u8')){if(Hls.isSupported()){let hls=new Hls(); hls.loadSource(url); hls.attachMedia(video); video.style.display='block'; video.play().catch(()=>{});} else {video.style.display='block'; video.src=url; video.play().catch(()=>{});}} else {video.style.display='block'; try{video.src=url; video.play().catch(()=>{video.style.display='none'; iframe.style.display='block'; iframe.src=url;});}catch(e){iframe.style.display='block'; iframe.src=url;}}}catch(e){alert('Error: '+e.message);}}
+function initAllMap(){try{setTimeout(()=>{let div=document.getElementById('allMap'); if(!div) return; if(allMap){try{allMap.invalidateSize(); renderMapMarkers();}catch(e){} return;} allMap=L.map('allMap',{zoomControl:false,maxZoom:19,minZoom:5}).setView([-25.6135,27.9852],15); let sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:19,attribution:'© Esri',errorTileUrl:'data:image/png;base64,[STRIPPED]'}).addTo(allMap); let labels=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:19}).addTo(allMap); let street=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,maxNativeZoom:19}); let terrain=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,maxNativeZoom:17}); mapLayers={sat,street,terrain,labels}; L.control.scale({position:'bottomleft'}).addTo(allMap); if(navigator.geolocation){try{navigator.geolocation.watchPosition(p=>{myLoc={lat:p.coords.latitude,lng:p.coords.longitude};}, null, {enableHighAccuracy:true});}catch(e){}} renderMapMarkers();},300);}catch(e){}}
 function renderMapMarkers(){try{if(!allMap) return; Object.values(markers||{}).forEach(m=>{try{if(m) allMap.removeLayer(m)}catch(e){}}); markers={}; Object.values(accCircles||{}).forEach(c=>{try{if(c) allMap.removeLayer(c)}catch(e){}}); accCircles={}; let now=Date.now(); Object.keys(locData||{}).forEach(phone=>{try{let p=locData[phone]; if(!p||p.lat==null) return; let lat=parseFloat(p.lat), lng=parseFloat(p.lng); if(isNaN(lat)||isNaN(lng)) return; let isEmergency=p.emergency||p.sos||p.status==='sos'; let isPatrol=p.role==='patrol'; let isOffline=(now - (lastSeen[phone]||0)) > 120000; if(isPatrol){if(!trails[phone]) trails[phone]=[]; trails[phone].push([lat,lng]); if(trails[phone].length>30) trails[phone].shift(); if(trails[phone].length>1){if(markers[phone+'_trail']) try{allMap.removeLayer(markers[phone+'_trail'])}catch(e){} try{markers[phone+'_trail']=L.polyline(trails[phone],{color:isEmergency?'#FF3B30':'#2D7FF9',weight:3,dashArray:'8 8',opacity:0.6}).addTo(allMap);}catch(e){}}} if(p.accuracy){try{accCircles[phone]=L.circle([lat,lng],{radius:parseFloat(p.accuracy)||10,color:isEmergency?'#FF3B30':(isPatrol?'#2D7FF9':'#00E676'),fillOpacity:0.12,weight:1}).addTo(allMap);}catch(e){}} let pinClass, icon; if(isOffline){pinClass='pin-grey'; icon='⚪';} else if(isEmergency){pinClass='pin-red'; icon='🆘';} else if(isPatrol){pinClass=p.status==='busy'?'pin-patrol-busy':'pin-patrol-available'; icon='🚓';} else {pinClass='pin-green'; icon='👤';} let divIcon=L.divIcon({html:`<div class="${pinClass}" id="pin-${phone}">${icon}</div>`,className:'',iconSize:[34,34],iconAnchor:[17,17]}); let statusText=isOffline?`⚪ Offline ${Math.round((now - (lastSeen[phone]||now))/60000)}m ago`: isEmergency?'🔴 EMERGENCY SOS': isPatrol?(p.status==='busy'?'🟠 Busy':'🔵 Available'):'🟢 Safe'; let popup=`<div style="min-width:180px"><b>${(p.name||phone).toString().slice(0,30)}</b><br><span style="font-size:12px;font-weight:800">${statusText}</span><br><small>${phone}<br>${lat.toFixed(6)}, ${lng.toFixed(6)}${p.accuracy?' ±'+p.accuracy+'m':''}</small><br><div style="display:grid;gap:4px;margin-top:6px">${isEmergency?`<button onclick="stopEmergency('${phone.replace(/'/g,'')}')" style="background:#FF3B30;color:#fff;border:none;padding:8px;border-radius:8px;font-weight:800">🛑 STOP GREEN</button>`:''}<button onclick="followTarget='${phone.replace(/'/g,'')}'; if(allMap) allMap.setView([${lat},${lng}],17)" style="background:#2D7FF9;color:#fff;border:none;padding:8px;border-radius:8px">📍 FOLLOW</button></div></div>`; try{markers[phone]=L.marker([lat,lng],{icon:divIcon}).addTo(allMap).bindPopup(popup); if(followTarget===phone){allMap.setView([lat,lng], allMap.getZoom(), {animate:true});}}catch(e){}}catch(e){}});}catch(e){}}
 function updateCounters(){try{let c=0,p=0; Object.keys(usersData||{}).forEach(k=>{let u=usersData[k]; if(!u||typeof u==='string') return; if(u.role==='client')c++; if(u.role==='patrol'&&u.status!=='pending')p++;}); let el1=document.getElementById('cTotal'); if(el1) el1.textContent=c; let el2=document.getElementById('pTotal'); if(el2) el2.textContent=p; let el3=document.getElementById('pPending'); if(el3) el3.textContent=Object.keys(pendingData||{}).length; let el4=document.getElementById('liveNow'); if(el4) el4.textContent=Object.keys(locData||{}).length;}catch(e){}}
-function renderClientsPatrols(){try{let cSearch=(document.getElementById('searchClient')?.value||'').toLowerCase(); let pSearch=(document.getElementById('searchPatrol')?.value||'').toLowerCase(); let cDiv=document.getElementById('clients'); let pDiv=document.getElementById('patrols'); if(!cDiv||!pDiv) return; cDiv.innerHTML=''; pDiv.innerHTML=''; Object.keys(usersData||{}).forEach(k=>{try{let u=usersData[k]; if(!u) return; if(typeof u==='string') u={name:u,role:'client',status:'active'}; if(u.role==='client'){if(cSearch&&!k.toLowerCase().includes(cSearch)&&!(u.name||'').toLowerCase().includes(cSearch)) return; let card=document.createElement('div'); card.className='card'; card.innerHTML=`<div class="iconBox">👤</div><b>${(u.name||k).toString().slice(0,20)}</b><small>${(u.client_id||'').toString().slice(0,20)}<br>${k.slice(0,20)}</small>`; cDiv.appendChild(card);} if(u.role==='patrol'&&u.status!=='pending'){if(pSearch&&!k.toLowerCase().includes(pSearch)) return; let card=document.createElement('div'); card.className='card'; card.innerHTML=`<div class="iconBox">🚓</div><b>${k.slice(0,20)}</b><small>${(u.client_id||'').toString().slice(0,20)}</small><br><button class="btn red small" onclick="deletePatrol('${k.replace(/'/g,'')}')">Delete</button>`; pDiv.appendChild(card);}}catch(e){}}); updateCounters();}catch(e){}}
+function renderClientsPatrols(){
+  try{
+    let cSearch=(document.getElementById('searchClient')?.value||'').toLowerCase();
+    let pSearch=(document.getElementById('searchPatrol')?.value||'').toLowerCase();
+    let cDiv=document.getElementById('clients'); let pDiv=document.getElementById('patrols');
+    if(!cDiv||!pDiv) return; cDiv.innerHTML=''; pDiv.innerHTML='';
+    Object.keys(usersData||{}).forEach(k=>{
+      try{
+        let u=usersData[k]; if(!u) return; if(typeof u==='string') u={name:u,role:'client',status:'active'};
+        if(u.role==='client'){
+          if(cSearch&&!k.toLowerCase().includes(cSearch)&&!(u.name||'').toLowerCase().includes(cSearch)) return;
+          let card=document.createElement('div'); card.className='card';
+          card.innerHTML=`<div class="iconBox">👤</div><b>${(u.name||k).toString().slice(0,20)}</b><small>${(u.client_id||'').toString().slice(0,20)}<br>${k.slice(0,20)}<br>${u.camBrand||'No cam'} ${u.camId||''}</small><div style="display:flex;gap:6px;margin-top:8px"><button class="btn gold small" style="flex:1" onclick="editClient('${k.replace(/'/g,'')}')">✏️ Edit</button><button class="btn red small" style="flex:1" onclick="deleteClient('${k.replace(/'/g,'')}')">🗑️ Del</button></div>`;
+          cDiv.appendChild(card);
+        }
+        if(u.role==='patrol'&&u.status!=='pending'){
+          if(pSearch&&!k.toLowerCase().includes(pSearch)) return;
+          let card=document.createElement('div'); card.className='card';
+          card.innerHTML=`<div class="iconBox">🚓</div><b>${k.slice(0,20)}</b><small>${(u.client_id||'').toString().slice(0,20)}</small><br><div style="display:flex;gap:6px;margin-top:6px"><button class="btn gold small" style="flex:1" onclick="editClient('${k.replace(/'/g,'')}')">✏️ Edit</button><button class="btn red small" style="flex:1" onclick="deletePatrol('${k.replace(/'/g,'')}')">Del</button></div>`;
+          pDiv.appendChild(card);
+        }
+      }catch(e){}
+    });
+    updateCounters();
+  }catch(e){}
+}
+let editingKey=null;
+function editClient(key){
+  try{
+    let u=usersData[key]; if(!u) return; if(typeof u==='string') u={name:u,role:'client',status:'active'};
+    editingKey=key;
+    document.getElementById('editTitle').innerText='✏️ Edit '+(u.role==='patrol'?'Patrol':'Client');
+    document.getElementById('editName').value=u.name||'';
+    document.getElementById('editPhone').value=key;
+    document.getElementById('editCamBrand').value=u.camBrand||'';
+    document.getElementById('editCamId').value=u.camId||'';
+    document.getElementById('editCamUrl').value=u.camUrl||u.rtsp||u.hls||'';
+    document.getElementById('editModal').style.display='flex';
+  }catch(e){}
+}
+function closeEdit(){ document.getElementById('editModal').style.display='none'; editingKey=null; }
+async function saveEdit(){
+  try{
+    if(!editingKey) return;
+    let u=usersData[editingKey]||{}; if(typeof u==='string') u={role:'client',status:'active'};
+    u.name=document.getElementById('editName').value.trim()||editingKey;
+    u.camBrand=document.getElementById('editCamBrand').value||'';
+    u.camId=document.getElementById('editCamId').value.trim()||'';
+    u.camUrl=document.getElementById('editCamUrl').value.trim()||'';
+    if(u.camUrl){ u.rtsp=u.camUrl; u.hls=u.camUrl; }
+    usersData[editingKey]=u;
+    try{localStorage.setItem('zondi_users',JSON.stringify(usersData));}catch(e){}
+    try{ await fetch('/api/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:editingKey, ...u})}); }catch(e){}
+    try{ await fetch('/api/index',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'update', phone:editingKey, data:u})}); }catch(e){}
+    closeEdit(); renderClientsPatrols(); renderCamGrid(); alert('✅ Saved '+editingKey);
+  }catch(e){ alert('Error: '+e.message); }
+}
+async function deleteClient(key){
+  try{
+    if(!confirm('Delete CLIENT '+key+'?'))return;
+    delete usersData[key];
+    try{localStorage.setItem('zondi_users',JSON.stringify(usersData));}catch(e){}
+    try{ await fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})}); }catch(e){}
+    renderClientsPatrols(); renderCamGrid(); updateCounters();
+  }catch(e){}
+}
 async function approvePatrol(key){try{await fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})}); if(pendingData[key]){usersData[key]=pendingData[key]; usersData[key].status='active'; usersData[key].role='patrol'; delete pendingData[key]; try{localStorage.setItem('zondi_users',JSON.stringify(usersData)); localStorage.setItem('zondi_pending_cache',JSON.stringify(pendingData));}catch(e){} lastUsersHash=hashObj(usersData); lastPendingHash=hashObj(pendingData);} renderClientsPatrols(); renderPending(); loadFromServer();}catch(e){}}
 async function deletePatrol(key){try{if(!confirm('Delete '+key+'?'))return; await fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:key})}); delete usersData[key]; delete pendingData[key]; try{localStorage.setItem('zondi_users',JSON.stringify(usersData)); localStorage.setItem('zondi_pending_cache',JSON.stringify(pendingData));}catch(e){} lastUsersHash=hashObj(usersData); lastPendingHash=hashObj(pendingData); renderClientsPatrols(); renderPending(); loadFromServer();}catch(e){}}
 function logout(){try{sessionStorage.removeItem('zondi_dev_ok'); location.href='/login';}catch(e){}}
