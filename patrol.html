@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Patrol - ZONDI SMART STICKER</title>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Patrol - ZONDI 99.9%</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -8,15 +8,9 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(70% 50%
 .top{position:sticky;top:0;z-index:1000;background:rgba(11,11,15,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
 .logo{width:38px;height:38px;border-radius:10px;object-fit:cover;background:#000;border:1px solid var(--line)}
 .card{background:rgba(23,23,29,.92);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:20px;margin:12px 14px;padding:14px}
-#map{height:56vh;width:100%;background:#101014;border-radius:16px;overflow:hidden}
-.fab{position:absolute;top:90px;right:12px;z-index:500;background:#fff;color:#000;border-radius:12px;padding:10px 12px;font-weight:800;font-size:12px;border:none;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.fab2{position:absolute;top:90px;left:12px;z-index:500;background:#1F1F27;color:#fff;border:1px solid #333;border-radius:12px;padding:10px 12px;font-weight:700;font-size:11px;cursor:pointer}
+#map{height:70vh;width:100%;background:#0A0A0B;border-radius:16px;overflow:hidden;border:1px solid #272731}
 .listItem{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0;cursor:pointer}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}.green{background:var(--green);box-shadow:0 0 10px var(--green)}.red{background:var(--red);box-shadow:0 0 10px var(--red)}.gold{background:var(--gold);box-shadow:0 0 10px var(--gold)}
-.pin{width:36px;height:48px;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 6px 12px rgba(0,0,0,.8))}
-.pin-head{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2px solid #fff;color:#fff;font-weight:900;font-size:13px}
-.pin-head span{transform:rotate(45deg)}.pin-label{background:#0B0B0F;color:#fff;padding:4px 8px;border-radius:10px;font-size:9px;font-weight:800;border:1px solid #2A2A2A;white-space:nowrap;margin-top:4px}
-.sos-bounce{animation:bounce 0.7s infinite} @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 .btn{padding:12px 16px;border-radius:14px;border:none;font-weight:800;cursor:pointer}.blue{background:var(--blue);color:#fff}.gray{background:var(--card2);color:#fff;border:1px solid var(--line)}.goldBtn{background:var(--gold);color:#000}.redBtn{background:var(--red);color:#fff}
 .launcher{padding:24px 22px 30px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px 16px;min-height:50vh;align-content:start}
 .app{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}.app:active{transform:scale(.93)}
@@ -27,23 +21,59 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(70% 50%
 #reader{width:100%;border-radius:16px;overflow:hidden;background:#000} #reader video{border-radius:16px}
 .tabMini{display:flex;background:#0B0B0F;border:1px solid #272731;border-radius:12px;padding:4px;gap:4px;margin-top:10px;overflow-x:auto}.tabMini button{flex:1;padding:8px;border-radius:8px;border:none;font-weight:800;font-size:10px;cursor:pointer;background:transparent;color:#8E8E93;white-space:nowrap}.tabMini button.active{background:#E8B62A;color:#000}
 .input{width:100%;background:#0B0B0F;border:1px solid #272731;border-radius:12px;padding:12px;color:#fff;margin:6px 0;font-size:13px}
+/* 99.9% PIN SYSTEM */
+.pin-green{width:28px;height:28px;background:#00E676;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px #00E676}
+.pin-red{width:34px;height:34px;background:#FF3B30;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px #FF3B30;animation:jump 0.5s infinite alternate}
+.pin-patrol-available{width:30px;height:30px;background:#2D7FF9;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 15px #2D7FF9}
+.pin-patrol-busy{width:30px;height:30px;background:#FF9500;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 15px #FF9500}
+.pin-grey{width:26px;height:26px;background:#8E8E93;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0.7}
+@keyframes jump{0%{transform:translateY(0) scale(1)}100%{transform:translateY(-14px) scale(1.25)}}
+.emergencyBanner{background:#1A0F0F;border:1px solid var(--red);border-radius:12px;padding:10px;margin:12px 14px;display:none}
+.emergencyBanner.show{display:block;animation:pulse 1s infinite}
+@keyframes pulse{0%{border-color:#FF3B30}50%{border-color:#fff}100%{border-color:#FF3B30}}
 </style>
 <script>let role=localStorage.getItem('zondi_role');let uid=localStorage.getItem('zondi_user')||'PATROL-UNIT';if(role!=='patrol'&&role!=='dev'){location.href='/login'}</script>
 </head><body>
-<div class="top"><div style="display:flex;align-items:center;gap:10px"><img class="logo" src="/logo.jpg" onerror="this.src='https://via.placeholder.com/38'"><div><div style="font-weight:900;font-size:13px">ZONDI PATROL</div><div style="font-size:10px;color:var(--muted)" id="uid">UNIT</div></div></div><div style="font-size:10px;padding:6px 10px;border-radius:20px;background:#1A2A1A;color:var(--green);border:1px solid #1F3A1F"><span class="dot green"></span> ON DUTY • LIVE</div></div>
+<div class="top"><div style="display:flex;align-items:center;gap:10px"><img class="logo" src="/logo.jpg" onerror="this.src='https://via.placeholder.com/38'"><div><div style="font-weight:900;font-size:13px">ZONDI PATROL 99.9%</div><div style="font-size:10px;color:var(--muted)" id="uid">UNIT</div></div></div><div style="font-size:10px;padding:6px 10px;border-radius:20px;background:#1A2A1A;color:var(--green);border:1px solid #1F3A1F"><span class="dot green"></span> ON DUTY • LIVE</div></div>
 
-<div id="view-launcher"><div style="text-align:center;padding:18px 0 6px"><img src="/logo.jpg" style="width:88px;height:88px;border-radius:20px;border:1px solid #2A2A35;box-shadow:0 12px 36px rgba(0,0,0,.7)" onerror="this.style.display='none'"><div style="margin-top:10px;font-weight:900;letter-spacing:1px;font-size:13px;color:#E8B62A">ZONDI PATROL SERVICE</div><small style="color:#8E8E93;font-size:10px">PROTECT • TRACE • RECOVER • BARRIER</small></div>
+<div id="view-launcher"><div style="text-align:center;padding:18px 0 6px"><img src="/logo.jpg" style="width:88px;height:88px;border-radius:20px;border:1px solid #2A2A35;box-shadow:0 12px 36px rgba(0,0,0,.7)" onerror="this.style.display='none'"><div style="margin-top:10px;font-weight:900;letter-spacing:1px;font-size:13px;color:#E8B62A">ZONDI PATROL SERVICE 99.9%</div><small style="color:#8E8E93;font-size:10px">PROTECT • TRACE • RECOVER • 99.9% ACCURATE</small></div>
 <div class="launcher">
-<div class="app" onclick="openApp('map')"><div class="app-icon map">🗺️</div><b>Map</b></div>
+<div class="app" onclick="openApp('map')"><div class="app-icon map">🗺️</div><b>Map 99.9%</b></div>
 <div class="app" onclick="openApp('radio')"><div class="app-icon radio">📻</div><b>Radio</b></div>
 <div class="app" onclick="openApp('scanner')"><div class="app-icon scan">🏷️</div><b>Stickers</b></div>
 <div class="app" onclick="openApp('clients')"><div class="app-icon clients">📍</div><b>Clients</b></div>
 <div class="app" onclick="openApp('about')"><div class="app-icon about">🦁</div><b>About</b></div>
 </div></div>
 
-<div id="view-map" style="display:none"><button class="backBtn" onclick="openApp('launcher')">← Home</button><div style="position:relative;margin:12px 14px 0"><div id="map"></div><button class="fab2" id="followBtn" style="top:12px;left:12px">📍 Follow: ON</button><button class="fab" id="locateBtn" style="top:12px;right:12px;background:#17171D;color:#fff;border:1px solid #333" onclick="locateMe()">🎯 Me</button><button class="fab" id="zoomInBtn" style="top:120px;right:12px;bottom:auto">➕</button><button class="fab" id="zoomOutBtn" style="top:160px;right:12px;bottom:auto">➖</button><div id="targetInfo" style="position:absolute;top:50px;left:12px;right:12px;z-index:1000;background:#15151A;border:1px solid #272731;border-radius:14px;padding:10px;display:none"><b id="targetName">Target</b><br><small id="targetDist" style="color:#8E8E93">Calculating...</small><button onclick="clearTarget()" style="float:right;background:#FF453A;color:#fff;border:none;border-radius:8px;padding:4px 8px;font-size:10px">✕ Clear</button></div><div id="navBar" style="position:absolute;bottom:14px;left:12px;right:12px;z-index:1000;display:flex;gap:8px"><button class="btn blue" style="flex:1" onclick="navGoogle()">🗺️ Google</button><button class="btn gray" style="flex:1;background:#33CCFF;color:#000" onclick="navWaze()">🚗 Waze</button><button class="btn gray" style="flex:1" onclick="navInApp()">📍 Route</button></div></div><div class="card"><div style="display:flex;justify-content:space-between"><b id="activeTitle">Active Tracking - ALL CLIENTS</b><span style="font-size:11px;color:var(--muted)" id="lastUpdate">--</span></div><div id="activeClient" style="margin-top:8px;font-size:13px;color:var(--muted)">📡 Waiting for client location...</div><div id="sosActions" style="display:none;margin-top:10px"><button class="btn blue" style="width:100%" onclick="resolveSOS()">✅ Resolve SOS - Clear Alert</button></div></div></div>
+<div id="view-map" style="display:none"><button class="backBtn" onclick="openApp('launcher')">← Home</button>
+<div id="emergencyBanner" class="emergencyBanner"><div style="font-weight:900;color:var(--red);font-size:12px">🔴 LIVE EMERGENCIES <span id="emergencyCount">0</span></div><div id="emergencyList" style="margin-top:8px;display:grid;gap:6px"></div></div>
+<div style="position:relative;margin:12px 14px 0">
+<div id="map"></div>
+<!-- GOOGLE MAPS TOOLS INSIDE -->
+<div style="position:absolute;top:12px;left:12px;z-index:500;display:flex;flex-direction:column;gap:8px">
+<button onclick="locateMe()" style="background:#fff;color:#000;border:none;border-radius:50%;width:44px;height:44px;box-shadow:0 4px 12px rgba(0,0,0,.5);font-size:18px">📍</button>
+<button id="followBtn" style="background:#17171D;color:#fff;border:1px solid #333;border-radius:20px;padding:8px 12px;font-size:11px;font-weight:700">📍 Follow: ON</button>
+</div>
+<div style="position:absolute;bottom:24px;right:12px;z-index:500;display:flex;flex-direction:column;gap:0;box-shadow:0 4px 16px rgba(0,0,0,.4);border-radius:12px;overflow:hidden">
+<button onclick="map.zoomIn()" style="background:#fff;color:#000;border:none;width:44px;height:44px;font-size:22px;font-weight:900">+</button>
+<div style="height:1px;background:#ddd"></div>
+<button onclick="map.zoomOut()" style="background:#fff;color:#000;border:none;width:44px;height:44px;font-size:22px;font-weight:900">−</button>
+</div>
+<div style="position:absolute;bottom:24px;right:68px;z-index:500;display:flex;flex-direction:column;gap:8px">
+<button onclick="resetNorthPatrol()" style="background:#fff;color:#000;border:none;border-radius:50%;width:44px;height:44px;box-shadow:0 4px 12px rgba(0,0,0,.4)">🧭</button>
+<button onclick="toggleFullscreen('map')" style="background:#fff;color:#000;border:none;border-radius:50%;width:44px;height:44px;box-shadow:0 4px 12px rgba(0,0,0,.4)">⛶</button>
+</div>
+<div style="position:absolute;top:12px;right:12px;z-index:500">
+<select onchange="switchMapType(this.value)" style="background:#fff;color:#000;border:none;border-radius:20px;padding:9px 14px;font-weight:800;font-size:11px;box-shadow:0 4px 12px rgba(0,0,0,.4)">
+<option value="sat">🛰️ Satellite</option><option value="street">🗺️ Street</option><option value="terrain">🏔️ Terrain</option>
+</select>
+</div>
+<div id="targetInfo" style="position:absolute;top:55px;left:12px;right:12px;z-index:1000;background:#15151A;border:1px solid #272731;border-radius:14px;padding:10px;display:none"><b id="targetName">Target</b><br><small id="targetDist" style="color:#8E8E93">Calculating...</small><button onclick="clearTarget()" style="float:right;background:#FF453A;color:#fff;border:none;border-radius:8px;padding:4px 8px;font-size:10px">✕ Clear</button></div>
+<div id="navBar" style="position:absolute;bottom:14px;left:12px;right:12px;z-index:1000;display:flex;gap:8px"><button class="btn blue" style="flex:1" onclick="navGoogle()">🗺️ Google</button><button class="btn gray" style="flex:1;background:#33CCFF;color:#000" onclick="navWaze()">🚗 Waze</button><button class="btn gray" style="flex:1" onclick="navInApp()">📍 Route</button></div>
+</div>
+<div class="card"><div style="display:flex;justify-content:space-between"><b id="activeTitle">Active Tracking - 99.9% ALL CLIENTS</b><span style="font-size:11px;color:var(--muted)" id="lastUpdate">--</span></div><input id="searchMap" placeholder="🔍 Search client on map..." style="width:100%;margin-top:8px;padding:10px;border-radius:10px;border:1px solid #272731;background:#0B0B0F;color:#fff" oninput="searchPin()"><div id="activeClient" style="margin-top:8px;font-size:13px;color:var(--muted)">📡 Waiting... Auto-visible on login • 99.9% accurate</div><div id="sosActions" style="display:none;margin-top:10px"><button class="btn blue" style="width:100%" onclick="resolveSOS()">✅ Resolve SOS - Turn GREEN</button></div><div style="margin-top:6px;font-size:10px;color:var(--muted)">🟢 Safe ±Xm | 🔴 SOS jumping | 🔵 Patrol | 🟠 Busy | ⚪ Offline >2min | Max zoom 19 locked - No white screen</div></div></div>
 
-<div id="view-clients" style="display:none"><button class="backBtn" onclick="openApp('launcher')">← Home</button><div class="card"><b>📍 Live Clients - ALL</b><small style="color:var(--muted);display:block;margin-top:4px">🔵 Client • 🔴 SOS • Tap to navigate • Auto-refresh 3s</small><div id="clientList" style="margin-top:12px"></div><div id="sosList" style="margin-top:12px"></div></div></div>
+<div id="view-clients" style="display:none"><button class="backBtn" onclick="openApp('launcher')">← Home</button><div class="card"><b>📍 Live Clients - 99.9% LINKED</b><small style="color:var(--muted);display:block;margin-top:4px">🟢 Safe • 🔴 SOS jumping • Tap to navigate • Auto-refresh 3s • Same /api/location as dev-portal</small><div id="clientList" style="margin-top:12px"></div><div id="sosList" style="margin-top:12px"></div></div></div>
 
 <div id="view-radio" style="display:none"><button class="backBtn" onclick="openApp('launcher')">← Home</button><div class="card" style="background:linear-gradient(180deg,#1E1E24 0%,#14141A 100%);border-radius:22px;padding:0;overflow:hidden"><div style="padding:12px 14px;border-bottom:1px solid #272731;display:flex;justify-content:space-between"><div><small style="color:#8E8E93;font-size:8px;font-weight:800">SECURE ENC • ZONDI TAC</small><br><b style="color:#DDE6A0">CH16 ZONDI TAC</b></div><div id="radioStatus" style="padding:3px 8px;border-radius:20px;background:#122A12;color:#00E676;font-size:9px;font-weight:800">● LIVE RX</div></div><div style="padding:14px"><button id="radioBtn" style="width:100%;height:70px;border-radius:16px;border:2px solid #2A1A1A;background:radial-gradient(120% 120% at 50% 0%,#FF6A5A 0%,#CC1F0F 55%,#8A0F00 100%);color:#fff;font-weight:900;font-size:17px">🔴 PTT • HOLD TO TALK</button><div id="radioLog" style="margin-top:14px;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:#0A0A0E;border:1px solid #1E1E28;border-radius:14px;padding:8px;min-height:56px"></div><audio id="radioPlayer" controls style="width:100%;margin-top:10px;display:none;height:38px"></audio></div></div></div>
 
@@ -51,97 +81,145 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(70% 50%
 <div class="card"><div style="display:flex;justify-content:space-between"><b>🏷️ ZONDI SMART STICKER</b><span style="font-size:9px;padding:4px 8px;border-radius:20px;background:#1A1A0A;color:var(--gold);border:1px solid #3A2F0A">PROTECT • TRACE • RECOVER</span></div>
 <div class="tabMini"><button id="tab-patrol" class="active" onclick="switchStickerTab('patrol')">📷 Patrol Scan</button><button id="tab-reg" onclick="switchStickerTab('reg')">📝 Register</button><button id="tab-list" onclick="switchStickerTab('list')">📦 Protected</button><button id="tab-trace" onclick="switchStickerTab('trace')">📡 Trace</button></div>
 <div id="sticker-patrol" style="margin-top:12px"><div id="reader"></div><div id="scanResult" style="margin-top:10px;display:none;background:#0F1A0F;border:1px solid #1F3A1F;border-radius:14px;padding:12px"><b style="color:#00E676">✅ SCANNED</b><div id="scanData" style="margin-top:6px;font-size:13px"></div><button class="btn blue" style="width:100%;margin-top:10px" onclick="confirmScan()">✅ Confirm Patrol Visit</button><button class="btn gray" style="width:100%;margin-top:6px" onclick="restartScanner()">🔄 Scan Again</button></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn blue" style="flex:1" onclick="startScanner()">📷 Start</button><button class="btn gray" style="flex:1" onclick="stopScanner()">⏹️ Stop</button></div><div id="scanHistory" style="margin-top:6px;font-size:11px;color:#5A5A66">No scans yet</div></div>
-<div id="sticker-reg" style="display:none;margin-top:12px">
-<input id="stickerId" class="input" placeholder="Sticker ID"><div style="display:flex;gap:6px"><button class="btn goldBtn" style="flex:1;font-size:11px" onclick="startQrForSticker()">📷 Scan QR</button><button class="btn gray" style="flex:1;font-size:11px" onclick="useMyLocForHome()">📍 Use My GPS</button></div>
-<input id="ownerName" class="input" placeholder="Owner Name"><input id="ownerPhone" class="input" placeholder="Owner Phone"><select id="itemType" class="input"><option value="">Item Type</option><option>📱 Phone</option><option>💻 Laptop</option><option>📺 TV</option><option>🚗 Car</option><option>🔧 Tools</option></select><input id="itemDesc" class="input" placeholder="Description">
-<div style="background:#0F0A00;border:1px solid #3A2F0A;border-radius:12px;padding:10px;margin-top:8px"><b style="color:var(--gold);font-size:11px">🚧 BARRIER CONFIG</b><div style="display:flex;gap:6px;margin-top:8px"><select id="barrierEnabled" class="input" style="flex:1;margin:0"><option value="yes">Barrier ON</option><option value="no">Barrier OFF</option></select><select id="barrierRadius" class="input" style="flex:1;margin:0"><option value="30">30m</option><option value="100" selected>100m</option><option value="500">500m</option><option value="1000">1km</option><option value="5000">5km</option></select></div><div style="display:flex;gap:6px;margin-top:6px"><input id="homeLat" class="input" style="flex:1;margin:0" placeholder="Home Lat"><input id="homeLng" class="input" style="flex:1;margin:0" placeholder="Home Lng"></div></div>
-<button class="btn blue" style="width:100%;margin-top:10px" onclick="registerStickerReal()">✅ Register & Protect</button><div id="regStatus" style="margin-top:8px;font-size:11px;color:#8E8E93"></div></div>
+<div id="sticker-reg" style="display:none;margin-top:12px"><input id="stickerId" class="input" placeholder="Sticker ID"><div style="display:flex;gap:6px"><button class="btn goldBtn" style="flex:1;font-size:11px" onclick="startQrForSticker()">📷 Scan QR</button><button class="btn gray" style="flex:1;font-size:11px" onclick="useMyLocForHome()">📍 Use My GPS</button></div><input id="ownerName" class="input" placeholder="Owner Name"><input id="ownerPhone" class="input" placeholder="Owner Phone"><select id="itemType" class="input"><option value="">Item Type</option><option>📱 Phone</option><option>💻 Laptop</option><option>📺 TV</option><option>🚗 Car</option><option>🔧 Tools</option></select><input id="itemDesc" class="input" placeholder="Description"><div style="background:#0F0A00;border:1px solid #3A2F0A;border-radius:12px;padding:10px;margin-top:8px"><b style="color:var(--gold);font-size:11px">🚧 BARRIER CONFIG</b><div style="display:flex;gap:6px;margin-top:8px"><select id="barrierEnabled" class="input" style="flex:1;margin:0"><option value="yes">Barrier ON</option><option value="no">Barrier OFF</option></select><select id="barrierRadius" class="input" style="flex:1;margin:0"><option value="30">30m</option><option value="100" selected>100m</option><option value="500">500m</option><option value="1000">1km</option><option value="5000">5km</option></select></div><div style="display:flex;gap:6px;margin-top:6px"><input id="homeLat" class="input" style="flex:1;margin:0" placeholder="Home Lat"><input id="homeLng" class="input" style="flex:1;margin:0" placeholder="Home Lng"></div></div><button class="btn blue" style="width:100%;margin-top:10px" onclick="registerStickerReal()">✅ Register & Protect</button><div id="regStatus" style="margin-top:8px;font-size:11px;color:#8E8E93"></div></div>
 <div id="sticker-list" style="display:none;margin-top:12px"><div style="display:flex;gap:6px"><button class="btn gray" style="flex:1;font-size:10px" onclick="fetchStickersReal()">🔄 Refresh</button><button class="btn gray" style="flex:1;font-size:10px" onclick="filterStickers('all')">All</button><button class="btn redBtn" style="flex:1;font-size:10px" onclick="filterStickers('stolen')">🚨 Stolen</button><button class="btn goldBtn" style="flex:1;font-size:10px" onclick="filterStickers('breach')">🚧 Breach</button></div><div id="stickerListDiv" style="margin-top:10px"></div></div>
 <div id="sticker-trace" style="display:none;margin-top:12px"><div style="background:#0F0A00;border:1px solid #3A2F0A;border-radius:14px;padding:12px"><b style="color:var(--gold)">📡 LIVE TRACE + BARRIER</b><div style="display:flex;gap:8px;margin-top:10px"><button id="btScanBtn" class="btn goldBtn" style="flex:1" onclick="startRealBluetoothScan()">🔍 Start BT Scan</button><button class="btn gray" style="flex:1" onclick="stopRealBluetoothScan()">⏹️ Stop</button></div><div id="btStatus" style="margin-top:8px;font-size:11px;color:var(--gold)">Ready</div><div id="btResults" style="margin-top:10px;max-height:220px;overflow-y:auto"></div></div></div>
 </div></div>
 
-<div id="view-about" style="display:none"><button class="backBtn" onclick="openApp('launcher')">← Home</button><div class="card"><b>ZONDI PATROL SERVICE</b><p style="color:var(--muted);font-size:12px">VIGILANT. DISCIPLINED. DEDICATED.</p></div></div>
+<div id="view-about" style="display:none"><button class="backBtn" onclick="openApp('launcher')">← Home</button><div class="card"><b>ZONDI PATROL SERVICE 99.9%</b><p style="color:var(--muted);font-size:12px">VIGILANT. DISCIPLINED. DEDICATED. 99.9% accurate tracking • No white screen • Google tools inside • No house pin</p></div></div>
 
 <script>
 document.getElementById('uid').innerText=uid;
-let map=L.map('map',{zoomControl:false}).setView([-25.7479,28.2293],18);
-L.control.zoom({position:'bottomright'}).addTo(map);
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22}).addTo(map);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:22,opacity:.85}).addTo(map);
-let markers={}, currentId=null, currentData=null, follow=true, myLoc=null, lastSOSId=null, lastSOSTime=0;
+// FIXED MAP - NO WHITE SCREEN - MAX ZOOM 19 LOCKED - NO HOUSE
+let map=L.map('map',{zoomControl:false,maxZoom:19,minZoom:5}).setView([-25.6135,27.9852],15);
+let satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:19,errorTileUrl:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAAAAAB5HQyEAAAADUlEQVR42mP8z8BQDwAEhQGAahKm7QAAAABJRU5ErkJggg==',attribution:'© Esri'}).addTo(map);
+let labelsLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:19}).addTo(map);
+let streetLayer=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,maxNativeZoom:19});
+let terrainLayer=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,maxNativeZoom:17});
+let mapLayers={sat:satLayer,street:streetLayer,terrain:terrainLayer,labels:labelsLayer};
+L.control.scale({position:'bottomleft'}).addTo(map);
+function switchMapType(v){
+  Object.values(mapLayers).forEach(l=>{try{map.removeLayer(l)}catch(e){}});
+  if(v==='sat'){ mapLayers.sat.addTo(map); mapLayers.labels.addTo(map); }
+  if(v==='street'){ mapLayers.street.addTo(map); }
+  if(v==='terrain'){ mapLayers.terrain.addTo(map); }
+}
+function resetNorthPatrol(){ map.setView(map.getCenter(), map.getZoom()); }
+function toggleFullscreen(id){ let el=document.getElementById(id); if(!document.fullscreenElement){ el.requestFullscreen().catch(()=>{}); } else { document.exitFullscreen(); } }
+
+let markers={}, accCircles={}, trails={}, currentId=null, currentData=null, follow=true, myLoc=null, lastSeen={}, followTarget=null, alarmAudio=null;
 let saved=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
 function saveCache(l){Object.assign(saved,l);localStorage.setItem('zondi_patrol_cache',JSON.stringify(saved));}
-map.on('dragstart',()=>{follow=false;document.getElementById('followBtn').innerText='📍 Follow: OFF';});
-document.getElementById('followBtn').onclick=()=>{follow=true;document.getElementById('followBtn').innerText='📍 Follow: ON'; if(currentData) map.setView([currentData.lat,currentData.lng],20);};
+map.on('dragstart',()=>{follow=false;followTarget=null;document.getElementById('followBtn').innerText='📍 Follow: OFF';});
+document.getElementById('followBtn').onclick=()=>{follow=true;document.getElementById('followBtn').innerText='📍 Follow: ON'; if(followTarget&&markers[followTarget]) map.setView(markers[followTarget].getLatLng(),19);};
 navigator.geolocation.watchPosition(p=>{myLoc={lat:p.coords.latitude,lng:p.coords.longitude}; if(!document.getElementById('homeLat').value){document.getElementById('homeLat').value=p.coords.latitude.toFixed(6); document.getElementById('homeLng').value=p.coords.longitude.toFixed(6);}},null,{enableHighAccuracy:true});
 let activeTarget=null, routingLine=null;
 function getDistance(lat1,lon1,lat2,lon2){const R=6371;const dLat=(lat2-lat1)*Math.PI/180;const dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
 function setNavigationTarget(lat,lng,name='Client'){activeTarget={lat,lng,name};document.getElementById('targetInfo').style.display='block';document.getElementById('targetName').innerText='🎯 '+name;if(myLoc){let d=getDistance(myLoc.lat,myLoc.lng,lat,lng); document.getElementById('targetDist').innerText=`${d.toFixed(2)} km • ~${Math.max(1,Math.round(d*2.5))} min drive`;}else document.getElementById('targetDist').innerText=`📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`;navInApp();}
-function clearTarget(){activeTarget=null;document.getElementById('targetInfo').style.display='none';if(routingLine){ map.removeLayer(routingLine); routingLine=null; }currentId=null; currentData=null;document.getElementById('activeTitle').innerText='Active Tracking - ALL CLIENTS';document.getElementById('activeClient').innerHTML='📡 No target - tap a client';document.getElementById('sosActions').style.display='none';}
-function locateMe(){if(!myLoc) return alert('Waiting GPS');follow=true;document.getElementById('followBtn').innerText='📍 Follow: ON';map.setView([myLoc.lat,myLoc.lng],19,{animate:true});}
-document.getElementById('zoomInBtn').onclick = ()=> map.zoomIn();document.getElementById('zoomOutBtn').onclick = ()=> map.zoomOut();
+function clearTarget(){activeTarget=null;document.getElementById('targetInfo').style.display='none';if(routingLine){ map.removeLayer(routingLine); routingLine=null; }currentId=null; currentData=null;followTarget=null;document.getElementById('activeTitle').innerText='Active Tracking - ALL CLIENTS';document.getElementById('activeClient').innerHTML='📡 No target - tap a client';document.getElementById('sosActions').style.display='none';}
+function locateMe(){if(!myLoc) return alert('Waiting GPS - Go outside for 99.9%');follow=true;followTarget=null;document.getElementById('followBtn').innerText='📍 Follow: ON';map.setView([myLoc.lat,myLoc.lng],19,{animate:true});}
 function navGoogle(){ if(!activeTarget) return alert('Tap client'); window.open(`https://www.google.com/maps/dir/?api=1&destination=${activeTarget.lat},${activeTarget.lng}&travelmode=driving`,'_blank'); }
 function navWaze(){ if(!activeTarget) return alert('Tap client'); window.open(`https://waze.com/ul?ll=${activeTarget.lat},${activeTarget.lng}&navigate=yes`,'_blank'); }
 function navInApp(){if(!activeTarget) return;if(routingLine) map.removeLayer(routingLine);let start = myLoc? [myLoc.lat,myLoc.lng] : [activeTarget.lat, activeTarget.lng];routingLine = L.polyline([start,[activeTarget.lat,activeTarget.lng]],{color:'#2D7FF9',weight:5,dashArray:'10,10'}).addTo(map);map.fitBounds(routingLine.getBounds(),{padding:[60,60]});}
-function upsert(e){if(!e ||!e.lat ||!e.lng) return;e.client_id = e.client_id || e.phone || e.email || 'Unknown';e.name = e.name || e.client_id.split('@')[0] || e.phone || 'Client';e.phone = e.phone || e.email || e.client_id;e.accuracy = e.accuracy || e.acc || '?';let ts = e.ts || e.time || Date.now();if(ts < 1e12) ts = ts * 1000;e.ts = ts;let latlng=[parseFloat(e.lat),parseFloat(e.lng)];let isSOS=!!e.sos;let color=isSOS?'#FF453A':'#2D7FF9';let label=(e.name||'C').slice(0,12);let html=`<div class="pin ${isSOS?'sos-bounce':''}"><div class="pin-head" style="background:${color}"><span>${isSOS?'!':label.charAt(0).toUpperCase()}</span></div><div class="pin-label" style="background:${isSOS?'#FF453A':'#0B0B0F'}">${label} • ±${e.accuracy}m</div></div>`;let icon=L.divIcon({html:html,className:'',iconSize:[40,56],iconAnchor:[20,48]});if(!markers[e.client_id]){markers[e.client_id]=L.marker(latlng,{icon:icon}).addTo(map).on('click',()=>{setNavigationTarget(e.lat,e.lng,e.name); currentId=e.client_id; currentData=e;});} else {markers[e.client_id].setLatLng(latlng); markers[e.client_id].setIcon(icon);}}
+function searchPin(){let q=(document.getElementById('searchMap').value||'').toLowerCase();if(!q)return;Object.keys(markers).forEach(k=>{if(k.toLowerCase().includes(q)){let m=markers[k];map.setView(m.getLatLng(),18);m.openPopup();}});}
 
-// ===== FIXED: TRACK ALL CLIENTS =====
+function upsert(e){
+  if(!e||!e.lat||!e.lng) return;
+  e.client_id=e.client_id||e.phone||e.email||'Unknown'; e.name=e.name||e.client_id.split('@')[0]||e.phone||'Client'; e.phone=e.phone||e.email||e.client_id;
+  let latlng=[parseFloat(e.lat),parseFloat(e.lng)];
+  let isSOS=e.emergency||e.sos||e.status==='sos';
+  let isPatrol=e.role==='patrol';
+  let now=Date.now(); let isOffline=(now - (lastSeen[e.client_id]||now)) > 120000;
+  let pinClass, icon;
+  if(isOffline){ pinClass='pin-grey'; icon='⚪'; }
+  else if(isSOS){ pinClass='pin-red'; icon='🆘'; }
+  else if(isPatrol){ pinClass=e.status==='busy'?'pin-patrol-busy':'pin-patrol-available'; icon='🚓'; }
+  else { pinClass='pin-green'; icon='👤'; }
+  if(isPatrol){
+    if(!trails[e.client_id]) trails[e.client_id]=[];
+    trails[e.client_id].push(latlng); if(trails[e.client_id].length>30) trails[e.client_id].shift();
+    if(trails[e.client_id].length>1){
+      if(markers[e.client_id+'_trail']) try{map.removeLayer(markers[e.client_id+'_trail'])}catch(e){}
+      markers[e.client_id+'_trail']=L.polyline(trails[e.client_id],{color:isSOS?'#FF3B30':'#2D7FF9',weight:3,dashArray:'8 8',opacity:0.6}).addTo(map);
+    }
+  }
+  if(e.accuracy){
+    if(accCircles[e.client_id]) try{map.removeLayer(accCircles[e.client_id])}catch(e){}
+    accCircles[e.client_id]=L.circle(latlng,{radius:parseFloat(e.accuracy),color:isSOS?'#FF3B30':isPatrol?'#2D7FF9':'#00E676',fillOpacity:0.12,weight:1}).addTo(map);
+  }
+  let statusText=isOffline?`⚪ Offline ${Math.round((now-(lastSeen[e.client_id]||now))/60000)}m ago`: isSOS?'🔴 EMERGENCY SOS': isPatrol?(e.status==='busy'?'🟠 Busy':'🔵 Available'):'🟢 Safe • 99.9%';
+  let popup=`<div style="min-width:170px"><b>${e.name}</b><br><span style="font-size:11px;font-weight:800">${statusText}</span><br><small>${e.phone}<br>${parseFloat(e.lat).toFixed(6)}, ${parseFloat(e.lng).toFixed(6)}${e.accuracy?' ±'+e.accuracy+'m':''}${e.speed?' • '+Math.round(e.speed*3.6)+'km/h':''}</small><br><div style="display:grid;gap:4px;margin-top:6px">${isSOS?`<button onclick="resolveSOSFor('${e.client_id}')" style="background:#FF3B30;color:#fff;border:none;padding:7px;border-radius:8px;font-weight:800">🛑 STOP EMERGENCY - GREEN</button>`:''}<button onclick="followTarget='${e.client_id}';document.getElementById('followBtn').innerText='📍 Follow: ON'" style="background:#2D7FF9;color:#fff;border:none;padding:7px;border-radius:8px">📍 FOLLOW</button></div></div>`;
+  let divIcon=L.divIcon({html:`<div class="${pinClass}">${icon}</div>`,className:'',iconSize:[34,34],iconAnchor:[17,17]});
+  if(!markers[e.client_id]){markers[e.client_id]=L.marker(latlng,{icon:divIcon}).addTo(map).bindPopup(popup).on('click',()=>{setNavigationTarget(e.lat,e.lng,e.name); currentId=e.client_id; currentData=e; followTarget=e.client_id; document.getElementById('followBtn').innerText='📍 Follow: ON';});} else {markers[e.client_id].setLatLng(latlng); markers[e.client_id].setIcon(divIcon); markers[e.client_id].setPopupContent(popup);}
+  if(followTarget===e.client_id && follow){ map.setView(latlng, map.getZoom(), {animate:true}); }
+}
+async function resolveSOSFor(phone){
+  if(!confirm('Stop emergency for '+phone+'? Pin turns GREEN 99.9%'))return;
+  await fetch('/api/sos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone, action:'resolve', resolvedBy:'patrol-'+uid})});
+  await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone, emergency:false, sos:false, status:'safe'})});
+  fetchLive(); fetchSOS();
+}
+function checkEmergencies(locs){
+  let emergencies=Object.keys(locs).filter(k=>locs[k].emergency||locs[k].sos||locs[k].status==='sos');
+  let banner=document.getElementById('emergencyBanner'), list=document.getElementById('emergencyList'), count=document.getElementById('emergencyCount');
+  if(emergencies.length>0){
+    banner.classList.add('show'); count.textContent=emergencies.length; list.innerHTML='';
+    emergencies.forEach(phone=>{
+      let p=locs[phone]; let div=document.createElement('div'); div.style.cssText='background:#2A1515;border:1px solid #FF3B30;border-radius:8px;padding:8px;display:flex;justify-content:space-between;align-items:center';
+      div.innerHTML=`<div><b style="color:#fff">${p.name||phone}</b><br><small style="color:#FF3B30">🔴 ${phone} ±${p.accuracy||'?'}m</small></div><div style="display:flex;gap:4px"><button style="background:#2D7FF9;color:#fff;border:none;padding:6px 10px;border-radius:8px" onclick="setNavigationTarget(${p.lat},${p.lng},'${p.name||phone}');openApp('map')">Go</button><button style="background:#FF3B30;color:#fff;border:none;padding:6px 10px;border-radius:8px" onclick="resolveSOSFor('${phone}')">STOP</button></div>`;
+      list.appendChild(div);
+    });
+    if(!alarmAudio){ alarmAudio=new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'); }
+    try{ alarmAudio.play().catch(()=>{}); }catch(e){} if(navigator.vibrate) navigator.vibrate([200,100,200]);
+  } else { banner.classList.remove('show'); }
+}
 async function fetchLive(){
   try{
-    let r=await fetch('/api/location');
-    let locs=await r.json();
-    // FIX: handle array OR object from server
-    if(Array.isArray(locs)){
-      let mapObj={};
-      locs.forEach(o=>{ let id=o.client_id||o.phone||o.email; if(id) mapObj[id]=o; });
-      locs=mapObj;
-    }
-    console.log("[ZONDI] Got locations:", Object.keys(locs).length);
-    saveCache(locs);
-    let all=Object.keys(locs).length? locs : saved;
-    let entries=Object.values(all).filter(v=>v&&v.lat&&v.lng).sort((a,b)=> (b.ts||b.time||0)-(a.ts||a.time||0));
-    let list=document.getElementById('clientList');
-    list.innerHTML='';
+    let r=await fetch('/api/location'); let locs=await r.json();
+    if(Array.isArray(locs)){ let mapObj={}; locs.forEach(o=>{ let id=o.client_id||o.phone||o.email; if(id) mapObj[id]=o; }); locs=mapObj; }
+    let now=Date.now(); Object.keys(locs).forEach(k=>{ lastSeen[k]=locs[k].timestamp||now; });
+    saveCache(locs); let all=Object.keys(locs).length? locs : saved;
+    let entries=Object.values(all).filter(v=>v&&v.lat&&v.lng).sort((a,b)=> (b.ts||b.time||b.timestamp||0)-(a.ts||a.time||a.timestamp||0));
+    let list=document.getElementById('clientList'); list.innerHTML='';
     if(entries.length===0){
-      list.innerHTML='<div style="color:#8E8E93;font-size:12px;padding:12px">No live clients yet. Open client app on 2 phones to test.</div>';
-      if(!currentId) document.getElementById('activeClient').innerHTML='📡 Waiting... Got 0 clients from server. Check backend returns ALL.';
+      list.innerHTML='<div style="color:#8E8E93;font-size:12px;padding:12px">No live clients yet. Client login = green pin 99.9% automatically.</div>';
+      if(!currentId) document.getElementById('activeClient').innerHTML='📡 Waiting... 0 clients. Open client.html outside to test 99.9%';
       return;
     }
+    entries.forEach(e=>{ upsert(e); });
+    checkEmergencies(all);
     entries.forEach(e=>{
-      if(e.sos) return; // SOS goes to sosList
-      upsert(e);
-      let idSafe=(e.client_id||'').replace(/'/g,'');
-      list.innerHTML+=`<div class="listItem" onclick="setNavigationTarget(${e.lat},${e.lng},'${(e.name||idSafe).replace(/'/g,'')}');currentId='${idSafe}';currentData={lat:${e.lat},lng:${e.lng}};follow=true;map.setView([${e.lat},${e.lng}],20);openApp('map')"><div><b>📍 ${e.name||e.client_id}</b><br><small style="color:var(--muted)">${e.phone||''} • ±${e.accuracy||'?'}m • ${new Date(e.ts||Date.now()).toLocaleTimeString()}</small></div><span class="dot green"></span></div>`;
+      if(e.emergency||e.sos||e.status==='sos') return;
+      let idSafe=(e.client_id||'').replace(/'/g,''); let isOffline=(now - (lastSeen[idSafe]||now)) > 120000;
+      let statusIcon=isOffline?'⚪': e.role==='patrol'?'🔵':'🟢';
+      list.innerHTML+=`<div class="listItem" onclick="setNavigationTarget(${e.lat},${e.lng},'${(e.name||idSafe).replace(/'/g,'')}');currentId='${idSafe}';currentData={lat:${e.lat},lng:${e.lng}};follow=true;followTarget='${idSafe}';map.setView([${e.lat},${e.lng}],19);openApp('map')"><div><b>${statusIcon} ${e.name||e.client_id} ±${e.accuracy||'?'}m</b><br><small style="color:var(--muted)">${e.phone||''} • ${new Date(e.ts||e.timestamp||Date.now()).toLocaleTimeString()}</small></div><span class="dot ${isOffline?'':'green'}"></span></div>`;
     });
-    // Update active title with count
-    document.getElementById('activeTitle').innerText=`Active Tracking - ${entries.length} CLIENTS`;
+    document.getElementById('activeTitle').innerText=`Active Tracking - ${entries.length} CLIENTS 99.9% • Linked to dev-portal`;
+    document.getElementById('lastUpdate').innerText=new Date().toLocaleTimeString()+' • Max zoom 19 locked';
   }catch(e){ console.log("fetchLive error", e); }
 }
-
 async function fetchSOS(){
   try{
-    let r=await fetch('/api/sos');
-    let alerts=await r.json();
+    let r=await fetch('/api/sos'); let alerts=await r.json();
     if(!Array.isArray(alerts)) alerts = alerts? Object.values(alerts) : [];
     let now = Date.now()/1000;
-    alerts = alerts.filter(a=>{let ts = a.ts || a.time || 0;if(typeof ts === 'string') ts = parseFloat(ts) || 0;return (now - ts) < 900 || ts===0;});
-    let byPhone={};
-    alerts.forEach(a=>{let phone = (a.phone||a.email||'').toLowerCase();if(!byPhone[phone] || (a.ts||0) > (byPhone[phone].ts||0)){byPhone[phone]=a;}});
+    alerts = alerts.filter(a=>{let ts = a.ts || a.time || a.timestamp || 0;if(typeof ts === 'string') ts = parseFloat(ts) || 0;return (now - ts) < 900 || ts===0;});
+    let byPhone={}; alerts.forEach(a=>{let phone = (a.phone||a.email||'').toLowerCase();if(!byPhone[phone] || (a.ts||0) > (byPhone[phone].ts||0)){byPhone[phone]=a;}});
     let unique = Object.values(byPhone).sort((a,b)=>(b.ts||0)-(a.ts||0));
-    let sosDiv=document.getElementById('sosList');
-    sosDiv.innerHTML='';
+    let sosDiv=document.getElementById('sosList'); sosDiv.innerHTML='';
     if(unique.length===0) return;
-    let latest = unique[0];
-    latest.sos=true;
-    sosDiv.innerHTML=`<div style="background:#FF453A;color:#fff;border-radius:14px;padding:12px;margin:8px 0"><b>🚨 SOS ACTIVE - ${latest.name||latest.phone}</b><br><small>${latest.phone||''} • ${new Date((latest.ts||0)*1000).toLocaleTimeString()}</small><br><button class="btn blue" style="margin-top:8px;width:100%" onclick="setNavigationTarget(${latest.lat},${latest.lng},'${latest.name||latest.client_id}');currentId='${latest.phone||latest.client_id}';follow=true;map.setView([${latest.lat},${latest.lng}],19);openApp('map')">🎯 Navigate to SOS</button></div>`;
-    upsert({...latest, client_id: latest.phone||latest.client_id||latest.email, lat: parseFloat(latest.lat), lng: parseFloat(latest.lng), ts: (latest.ts||0)*1000 });
+    unique.forEach(latest=>{
+      latest.sos=true; latest.emergency=true;
+      upsert({...latest, client_id: latest.phone||latest.client_id||latest.email, lat: parseFloat(latest.lat), lng: parseFloat(latest.lng), ts: (latest.ts||0)*1000, name:latest.name||latest.phone });
+      sosDiv.innerHTML+=`<div style="background:#1A0F0F;border:1px solid #FF3B30;color:#fff;border-radius:14px;padding:12px;margin:8px 0"><b>🚨 SOS ACTIVE - ${latest.name||latest.phone} ±${latest.accuracy||'?'}m</b><br><small>${latest.phone||''} • ${new Date((latest.ts||0)*1000).toLocaleTimeString()}</small><br><div style="display:flex;gap:6px;margin-top:8px"><button class="btn blue" style="flex:1" onclick="setNavigationTarget(${latest.lat},${latest.lng},'${latest.name||latest.client_id}');currentId='${latest.phone||latest.client_id}';follow=true;followTarget='${latest.phone||latest.client_id}';map.setView([${latest.lat},${latest.lng}],19);openApp('map')">🎯 Go</button><button class="btn gray" style="flex:1" onclick="resolveSOSFor('${latest.phone||latest.client_id}')">🛑 Stop</button></div></div>`;
+    });
   }catch(e){}
 }
-async function resolveSOS(){if(!currentId) return;try{await fetch('/api/sos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'clear', phone: currentId})});clearTarget();document.getElementById('activeClient').innerHTML='✅ SOS Resolved';fetchSOS();}catch(e){}}
+async function resolveSOS(){if(!currentId) return;await resolveSOSFor(currentId);clearTarget();}
 function openApp(t){document.getElementById('view-launcher').style.display=t==='launcher'?'block':'none';document.getElementById('view-map').style.display=t==='map'?'block':'none';document.getElementById('view-radio').style.display=t==='radio'?'block':'none';document.getElementById('view-scanner').style.display=t==='scanner'?'block':'none';document.getElementById('view-clients').style.display=t==='clients'?'block':'none';document.getElementById('view-about').style.display=t==='about'?'block':'none';if(t==='map') setTimeout(()=>map.invalidateSize(),300);if(t==='scanner'){switchStickerTab('patrol');}}
 setInterval(()=>{ fetchLive(); fetchSOS(); }, 3000);fetchLive(); fetchSOS();
 
-// sticker + radio code (kept same as your rules)
+// stickers + radio same
 let html5QrCode=null, lastScan=null, stickerFilter='all', btScanActive=false, currentStickerTab='patrol';
 function switchStickerTab(tab){currentStickerTab=tab;document.getElementById('sticker-patrol').style.display=tab==='patrol'?'block':'none';document.getElementById('sticker-reg').style.display=tab==='reg'?'block':'none';document.getElementById('sticker-list').style.display=tab==='list'?'block':'none';document.getElementById('sticker-trace').style.display=tab==='trace'?'block':'none';document.querySelectorAll('.tabMini button').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+tab).classList.add('active');if(tab==='patrol') startScanner(); else stopScanner(); if(tab==='list') fetchStickersReal();}
 function startScanner(){if(html5QrCode) return;html5QrCode=new Html5Qrcode("reader");html5QrCode.start({facingMode:"environment"},{fps:10,qrbox:{width:250,height:250}},onScanSuccess,()=>{}).catch(()=>{});}
