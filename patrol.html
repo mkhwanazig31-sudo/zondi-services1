@@ -21,7 +21,6 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(70% 50%
 #reader{width:100%;border-radius:16px;overflow:hidden;background:#000} #reader video{border-radius:16px}
 .tabMini{display:flex;background:#0B0B0F;border:1px solid #272731;border-radius:12px;padding:4px;gap:4px;margin-top:10px;overflow-x:auto}.tabMini button{flex:1;padding:8px;border-radius:8px;border:none;font-weight:800;font-size:10px;cursor:pointer;background:transparent;color:#8E8E93;white-space:nowrap}.tabMini button.active{background:#E8B62A;color:#000}
 .input{width:100%;background:#0B0B0F;border:1px solid #272731;border-radius:12px;padding:12px;color:#fff;margin:6px 0;font-size:13px}
-/* 99.9% PIN SYSTEM */
 .pin-green{width:28px;height:28px;background:#00E676;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px #00E676}
 .pin-red{width:34px;height:34px;background:#FF3B30;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px #FF3B30;animation:jump 0.5s infinite alternate}
 .pin-patrol-available{width:30px;height:30px;background:#2D7FF9;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 15px #2D7FF9}
@@ -49,7 +48,6 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(70% 50%
 <div id="emergencyBanner" class="emergencyBanner"><div style="font-weight:900;color:var(--red);font-size:12px">🔴 LIVE EMERGENCIES <span id="emergencyCount">0</span></div><div id="emergencyList" style="margin-top:8px;display:grid;gap:6px"></div></div>
 <div style="position:relative;margin:12px 14px 0">
 <div id="map"></div>
-<!-- GOOGLE MAPS TOOLS INSIDE -->
 <div style="position:absolute;top:12px;left:12px;z-index:500;display:flex;flex-direction:column;gap:8px">
 <button onclick="locateMe()" style="background:#fff;color:#000;border:none;border-radius:50%;width:44px;height:44px;box-shadow:0 4px 12px rgba(0,0,0,.5);font-size:18px">📍</button>
 <button id="followBtn" style="background:#17171D;color:#fff;border:1px solid #333;border-radius:20px;padding:8px 12px;font-size:11px;font-weight:700">📍 Follow: ON</button>
@@ -90,9 +88,8 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(70% 50%
 
 <script>
 document.getElementById('uid').innerText=uid;
-// FIXED MAP - NO WHITE SCREEN - MAX ZOOM 19 LOCKED - NO HOUSE
 let map=L.map('map',{zoomControl:false,maxZoom:19,minZoom:5}).setView([-25.6135,27.9852],15);
-let satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:19,errorTileUrl:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAAAAAB5HQyEAAAADUlEQVR42mP8z8BQDwAEhQGAahKm7QAAAABJRU5ErkJggg==',attribution:'© Esri'}).addTo(map);
+let satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:19,errorTileUrl:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',attribution:'© Esri'}).addTo(map);
 let labelsLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:19}).addTo(map);
 let streetLayer=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,maxNativeZoom:19});
 let terrainLayer=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,maxNativeZoom:17});
@@ -107,7 +104,11 @@ function switchMapType(v){
 function resetNorthPatrol(){ map.setView(map.getCenter(), map.getZoom()); }
 function toggleFullscreen(id){ let el=document.getElementById(id); if(!document.fullscreenElement){ el.requestFullscreen().catch(()=>{}); } else { document.exitFullscreen(); } }
 
-let markers={}, accCircles={}, trails={}, currentId=null, currentData=null, follow=true, myLoc=null, lastSeen={}, followTarget=null, alarmAudio=null;
+let markers={}, accCircles={}, trails={}, currentId=null, currentData=null, follow=true, myLoc=null, lastSeen={}, followTarget=null, alarmAudio=null, audioEnabled=false;
+// FIX: Enable audio on first user interaction to bypass autoplay block
+function enableAudio(){ if(!audioEnabled){ audioEnabled=true; alarmAudio=new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'); alarmAudio.volume=0.5; } }
+document.addEventListener('click', enableAudio, {once:true}); document.addEventListener('touchstart', enableAudio, {once:true});
+
 let saved=JSON.parse(localStorage.getItem('zondi_patrol_cache')||'{}');
 function saveCache(l){Object.assign(saved,l);localStorage.setItem('zondi_patrol_cache',JSON.stringify(saved));}
 map.on('dragstart',()=>{follow=false;followTarget=null;document.getElementById('followBtn').innerText='📍 Follow: OFF';});
@@ -115,9 +116,9 @@ document.getElementById('followBtn').onclick=()=>{follow=true;document.getElemen
 navigator.geolocation.watchPosition(p=>{myLoc={lat:p.coords.latitude,lng:p.coords.longitude}; if(!document.getElementById('homeLat').value){document.getElementById('homeLat').value=p.coords.latitude.toFixed(6); document.getElementById('homeLng').value=p.coords.longitude.toFixed(6);}},null,{enableHighAccuracy:true});
 let activeTarget=null, routingLine=null;
 function getDistance(lat1,lon1,lat2,lon2){const R=6371;const dLat=(lat2-lat1)*Math.PI/180;const dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
-function setNavigationTarget(lat,lng,name='Client'){activeTarget={lat,lng,name};document.getElementById('targetInfo').style.display='block';document.getElementById('targetName').innerText='🎯 '+name;if(myLoc){let d=getDistance(myLoc.lat,myLoc.lng,lat,lng); document.getElementById('targetDist').innerText=`${d.toFixed(2)} km • ~${Math.max(1,Math.round(d*2.5))} min drive`;}else document.getElementById('targetDist').innerText=`📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`;navInApp();}
+function setNavigationTarget(lat,lng,name='Client'){enableAudio();activeTarget={lat,lng,name};document.getElementById('targetInfo').style.display='block';document.getElementById('targetName').innerText='🎯 '+name;if(myLoc){let d=getDistance(myLoc.lat,myLoc.lng,lat,lng); document.getElementById('targetDist').innerText=`${d.toFixed(2)} km • ~${Math.max(1,Math.round(d*2.5))} min drive`;}else document.getElementById('targetDist').innerText=`📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`;navInApp();}
 function clearTarget(){activeTarget=null;document.getElementById('targetInfo').style.display='none';if(routingLine){ map.removeLayer(routingLine); routingLine=null; }currentId=null; currentData=null;followTarget=null;document.getElementById('activeTitle').innerText='Active Tracking - ALL CLIENTS';document.getElementById('activeClient').innerHTML='📡 No target - tap a client';document.getElementById('sosActions').style.display='none';}
-function locateMe(){if(!myLoc) return alert('Waiting GPS - Go outside for 99.9%');follow=true;followTarget=null;document.getElementById('followBtn').innerText='📍 Follow: ON';map.setView([myLoc.lat,myLoc.lng],19,{animate:true});}
+function locateMe(){enableAudio();if(!myLoc) return alert('Waiting GPS - Go outside for 99.9%');follow=true;followTarget=null;document.getElementById('followBtn').innerText='📍 Follow: ON';map.setView([myLoc.lat,myLoc.lng],19,{animate:true});}
 function navGoogle(){ if(!activeTarget) return alert('Tap client'); window.open(`https://www.google.com/maps/dir/?api=1&destination=${activeTarget.lat},${activeTarget.lng}&travelmode=driving`,'_blank'); }
 function navWaze(){ if(!activeTarget) return alert('Tap client'); window.open(`https://waze.com/ul?ll=${activeTarget.lat},${activeTarget.lng}&navigate=yes`,'_blank'); }
 function navInApp(){if(!activeTarget) return;if(routingLine) map.removeLayer(routingLine);let start = myLoc? [myLoc.lat,myLoc.lng] : [activeTarget.lat, activeTarget.lng];routingLine = L.polyline([start,[activeTarget.lat,activeTarget.lng]],{color:'#2D7FF9',weight:5,dashArray:'10,10'}).addTo(map);map.fitBounds(routingLine.getBounds(),{padding:[60,60]});}
@@ -169,8 +170,7 @@ function checkEmergencies(locs){
       div.innerHTML=`<div><b style="color:#fff">${p.name||phone}</b><br><small style="color:#FF3B30">🔴 ${phone} ±${p.accuracy||'?'}m</small></div><div style="display:flex;gap:4px"><button style="background:#2D7FF9;color:#fff;border:none;padding:6px 10px;border-radius:8px" onclick="setNavigationTarget(${p.lat},${p.lng},'${p.name||phone}');openApp('map')">Go</button><button style="background:#FF3B30;color:#fff;border:none;padding:6px 10px;border-radius:8px" onclick="resolveSOSFor('${phone}')">STOP</button></div>`;
       list.appendChild(div);
     });
-    if(!alarmAudio){ alarmAudio=new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'); }
-    try{ alarmAudio.play().catch(()=>{}); }catch(e){} if(navigator.vibrate) navigator.vibrate([200,100,200]);
+    if(audioEnabled && alarmAudio){ try{ alarmAudio.play().catch(()=>{}); }catch(e){} if(navigator.vibrate) navigator.vibrate([200,100,200]); }
   } else { banner.classList.remove('show'); }
 }
 async function fetchLive(){
@@ -219,7 +219,6 @@ async function resolveSOS(){if(!currentId) return;await resolveSOSFor(currentId)
 function openApp(t){document.getElementById('view-launcher').style.display=t==='launcher'?'block':'none';document.getElementById('view-map').style.display=t==='map'?'block':'none';document.getElementById('view-radio').style.display=t==='radio'?'block':'none';document.getElementById('view-scanner').style.display=t==='scanner'?'block':'none';document.getElementById('view-clients').style.display=t==='clients'?'block':'none';document.getElementById('view-about').style.display=t==='about'?'block':'none';if(t==='map') setTimeout(()=>map.invalidateSize(),300);if(t==='scanner'){switchStickerTab('patrol');}}
 setInterval(()=>{ fetchLive(); fetchSOS(); }, 3000);fetchLive(); fetchSOS();
 
-// stickers + radio same
 let html5QrCode=null, lastScan=null, stickerFilter='all', btScanActive=false, currentStickerTab='patrol';
 function switchStickerTab(tab){currentStickerTab=tab;document.getElementById('sticker-patrol').style.display=tab==='patrol'?'block':'none';document.getElementById('sticker-reg').style.display=tab==='reg'?'block':'none';document.getElementById('sticker-list').style.display=tab==='list'?'block':'none';document.getElementById('sticker-trace').style.display=tab==='trace'?'block':'none';document.querySelectorAll('.tabMini button').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+tab).classList.add('active');if(tab==='patrol') startScanner(); else stopScanner(); if(tab==='list') fetchStickersReal();}
 function startScanner(){if(html5QrCode) return;html5QrCode=new Html5Qrcode("reader");html5QrCode.start({facingMode:"environment"},{fps:10,qrbox:{width:250,height:250}},onScanSuccess,()=>{}).catch(()=>{});}
