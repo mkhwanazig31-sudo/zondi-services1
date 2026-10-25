@@ -24,6 +24,8 @@ def patrol(): return page("patrol.html")
 def dev_portal(): return page("dev-portal.html")
 @app.get("/register")
 def register(): return page("register.html")
+@app.get("/forgot-password")
+def forgot(): return page("forgot-password.html")
 @app.get("/favicon.ico")
 def favicon(): return JSONResponse({},status_code=204)
 
@@ -67,15 +69,18 @@ def api_index(): return JSONResponse({"users":users_db,"locations":locations})
 @app.get("/api/pending")
 def get_pending(): return JSONResponse(pending_db)
 @app.post("/api/approve")
-async def approve(request: Request): d=await request.json(); p=d.get("phone"); 
-    if p in pending_db: users_db[p]=pending_db.pop(p); users_db[p]["status"]="active"
+async def approve(request: Request): 
+    d=await request.json(); p=d.get("phone")
+    if p in pending_db:
+        users_db[p]=pending_db.pop(p); users_db[p]["status"]="active"
     return {"ok":True}
 @app.post("/api/delete")
 async def delete_user(request: Request): d=await request.json(); p=d.get("phone"); users_db.pop(p,None); pending_db.pop(p,None); locations.pop(p,None); sos_alerts.pop(p,None); return {"ok":True}
 @app.post("/api/notify-family")
 async def notify_family(request: Request): return {"ok":True}
 @app.post("/api/radio")
-async def radio_post(request: Request): global radio_latest; d=await request.json(); radio_latest={"from":d.get("from"),"audio":d.get("audio"),"ts":int(time.time()*1000)}; return {"ok":True}
+async def radio_post(request: Request): 
+    global radio_latest; d=await request.json(); radio_latest={"from":d.get("from"),"audio":d.get("audio"),"ts":int(time.time()*1000)}; return {"ok":True}
 @app.get("/api/radio-latest")
 def radio_latest_get(): return JSONResponse({"radio":radio_latest})
 @app.post("/api/stickers")
@@ -83,9 +88,11 @@ def radio_latest_get(): return JSONResponse({"radio":radio_latest})
 async def stickers_api(request: Request):
     if request.method=="GET": return JSONResponse(stickers_db)
     d=await request.json()
-    if d.get("action")=="updateStatus": sid=d.get("id"); 
+    if d.get("action")=="updateStatus": 
+        sid=d.get("id")
         if sid in stickers_db: stickers_db[sid].update({"status":d.get("status")})
-    else: sid=d.get("id") or f"STK-{int(time.time())}"; stickers_db[sid]=d; stickers_db[sid]["id"]=sid
+    else: 
+        sid=d.get("id") or f"STK-{int(time.time())}"; stickers_db[sid]=d; stickers_db[sid]["id"]=sid
     return {"ok":True}
 @app.post("/api/scan")
 async def scan_api(request: Request): scans_db.append(await request.json()); return {"ok":True}
