@@ -1,5 +1,6 @@
 from http.server import BaseHTTPRequestHandler
 import os, json, urllib.request
+
 KV_URL = (os.environ.get("KV_REST_API_URL") or os.environ.get("KV_URL") or "").rstrip("/")
 KV_TOKEN = os.environ.get("KV_REST_API_TOKEN") or ""
 
@@ -23,7 +24,6 @@ def _set(k,v):
     if not KV_URL or not KV_TOKEN: return False
     try:
         sv=json.dumps(v)
-        # FIX: Use correct REST format
         req=urllib.request.Request(f"{KV_URL}", data=json.dumps(["SET",k,sv]).encode(), headers={"Authorization": f"Bearer {KV_TOKEN}","Content-Type":"application/json"}, method="POST")
         with urllib.request.urlopen(req, timeout=5) as r: 
             return True
@@ -56,18 +56,13 @@ class handler(BaseHTTPRequestHandler):
             length = int(self.headers.get('content-length',0) or 0)
             raw = self.rfile.read(length).decode() if length else '{}'
             body = json.loads(raw) if raw else {}
-            # FIX: Keep original + lower + trimmed versions
             raw_key = (body.get('email') or body.get('phone') or '').strip()
             if not raw_key:
                 self.wfile.write(b'{"ok":false,"error":"no key"}')
                 return
-            
             keys_to_try = [raw_key, raw_key.lower(), raw_key.strip().lower()]
-            keys_to_try = list(dict.fromkeys(keys_to_try)) # unique
-
-            # FIX: Delete from ALL possible storage keys!
+            keys_to_try = list(dict.fromkeys(keys_to_try))
             all_hashes = ["users", "pending", "zondi_users", "zondi_pending", "zondi_pending_cache", "zondi_patrol_cache"]
-            
             for hash_name in all_hashes:
                 data = _get(hash_name)
                 if not data or not isinstance(data, dict): continue
@@ -76,24 +71,18 @@ class handler(BaseHTTPRequestHandler):
                     if k in data:
                         del data[k]
                         changed = True
-                    # Also try case-insensitive search
                     for existing in list(data.keys()):
                         if existing.lower() == k.lower():
                             del data[existing]
                             changed = True
                 if changed:
                     _set(hash_name, data)
-                    print(f"Deleted {keys_to_try} from {hash_name}")
-
-            # Also try HDEL for hash structures
             for k in keys_to_try:
                 for h in all_hashes:
                     _hdel(h, k)
-
             self.wfile.write(json.dumps({"ok":True, "deleted":raw_key, "tried":keys_to_try}).encode())
         except Exception as e:
             print(f"delete error: {e}")
             self.wfile.write(json.dumps({"ok":False,"error":str(e)}).encode())
-
     def do_GET(self): self.do_POST()
     def do_DELETE(self): self.do_POST()
